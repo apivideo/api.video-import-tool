@@ -1,0 +1,284 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background-color: rgb(6, 12, 25);
+  color: rgb(195, 184, 216);
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  padding: 0 2rem;
+}
+
+b {
+  color: white;
+}
+
+.main {
+  min-height: 100vh;
+  padding: 4rem 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 800px;
+}
+
+
+.content {
+  width: 960px;
+}
+
+
+#content {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(9,20,41, 1);
+  width: 700px;
+  padding: 32px 50px ;
+  border-radius: 20px;
+}
+
+@media (max-width: 700px) {
+  .grid {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  #content {
+    width: 100%;
+  }
+
+  table td {
+    font-size: 14px;
+  }
+} 
+
+h1 {
+  color: white;
+  text-align: center;
+}
+
+.orange {
+  color: rgb(250, 91, 48);
+}
+
+
+#content div {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: left;
+  padding: 20px 0;
+  
+  
+}
+
+input[type="password"], input[type="text"] {
+  padding: 6px;
+  width: 100%;
+  border-radius: 5px;
+  border: 2px solid white;
+}
+
+input[type="password"].error, input[type="text"].error {
+  border: 2px solid red;
+}
+
+p.inputError {
+  margin: 6px 0 0;
+  padding: 0;
+  color: red;
+  font-size: 0.9em;
+}
+
+label {
+  margin-bottom: 6px;
+}
+
+button {
+  background-color: rgb(250, 91, 48);
+  border: none;
+  color: white;
+  border-radius: 5px;
+  font-size: 16px;
+  padding: 10px;
+  font-weight: bold;
+}
+
+button.submitButton {
+  margin-top: 20px;
+}
+
+button:disabled {
+  background-color: rgb(195, 184, 216);
+}
+
+p.explanation {
+  color: white;
+  line-height: 1.3em;
+}
+td.thumbnail img {
+  height: 75px;
+}
+
+a {
+  color: rgb(250, 91, 48);
+  text-decoration: underline;
+}
+
+th {
+  text-align: left;
+}
+
+table.result td {
+  padding: 10px 0;
+}
+
+table.result tr td:first-child {
+  width: 40%;
+}
+
+td.status p {
+  padding: 0;
+  margin: 0;
+}
+
+td.status span.status {
+  padding: 2px 4px;
+  color: white;
+  border-radius: 3px;
+  margin: 0;
+  display: inline;
+  background-color: grey;
+  margin: 0 2px;
+  font-size: 10px;
+  top: -1px;
+  position: relative;
+}
+
+td.status span.status.encoded {
+  background-color: green;
+}
+
+span.icon {
+  font-weight: 900;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+span.icon.loading {
+  animation: rotation 1s infinite linear;
+}
+
+span.icon.loading::after {
+  content: "◡";
+}
+
+span.icon.done {
+  color: green;
+}
+
+
+span.icon.done::after {
+  content: "✓";
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+
+.stepper {
+  display: flex;
+  margin-bottom: 30px;
+}
+
+.stepper .step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stepper .circle {
+  border-radius: 20px;
+  border: none;
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+  color: #666;
+  background-color: rgb(195, 184, 216);
+  text-align: center;
+  vertical-align: middle;
+  padding-top: 10px;
+  font-weight: bold;
+}
+
+.stepper .label {
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.stepper .active .label, .stepper .done .label {
+  color: rgb(250, 91, 48);
+}
+
+.stepper .done .circle, .stepper .active .circle {
+  background-color: rgb(250, 91, 48);
+  color: white;
+}
+
+.stepper .separator {
+  width: 90px;
+  border: 1px solid rgb(195, 184, 216);
+  height: 1px;
+  margin-top: 32px;
+}
+
+.stepper .separator.done {
+  border: 1px solid rgb(250, 91, 48);
+}
+
+.help-page h1, .help-page h2 {
+  color: white;
+}
+
+.help-page p, .help-page li {
+  font-size: 1.1em;
+  line-height: 1.4em;
+}
+
+.help-page img {
+  border-radius: 5px;
+}
+
+@media (max-width: 1024px) {
+  .content {
+    width: 90%
+  }
+}
