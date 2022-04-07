@@ -23,12 +23,16 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
     return str.substring(0, 1).toLocaleUpperCase() + str.substring(1).toLocaleLowerCase();
   }
 
+  const getTitle = () => {
+    if(props.provider === "VIMEO") return <>Welcome to the <span style={{color: "rgb(0, 173, 239)"}}>Vimeo</span> to <span className="orange">api.video</span> migration tool</>
+    if(props.provider === "ZOOM") return <>Welcome to the <span style={{color: "#0c63ce"}}>Zoom recordings</span> to <span className="orange">api.video</span> migration tool</>
+    return "";
+  }
+
   return (
     <div className="container">
       <main className="main">
-        <h1 className="title">
-          Welcome to the {capitalize(props.provider)} to <span className="orange">api.video</span> migration tool
-        </h1>
+        <h1 className="title">{getTitle()}</h1>
 
 
         <Stepper activeStep={step} steps={["Authentication", "Videos selection", "Import progress"]}></Stepper>

@@ -75,10 +75,10 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
           {props.videoSources.map(videoSource =>
             <tr key={videoSource.id}>
               <td><input type="checkbox" checked={selectedIds.indexOf(videoSource.id) !== -1} onChange={(a) => toggleSelection(videoSource.id)} /></td>
-              <td><Image height="75px" width="100px" alt={videoSource.name} src={videoSource.thumbnail} /></td>
+              <td>{ videoSource.thumbnail && <Image height="75px" width="100px" alt={videoSource.name} src={videoSource.thumbnail} />}</td>
               <td>{videoSource.name}</td>
               <td>{Math.round(videoSource.size / 1024 / 1024 * 100) / 100} MB</td>
-              <td>{formatDuration(videoSource.duration)}</td>
+              <td>{videoSource.duration && formatDuration(videoSource.duration)}</td>
             </tr>
           )}
         </tbody>
