@@ -21,10 +21,10 @@ const Stepper: React.FC<StepperProps> = (props) => {
       if(i > 0) {
         const sepClasses = ["separator"];
         if(i <= props.activeStep) sepClasses.push("done");
-        res.push(<div className={sepClasses.join(" ")}></div>)
+        res.push(<div key={"sep" + i} className={sepClasses.join(" ")}></div>)
       }
 
-      res.push(<div className={classes.join(" ")}> 
+      res.push(<div key={"step" + i} className={classes.join(" ")}> 
         <p className="circle">{i < props.activeStep ? "✓" : i+1}</p>
         <p className="label" key={step}>{step}</p>
       </div>);

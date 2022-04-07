@@ -55,6 +55,10 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
     return `Import ${selectedIds.length} video${selectedIds.length > 1 ? "s" : ""}`;
   }
 
+  if(!props.videoSources || props.videoSources.length === 0) {
+    return <p>We found no video that can be imported :(</p>
+  }
+
   return (
     <>
       <p className="explanation">Please select the videos you want to import using the check boxes. Once you have made your selection, click on the button at the bottom of the page to start the import.</p>

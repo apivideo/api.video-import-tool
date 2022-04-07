@@ -1,0 +1,1 @@
+export type MigrationProvider = "VIMEO" | "ZOOM";

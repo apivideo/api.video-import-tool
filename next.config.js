@@ -4,6 +4,15 @@ const nextConfig = {
   images: {
     domains: ['i.vimeocdn.com'],
   },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/vimeo',
+        permanent: false,
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

@@ -43,15 +43,18 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
   });
 
   const statusCellContent = (video: VideoWithStatus) => {
-    if(!video.status?.ingest?.status) {
-      return <p><span className={"icon loading"}></span></p>
+    if (!video.status?.ingest?.status) {
+      return <>
+        <p><span className={"icon loading"}></span>ingest</p>
+        <p><span className={"icon loading"}></span>encoding</p>
+      </>
     }
     const ingested = video.status?.ingest?.status && video.status?.ingest?.status as string !== "ingesting"
     const qualities = video.status?.encoding?.qualities?.filter(q => q.type === "hls") || [];
     const allQualitiesEncoded = qualities.length > 0 && !qualities.find(q => q.status !== "encoded");
     return <>
       <p><span className={"icon " + (ingested ? "done" : "loading")}></span>ingest</p>
-      <p><span className={"icon " + (allQualitiesEncoded ? "done" : "loading")}></span>encoding {qualities.map(q => <span key={q.quality+(q.type || "")} className={q.status + " status"}>{q.quality}</span>)}</p>
+      <p><span className={"icon " + (allQualitiesEncoded ? "done" : "loading")}></span>encoding {qualities.map(q => <span key={q.quality + (q.type || "")} className={q.status + " status"}>{q.quality}</span>)}</p>
     </>
   }
 
