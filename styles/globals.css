@@ -144,9 +144,22 @@ a {
   text-decoration: underline;
 }
 
+tr th a {
+  color: white;
+  font-weight: normal;
+}
+
+tr th a.current {
+  font-weight: bold;
+}
+
 th {
   text-align: left;
   padding-bottom: 10px;
+}
+
+table.result {
+  margin-top: 20px;
 }
 
 table.result td {
@@ -280,4 +293,12 @@ span.icon.done::after {
   .content {
     width: 90%
   }
+}
+
+.migrationsList li {
+  line-height: 1.6em
+}
+
+.migrationsList a {
+  color: white;
 }

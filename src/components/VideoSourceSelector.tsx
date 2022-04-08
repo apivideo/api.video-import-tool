@@ -7,12 +7,19 @@ import VideoSource from "../types/videoSource";
 interface VideoSourceSelectorProps {
   videoSources: VideoSource[];
   apiVideoApiKey: string;
+  migrationId: string;
+  providerName: string;
   onSubmit: (videoSources: Video[]) => void;
 }
+
+type ColumnName = "name" | "size" | "duration";
 
 const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
   const [selectedIds, setSelectedIds] = useState<string[]>(props.videoSources.map(p => p.id));
   const [loading, setLoading] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<ColumnName>("name");
+  const [sortOrder, setSortOrder] = useState<1 | -1>(1);
+  const [createdCount, setCreatedCount] = useState<number | undefined>();
 
   const toggleSelection = (id: string) => {
     if (selectedIds.indexOf(id) === -1) {
@@ -29,64 +36,114 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
     const seconds = durationSec % 60;
     const minutes = Math.floor(durationSec / 60) % 60;
     const hours = Math.floor(durationSec / 3600) % 3600;
-    
+
     const twoDigits = (t: number) => t < 10 ? "0" + t : t;
 
-    if(hours > 0) return `${hours}h ${twoDigits(minutes)}m ${twoDigits(seconds)}s`;
-    if(minutes > 0) return `${minutes}m ${twoDigits(seconds)}s`;
+    if (hours > 0) return `${hours}h ${twoDigits(minutes)}m ${twoDigits(seconds)}s`;
+    if (minutes > 0) return `${minutes}m ${twoDigits(seconds)}s`;
     return `${twoDigits(seconds)}s`;
   }
 
-  const createApiVideoVideos = (): Promise<Video[]> => {
-    return fetch("/api/apivideo/video", {
-      method: "POST",
-      body: JSON.stringify({
-        videoSources: props.videoSources.filter(a => selectedIds.indexOf(a.id) > -1),
-        apiKey: props.apiVideoApiKey
+  const formatSize = (size: number) => {
+    return (Math.round(size / 1024 / 1024 * 100) / 100) + " MB";
+  }
+
+  const getSelectedVideos = (): VideoSource[] => {
+    return props.videoSources.filter(a => selectedIds.indexOf(a.id) > -1);
+  }
+
+  const createApiVideoVideos = async (): Promise<{successes: Video[], fails: VideoSource[]}> => {
+    const selectedVideos = getSelectedVideos();
+    const successes: Video[] = [];
+    const fails: VideoSource[] = [];
+
+    for (let selectedVideo of selectedVideos) {
+
+      await fetch("/api/apivideo/create-video", {
+        method: "POST",
+        body: JSON.stringify({
+          apiKey: props.apiVideoApiKey,
+          migrationId: props.migrationId,
+          provider: props.providerName,
+          videoSource: selectedVideo,
+        })
       })
-    })
-      .then(v => v.json())
-      .then(v => v.videos)
+        .then(response => {
+          if (!response.ok) {
+            fails.push(selectedVideo)
+          }
+          response.json().then(v => successes.push(v))
+        });
+
+      setCreatedCount(successes.length);
+    }
+
+    return {successes, fails};
   }
 
   const getButtonLabel = () => {
-    if (loading) return "Please wait...";
+    if (createdCount) return `Please wait... ${createdCount} / ${selectedIds.length} videos created`;
+    if (loading) return `Please wait...`;
     if (selectedIds.length === 0) return "First select some videos to import";
-    return `Import ${selectedIds.length} video${selectedIds.length > 1 ? "s" : ""}`;
+    const selectedVideosSize = getSelectedVideos().map(v => v.size).reduce((partialSum, a) => partialSum + a, 0);
+    return `Import ${selectedIds.length} video${selectedIds.length > 1 ? "s" : ""} (${formatSize(selectedVideosSize)})`;
   }
 
-  if(!props.videoSources || props.videoSources.length === 0) {
+  const onSortClick = (column: ColumnName) => {
+    if (sortBy === column) {
+      setSortOrder(-sortOrder as 1 | -1);
+    } else {
+      setSortBy(column);
+    }
+  }
+
+  const compareFn = (a: VideoSource, b: VideoSource): number => {
+    switch (sortBy) {
+      case "name":
+        return sortOrder * a.name.localeCompare(b.name);
+      case "duration":
+        return sortOrder * ((a.duration || 0) - (b.duration || 0));
+      case "size":
+        return sortOrder * ((a.size || 0) - (b.size || 0))
+    }
+  }
+
+  if (!props.videoSources || props.videoSources.length === 0) {
     return <p>We found no video that can be imported :(</p>
   }
+
 
   return (
     <>
       <p className="explanation">Please select the videos you want to import using the check boxes. Once you have made your selection, click on the button at the bottom of the page to start the import.</p>
-      <table>
+      {!createdCount && <table>
         <thead>
           <tr>
             <th></th>
-            <th colSpan={2}>Video</th>
-            <th>Size</th>
-            <th>Duration</th>
+            <th colSpan={2}><a href="#" className={sortBy === "name" ? "current" : ""} onClick={() => onSortClick("name")}>Video</a></th>
+            <th><a href="#" className={sortBy === "size" ? "current" : ""} onClick={() => onSortClick("size")}>Size</a></th>
+            <th><a href="#" className={sortBy === "duration" ? "current" : ""} onClick={() => onSortClick("duration")}>Duration</a></th>
           </tr>
         </thead>
         <tbody>
-          {props.videoSources.map(videoSource =>
-            <tr key={videoSource.id}>
+          {props.videoSources.sort((a, b) => compareFn(a, b)).map(videoSource =>
+            <tr key={videoSource.id} onClick={() => toggleSelection(videoSource.id)}>
               <td><input type="checkbox" checked={selectedIds.indexOf(videoSource.id) !== -1} onChange={(a) => toggleSelection(videoSource.id)} /></td>
-              <td>{ videoSource.thumbnail && <Image height="75px" width="100px" alt={videoSource.name} src={videoSource.thumbnail} />}</td>
+              <td>{videoSource.thumbnail && <Image height="75px" width="100px" alt={videoSource.name} src={videoSource.thumbnail} />}</td>
               <td>{videoSource.name}</td>
-              <td>{Math.round(videoSource.size / 1024 / 1024 * 100) / 100} MB</td>
+              <td>{formatSize(videoSource.size)}</td>
               <td>{videoSource.duration && formatDuration(videoSource.duration)}</td>
             </tr>
           )}
         </tbody>
-      </table>
-      <button className="submitButton" disabled={selectedIds.length == 0 || loading} onClick={() => {
+      </table>}
+      <button className="submitButton" disabled={selectedIds.length == 0 || loading || !!createdCount} onClick={() => {
         setLoading(true);
-        createApiVideoVideos().then(videos => {
-          props.onSubmit(videos);
+        createApiVideoVideos().then(result => {
+          // TODO manage video creation fails in result.failed
+          props.onSubmit(result.successes);
+        }).catch((e) => {
+          alert("Video creation failed.");
           setLoading(false);
         });
       }}>{getButtonLabel()}</button>

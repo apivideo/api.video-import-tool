@@ -14,7 +14,6 @@ export default function handler(
 ) {
     if (req.method === "POST") {
         const body = JSON.parse(req.body) as ZoomRecordingsBody;
-        console.log(body);
         const headers = new Headers();
         headers.append("Authorization", "Bearer " + body.access_token)
         fetch("https://api.zoom.us/v2/users/me/recordings", {

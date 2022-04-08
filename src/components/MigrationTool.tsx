@@ -1,16 +1,26 @@
 import Video from '@api.video/nodejs-client/lib/model/Video'
-import type { NextPage } from 'next'
+import Link from 'next/link'
 import { useState } from 'react'
 import Authenticate from '../components/Authenticate'
 import ImportProgress from '../components/ImportProgress'
 import Stepper from '../components/stepper/Stepper'
 import VideoSourceSelector from '../components/VideoSourceSelector'
-import VimeoLogin from '../components/providers/VimeoLogin'
-import VideoSource from '../types/videoSource'
 import { MigrationProvider } from '../types/providers'
+import VideoSource from '../types/videoSource'
 
 interface MigrationToolProps {
   provider: MigrationProvider;
+}
+
+const buildId = (length: number) => {
+  let result = '';
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() *
+      charactersLength));
+  }
+  return result;
 }
 
 const MigrationTool: React.FC<MigrationToolProps> = (props) => {
@@ -18,22 +28,13 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
   const [apiVideoApiKey, setApiVideoApiKey] = useState<string>();
   const [importableVideos, setImportableVideos] = useState<VideoSource[]>();
   const [importedVideos, setImportedVideos] = useState<Video[]>();
+  const [migrationId, _] = useState<string>(buildId(9));
 
-  const capitalize = (str: string) => {
-    return str.substring(0, 1).toLocaleUpperCase() + str.substring(1).toLocaleLowerCase();
-  }
-
-  const getTitle = () => {
-    if(props.provider === "VIMEO") return <>Welcome to the <span style={{color: "rgb(0, 173, 239)"}}>Vimeo</span> to <span className="orange">api.video</span> migration tool</>
-    if(props.provider === "ZOOM") return <>Welcome to the <span style={{color: "#0c63ce"}}>Zoom recordings</span> to <span className="orange">api.video</span> migration tool</>
-    return "";
-  }
 
   return (
     <div className="container">
       <main className="main">
-        <h1 className="title">{getTitle()}</h1>
-
+        <h1 className="title">{props.provider.title}</h1>
 
         <Stepper activeStep={step} steps={["Authentication", "Videos selection", "Import progress"]}></Stepper>
 
@@ -48,6 +49,8 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
           />}
 
           {step === 1 && <VideoSourceSelector
+            migrationId={migrationId}
+            providerName={props.provider.key}
             videoSources={importableVideos!}
             apiVideoApiKey={apiVideoApiKey!}
             onSubmit={(videos) => {
@@ -61,6 +64,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
             videos={importedVideos || []}
           />}
         </div>
+        {step === 0 && <p><Link href="/migrations">Your previous migrations</Link></p>}
       </main>
     </div>
   )

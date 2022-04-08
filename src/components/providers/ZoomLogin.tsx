@@ -77,9 +77,7 @@ const ZoomLogin: React.FC<ProviderLoginProps> = (props) => {
     const res: VideoSource[] = [];
     zoomVideos.meetings.forEach((m: any) => {
       if (m.recording_files) {
-        
         const f = m.recording_files.filter((r: any) => r.file_type === "MP4")[0];
-        console.log(f);
         res.push({
           id: f.id,
           url: f.download_url,
@@ -88,7 +86,6 @@ const ZoomLogin: React.FC<ProviderLoginProps> = (props) => {
         })
       }
     });
-    console.log(res);
     return res;
   }
 

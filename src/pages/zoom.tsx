@@ -1,9 +1,11 @@
 import type { NextPage } from 'next'
 import MigrationTool from '../components/MigrationTool'
+import { Providers } from '../types/providers'
 
 const ZoomHome: NextPage = () => {
+  // <MigrationTool provider={Providers.ZOOM} />
   return (
-    <MigrationTool provider='ZOOM' />
+    <p>Soon :)</p>
   )
 }
 

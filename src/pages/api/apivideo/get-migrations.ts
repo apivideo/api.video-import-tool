@@ -10,10 +10,10 @@ interface GetStatusBody {
 }
 
 interface GetStatusResponse {
-    videos: VideoWithStatus[];
+    videos: Video[];
 }
 
-export default function handler(
+export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<GetStatusResponse | string>
 ) {
@@ -22,12 +22,17 @@ export default function handler(
 
         const client = new ApiVideoClient({ apiKey: body.apiKey, applicationName: "vimeo-migration-tool", applicationVersion: packageJson.version });
 
-        const promises: Promise<VideoWithStatus>[] = body.videos.map(v => client.videos.getStatus(v.videoId).then(status => ({
-            ...v,
-            status
-        })));
+        let allVideos: Video[] = [];
 
-        Promise.all(promises).then(v => res.status(200).json({ videos: v }));
+        for (let currentPage = 1; ; currentPage++) {
+            const res = await client.videos.list({ metadata: { "x-apivideo-is-migration": "1" }, currentPage });
+            allVideos = [...allVideos, ...res.data];
+            if (currentPage >= (res?.pagination?.pagesTotal || 0)) {
+                break;
+            }
+        }
+
+        res.status(200).json({ videos: allVideos });
     } else {
         res.status(405).send("");
     }

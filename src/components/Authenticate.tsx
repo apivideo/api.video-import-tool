@@ -18,7 +18,7 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
 
   const validateApiVideoAuthentication = async (): Promise<boolean> => {
     let errorMessage;
-    if(apiVideoApiKey.trim() === "") {
+    if (apiVideoApiKey.trim() === "") {
       errorMessage = "Please enter your api.video API key";
     }
     errorMessage = await fetch("/api/apivideo/verify-api-key", {
@@ -36,31 +36,44 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
     return providerValidateRef?.current && await providerValidateRef?.current() || false
   }
 
+  const getVideosFromProvider = async (): Promise<VideoSource[]> => {
+    if(!props.provider.loginComponent) {
+      return [];
+    }
+    
+    return providerGetVideosRef?.current && await providerGetVideosRef?.current() || [];;
+  }
+
   return (
     <>
+      {props.provider.intro && <p className="explanation">{props.provider.intro}</p>}
+
       <div>
         <label htmlFor="apiVideoApiKey">Enter your api.video API key</label>
         <input className={apiKeyErrorMessage ? "error" : ""} id="apiVideoApiKey" type={"password"} value={apiVideoApiKey} onChange={(v) => setApiVideoApiKey(v.target.value)}></input>
         <p className="inputError">{apiKeyErrorMessage}&nbsp;</p>
       </div>
-      <div>
-        {props.provider === "VIMEO" && <VimeoLogin validate={providerValidateRef} getVideos={providerGetVideosRef}></VimeoLogin>}
-        {props.provider === "ZOOM" && <ZoomLogin validate={providerValidateRef} getVideos={providerGetVideosRef}></ZoomLogin>}
-      </div>
-      
+      {props.provider.loginComponent &&
+        <div>
+          <props.provider.loginComponent validate={providerValidateRef} getVideos={providerGetVideosRef} />
+        </div>
+      }
+
       <div>
         <button disabled={loading} onClick={async () => {
           setLoading(true);
-       
-          const authentValidation: boolean[] = await Promise.all([validateApiVideoAuthentication(), validateProviderAuthentication()]);
-          
-          if(authentValidation.filter(v => !v).length > 0) {
+
+          const authentValidation: boolean[] = await Promise.all(props.provider.loginComponent 
+              ? [validateApiVideoAuthentication(), validateProviderAuthentication()]
+              : [validateApiVideoAuthentication()]);
+
+          if (authentValidation.filter(v => !v).length > 0) {
             setLoading(false);
             return;
-          } 
-          
-          const videos = providerGetVideosRef?.current && await providerGetVideosRef?.current() || [];
-          props.onSubmit(apiVideoApiKey, videos);
+          }
+
+          props.onSubmit(apiVideoApiKey, await getVideosFromProvider());
+
           setLoading(false);
         }}>{loading ? "Please wait..." : "Authenticate"}</button>
       </div>

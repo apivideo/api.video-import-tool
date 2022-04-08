@@ -1,46 +1,68 @@
 import Video from "@api.video/nodejs-client/lib/model/Video";
 import React, { useEffect, useRef, useState } from "react";
 import { VideoWithStatus } from "../types/videoWithStatus";
+import { unparse } from 'papaparse';
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 interface ImportProgressProps {
   videos: Video[];
   apiVideoApiKey: string;
 }
 
+
+
+const useInterval = (callback: () => Promise<boolean>, delay: number) => {
+
+  const savedCallback = useRef<() => Promise<boolean>>();
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+
+  useEffect(() => {
+    const tick = async () => {
+      if (savedCallback.current) {
+        if (await savedCallback.current()) {
+          setTimeout(() => tick(), delay);
+        }
+      }
+    }
+    tick();
+  }, [delay]);
+}
+
 const ImportProgress: React.FC<ImportProgressProps> = (props) => {
   const [videoWithStatus, setVideoWithStatus] = useState<VideoWithStatus[]>(props.videos);
   const statusesFetchIntervalRef = useRef<any>();
+  const router = useRouter();
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      const notDoneVideos = videoWithStatus.filter((v: VideoWithStatus) => !v?.status?.encoding?.qualities || v?.status?.encoding?.qualities.length == 0 || v?.status?.encoding?.qualities?.find(s => s.status !== "encoded"));
+  const isNotTotallyEncoded = (v: VideoWithStatus) => {
+    return !v?.status?.encoding?.qualities || v?.status?.encoding?.qualities.length == 0 || v?.status?.encoding?.qualities?.find(s => s.status !== "encoded");
+  }
 
-      if (notDoneVideos.length === 0) {
-        clearInterval(statusesFetchIntervalRef.current);
-        statusesFetchIntervalRef.current = undefined;
-        return;
-      }
 
-      return fetch("/api/apivideo/status", {
-        method: "POST",
-        body: JSON.stringify({
-          videos: notDoneVideos,
-          apiKey: props.apiVideoApiKey
-        })
+  useInterval(() => {
+
+    const notDoneVideos = videoWithStatus.filter(isNotTotallyEncoded);
+
+    return fetch("/api/apivideo/status", {
+      method: "POST",
+      body: JSON.stringify({
+        videos: notDoneVideos,
+        apiKey: props.apiVideoApiKey
       })
-        .then(v => v.json())
-        .then(res => setVideoWithStatus([
+    })
+      .then(v => v.json())
+      .then(res => {
+        setVideoWithStatus([
           ...videoWithStatus.filter(v => !(res.videos as VideoWithStatus[]).find(r => r.videoId == v.videoId)),
           ...res.videos
-        ]));
-    }, 5000);
-
-    statusesFetchIntervalRef.current = id;
-
-    return () => {
-      clearInterval(statusesFetchIntervalRef.current);
-    };
-  });
+        ]);
+        return res.videos.length == 0 || res.videos.filter(isNotTotallyEncoded).length > 0;
+      });
+  }, 5000);
 
   const statusCellContent = (video: VideoWithStatus) => {
     if (!video.status?.ingest?.status) {
@@ -58,8 +80,43 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
     </>
   }
 
+  const generateExportVideoItem = (video: VideoWithStatus) => {
+    const metadata: { [key: string]: string } = {};
+    video.metadata?.forEach(m => {
+      if (m.key) metadata[m.key] = m.value || "";
+    });
+    return {
+      [metadata["x-apivideo-migration-provider"] + "_id"]: metadata["x-apivideo-migration-video-id"],
+      apivideo_id: video.videoId,
+      size: metadata["x-apivideo-migration-video-size"],
+      name: video.title,
+      apivideo_url: video.assets?.player
+    };
+  }
+
+  const download = (format: "json" | "csv") => {
+    const mimeType = format === "json" ? "application/json" : "text/csv";
+    const stringify = format === "json" ? JSON.stringify : unparse;
+
+    var element = document.createElement('a');
+    element.setAttribute('href', `data:${mimeType};charset=utf-8,` + encodeURIComponent(stringify(videoWithStatus.map(v => generateExportVideoItem(v)))));
+    element.setAttribute('download', `api-video-migration-report.${format}`);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+  }
+
   return (
     <>
+      <p className="explanation">Your videos have been created. You can now close this tab at any moment, even if the encoding isn&apos;t ended.</p>
+      {router.pathname !== "/migrations" &&
+        <p className="explanation">You&apos;ll be able to see this report again by going to the <Link href="/migrations">my migrations</Link> page </p>
+      }
+      <p className="explanation">You can download a report of your migration in the following format: <a href="#" onClick={() => download("csv")}>csv</a> or <a href="#" onClick={() => download("json")}>json</a>.</p>
       <table className="result">
         <thead>
           <tr>
