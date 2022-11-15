@@ -1,23 +1,27 @@
-import React, { ReactNode, useRef, useState } from "react";
-import { MigrationProvider } from "../types/providers";
-import VideoSource from "../types/videoSource";
-import VimeoLogin from "./providers/VimeoLogin";
-import ZoomLogin from "./providers/ZoomLogin";
+import React, { useEffect, useState } from "react";
+import { ValidateProviderCredentialsRequestBody, ValidateProviderCredentialsRequestResponse } from "../pages/api/providers/validate-provider-credentials";
+import { AuthenticationContext } from "../types/common";
+import { MigrationProvider, ProviderLoginProps, ProviderName, Providers } from "../providers";
 
 interface AuthenticateProps {
-  onSubmit: (apiKey: string, sources: VideoSource[]) => void;
-  provider: MigrationProvider;
+  onSubmit: (authenticationContext: AuthenticationContext) => void;
+  introMessage?: JSX.Element;
+  providerName?: ProviderName;
 }
 
 const Authenticate: React.FC<AuthenticateProps> = (props) => {
   const [apiVideoApiKey, setApiVideoApiKey] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [apiKeyErrorMessage, setApiKeyErrorMessage] = useState<string>("");
-  const providerValidateRef = useRef<() => Promise<boolean>>(null);
-  const providerGetVideosRef = useRef<() => Promise<VideoSource[]>>(null);
+  const [apiVideoErrorMessage, setApiVideoErrorMessage] = useState<string | null>(null);
+  const [providerAccessToken, setProviderAccessToken] = useState<string | null>(null);
+  const [providerErrorMessage, setProviderErrorMessage] = useState<string | null>();
 
-  const validateApiVideoAuthentication = async (): Promise<boolean> => {
-    let errorMessage;
+  useEffect(() => {
+    setApiVideoApiKey(sessionStorage.getItem("apiVideoApiKey") || "");
+  }, []);
+
+  const validateApiVideoAuthentication = async (): Promise<string | null> => {
+    let errorMessage = null;
     if (apiVideoApiKey.trim() === "") {
       errorMessage = "Please enter your api.video API key";
     }
@@ -26,53 +30,87 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
       body: JSON.stringify({
         apiKey: apiVideoApiKey
       })
-    }).then((e) => e.status == 403 ? "Please verify your api key" : "")
+    }).then((e) => e.status == 403 ? "Please verify your api key" : null)
 
-    setApiKeyErrorMessage(errorMessage);
-    return !errorMessage;
-  }
+    setApiVideoErrorMessage(errorMessage);
+    return errorMessage;
+  } 
 
-  const validateProviderAuthentication = async () => {
-    return providerValidateRef?.current && await providerValidateRef?.current() || false
-  }
-
-  const getVideosFromProvider = async (): Promise<VideoSource[]> => {
-    if(!props.provider.loginComponent) {
-      return [];
+  const validateProviderAuthentication = async (): Promise<string | null> => {
+    if(!props.providerName) {
+      return null;
     }
-    
-    return providerGetVideosRef?.current && await providerGetVideosRef?.current() || [];;
+
+    const provider = Providers[props.providerName];
+
+    if(!providerAccessToken) {
+      return `Missing ${provider.displayName} authentication`;
+    }
+
+    if(provider.backendFeatures.indexOf("validateProviderCredentials") === -1) {
+      return null;
+    }
+
+    const body: ValidateProviderCredentialsRequestBody = {
+      authenticationContext: {
+        providerAccessToken
+      },
+      provider: props.providerName 
+    }
+    const apiRes = await fetch(`/api/providers/validate-provider-credentials`, {
+      method: "POST",
+      body: JSON.stringify(body)
+    });
+    const res: ValidateProviderCredentialsRequestResponse = await apiRes.json();
+    return res.error;
   }
+
+  const provider = props.providerName ? Providers[props.providerName] : undefined;
 
   return (
     <>
-      {props.provider.intro && <p className="explanation">{props.provider.intro}</p>}
+      {props.introMessage && <p className="explanation">{props.introMessage}</p>}
 
       <div>
         <label htmlFor="apiVideoApiKey">Enter your api.video API key</label>
-        <input className={apiKeyErrorMessage ? "error" : ""} id="apiVideoApiKey" type={"password"} value={apiVideoApiKey} onChange={(v) => setApiVideoApiKey(v.target.value)}></input>
-        <p className="inputError">{apiKeyErrorMessage}&nbsp;</p>
+        <input className={apiVideoErrorMessage ? "error" : ""} id="apiVideoApiKey" type={"password"} value={apiVideoApiKey} onChange={(v) => {
+          sessionStorage.setItem("apiVideoApiKey", v.target.value);
+          setApiVideoApiKey(v.target.value);
+        }}></input>
+        <p className="inputError">{apiVideoErrorMessage}&nbsp;</p>
       </div>
-      {props.provider.loginComponent &&
+
+      {provider &&
         <div>
-          <props.provider.loginComponent validate={providerValidateRef} getVideos={providerGetVideosRef} />
+          <provider.loginComponent 
+            onAccessTokenChanged={(providerAccessToken) => setProviderAccessToken(providerAccessToken)}
+            errorMessage={providerErrorMessage || undefined} />
         </div>
       }
 
       <div>
         <button disabled={loading} onClick={async () => {
           setLoading(true);
-
-          const authentValidation: boolean[] = await Promise.all(props.provider.loginComponent 
+          
+          const authentValidation: (string | null)[] = await Promise.all(provider 
               ? [validateApiVideoAuthentication(), validateProviderAuthentication()]
               : [validateApiVideoAuthentication()]);
 
-          if (authentValidation.filter(v => !v).length > 0) {
+          setApiVideoErrorMessage(authentValidation[0]);
+
+          if(authentValidation.length > 1) {
+            setProviderErrorMessage(authentValidation[1]);
+          }
+          
+          if (authentValidation.filter(v => v !== null).length > 0) {
             setLoading(false);
             return;
           }
 
-          props.onSubmit(apiVideoApiKey, await getVideosFromProvider());
+          props.onSubmit({
+            apiVideoApiKey: apiVideoApiKey,
+            providerAccessToken: providerAccessToken!
+          });
 
           setLoading(false);
         }}>{loading ? "Please wait..." : "Authenticate"}</button>

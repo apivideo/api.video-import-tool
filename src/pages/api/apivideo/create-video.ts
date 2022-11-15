@@ -1,7 +1,7 @@
 import ApiVideoClient from '@api.video/nodejs-client';
 import Video from '@api.video/nodejs-client/lib/model/Video';
 import type { NextApiRequest, NextApiResponse } from 'next'
-import VideoSource from '../../../types/videoSource';
+import VideoSource from '../../../types/common';
 import packageJson from '../../../../package.json';
 
 interface CreateVideoBody {

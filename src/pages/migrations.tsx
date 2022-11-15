@@ -4,14 +4,13 @@ import Link from 'next/link';
 import { useState } from 'react';
 import Authenticate from '../components/Authenticate';
 import ImportProgress from '../components/ImportProgress';
-import { Providers } from '../types/providers';
+import { ProviderName, Providers } from '../providers';
 
 type Migration = {
     id: string;
     date: Date;
     videos: Video[];
 }
-
 
 const MigrationsHome: NextPage = () => {
     const [apiVideoApiKey, setApiVideoApiKey] = useState<string>();
@@ -49,14 +48,14 @@ const MigrationsHome: NextPage = () => {
     return (
         <div className="container">
             <main className="main">
-                <h1 className="title">{Providers.EMPTY.title}</h1>
+                <h1 className="title">Welcome to the <span className="orange">api.video</span> migration tool</h1>
 
                 <div id="content">
                     {!migrations && <Authenticate
-                        provider={Providers.EMPTY}
-                        onSubmit={(apiKey, _) => {
-                            setApiVideoApiKey(apiKey);
-                            getMigratedVideos(apiKey);
+                        introMessage={<>From here you will be able to see the migrations you&apos;ve done using the migration tool.</>}
+                        onSubmit={(authenticationContext) => {
+                            setApiVideoApiKey(authenticationContext.apiVideoApiKey);
+                            getMigratedVideos(authenticationContext.apiVideoApiKey);
                         }}
                     />}
                     {migrations && migrations.length === 0 &&

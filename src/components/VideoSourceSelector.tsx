@@ -1,25 +1,62 @@
-import PlayerThemeCreationPayload from "@api.video/nodejs-client/lib/model/PlayerThemeCreationPayload";
 import Video from "@api.video/nodejs-client/lib/model/Video";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import VideoSource from "../types/videoSource";
+import { BeforeVideoCreationHookRequestBody } from "../pages/api/providers/before-video-creation-hook";
+import { GetImportableVideosRequestBody } from "../pages/api/providers/get-importable-videos";
+
+import VideoSource, { AuthenticationContext, Page } from "../types/common";
+import { MigrationProvider, ProviderName, Providers } from "../providers";
 
 interface VideoSourceSelectorProps {
-  videoSources: VideoSource[];
-  apiVideoApiKey: string;
+  authenticationContext: AuthenticationContext;
   migrationId: string;
-  providerName: string;
+  providerName: ProviderName;
   onSubmit: (videoSources: Video[]) => void;
 }
 
 type ColumnName = "name" | "size" | "duration";
 
 const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
-  const [selectedIds, setSelectedIds] = useState<string[]>(props.videoSources.map(p => p.id));
+  const [videoSources, setVideoSources] = useState<VideoSource[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<ColumnName>("name");
   const [sortOrder, setSortOrder] = useState<1 | -1>(1);
   const [createdCount, setCreatedCount] = useState<number | undefined>();
+  const [fetchingVideos, setFetchingVideos] = useState<boolean>(true);
+
+  useEffect(() => {
+    fetchVideos(props.authenticationContext);
+  }, []);
+
+
+  const fetchVideos = async (authenticationContext: AuthenticationContext, videos: VideoSource[] = [], nextPageFetchDetails?: any) => {
+    if (nextPageFetchDetails) {
+      console.log(nextPageFetchDetails);
+
+    }
+    const body: GetImportableVideosRequestBody = {
+      authenticationContext,
+      provider: props.providerName,
+      nextPageFetchDetails,
+    }
+    const apiRes = await fetch(`/api/providers/get-importable-videos`, {
+      method: "POST",
+      body: JSON.stringify(body)
+    });
+    const res: Page<VideoSource> = await apiRes.json();
+
+    videos = videos.concat(res.data);
+
+    setVideoSources(videos);
+    setSelectedIds(videos.map((video) => video.id));
+
+    if (res.hasMore) {
+      fetchVideos(authenticationContext, videos, res.nextPageFetchDetails);
+    } else {
+      setFetchingVideos(false);
+    }
+  }
 
   const toggleSelection = (id: string) => {
     if (selectedIds.indexOf(id) === -1) {
@@ -49,20 +86,33 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
   }
 
   const getSelectedVideos = (): VideoSource[] => {
-    return props.videoSources.filter(a => selectedIds.indexOf(a.id) > -1);
+    return videoSources.filter(a => selectedIds.indexOf(a.id) > -1);
   }
 
-  const createApiVideoVideos = async (): Promise<{successes: Video[], fails: VideoSource[]}> => {
+  const createApiVideoVideos = async (): Promise<{ successes: Video[], fails: VideoSource[] }> => {
     const selectedVideos = getSelectedVideos();
     const successes: Video[] = [];
     const fails: VideoSource[] = [];
 
     for (let selectedVideo of selectedVideos) {
 
+      if (Providers[props.providerName].backendFeatures.indexOf("beforeVideoCreationHook") > -1) {
+        const body: BeforeVideoCreationHookRequestBody = {
+          provider: props.providerName,
+          authenticationContext: props.authenticationContext,
+          video: selectedVideo
+        }
+
+        selectedVideo = await fetch("/api/providers/before-video-creation-hook", {
+          method: "POST",
+          body: JSON.stringify(body)
+        }).then(a => a.json());
+      }
+
       await fetch("/api/apivideo/create-video", {
         method: "POST",
         body: JSON.stringify({
-          apiKey: props.apiVideoApiKey,
+          apiKey: props.authenticationContext.apiVideoApiKey,
           migrationId: props.migrationId,
           provider: props.providerName,
           videoSource: selectedVideo,
@@ -78,7 +128,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
       setCreatedCount(successes.length);
     }
 
-    return {successes, fails};
+    return { successes, fails };
   }
 
   const getButtonLabel = () => {
@@ -108,45 +158,52 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
     }
   }
 
-  if (!props.videoSources || props.videoSources.length === 0) {
+  if (!fetchingVideos && (!videoSources || videoSources.length === 0)) {
     return <p>We found no video that can be imported :(</p>
   }
 
+  const hasDurations = !!videoSources.find(v => !!v.duration);
 
   return (
     <>
-      <p className="explanation">Please select the videos you want to import using the check boxes. Once you have made your selection, click on the button at the bottom of the page to start the import.</p>
-      {!createdCount && <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th colSpan={2}><a href="#" className={sortBy === "name" ? "current" : ""} onClick={() => onSortClick("name")}>Video</a></th>
-            <th><a href="#" className={sortBy === "size" ? "current" : ""} onClick={() => onSortClick("size")}>Size</a></th>
-            <th><a href="#" className={sortBy === "duration" ? "current" : ""} onClick={() => onSortClick("duration")}>Duration</a></th>
-          </tr>
-        </thead>
-        <tbody>
-          {props.videoSources.sort((a, b) => compareFn(a, b)).map(videoSource =>
-            <tr key={videoSource.id} onClick={() => toggleSelection(videoSource.id)}>
-              <td><input type="checkbox" checked={selectedIds.indexOf(videoSource.id) !== -1} onChange={(a) => toggleSelection(videoSource.id)} /></td>
-              <td>{videoSource.thumbnail && <Image height="75px" width="100px" alt={videoSource.name} src={videoSource.thumbnail} />}</td>
-              <td>{videoSource.name}</td>
-              <td>{formatSize(videoSource.size)}</td>
-              <td>{videoSource.duration && formatDuration(videoSource.duration)}</td>
-            </tr>
-          )}
-        </tbody>
-      </table>}
-      <button className="submitButton" disabled={selectedIds.length == 0 || loading || !!createdCount} onClick={() => {
-        setLoading(true);
-        createApiVideoVideos().then(result => {
-          // TODO manage video creation fails in result.failed
-          props.onSubmit(result.successes);
-        }).catch((e) => {
-          alert("Video creation failed.");
-          setLoading(false);
-        });
-      }}>{getButtonLabel()}</button>
+      {fetchingVideos
+        ? <p>Retrieving videos from {Providers[props.providerName].displayName}. {videoSources.length} retrieved so far...</p>
+        : <>
+          <p className="explanation">Please select the videos you want to import using the check boxes. Once you have made your selection, click on the button at the bottom of the page to start the import.</p>
+          {!createdCount && <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th colSpan={2}><a href="#" className={sortBy === "name" ? "current" : ""} onClick={() => onSortClick("name")}>Video</a></th>
+                <th><a href="#" className={sortBy === "size" ? "current" : ""} onClick={() => onSortClick("size")}>Size</a></th>
+                {hasDurations && <th><a href="#" className={sortBy === "duration" ? "current" : ""} onClick={() => onSortClick("duration")}>Duration</a></th>}
+              </tr>
+            </thead>
+            <tbody>
+              {videoSources.sort((a, b) => compareFn(a, b)).map(videoSource =>
+                <tr key={videoSource.id} onClick={() => toggleSelection(videoSource.id)}>
+                  <td><input type="checkbox" checked={selectedIds.indexOf(videoSource.id) !== -1} onChange={(a) => toggleSelection(videoSource.id)} /></td>
+                  <td>{videoSource.thumbnail && (videoSource.thumbnail.startsWith("data")
+                    ? <img height="75px" width="100px" src={videoSource.thumbnail} alt={videoSource.name} />
+                    : <Image height="75" width="100" alt={videoSource.name} src={videoSource.thumbnail} />)}</td>
+                  <td>{videoSource.name}</td>
+                  <td>{formatSize(videoSource.size)}</td>
+                  {hasDurations && <td>{videoSource.duration && formatDuration(videoSource.duration)}</td>}
+                </tr>
+              )}
+            </tbody>
+          </table>}
+          <button className="submitButton" disabled={selectedIds.length == 0 || loading || !!createdCount} onClick={() => {
+            setLoading(true);
+            createApiVideoVideos().then(result => {
+              // TODO manage video creation fails in result.failed
+              props.onSubmit(result.successes);
+            }).catch((e) => {
+              alert("Video creation failed.");
+              setLoading(false);
+            });
+          }}>{getButtonLabel()}</button>
+        </>}
     </>
   );
 }
