@@ -1,30 +1,32 @@
-import ApiVideoClient from '@api.video/nodejs-client';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import packageJson from '../../../../package.json';
+import ApiVideoService from '../../../service/ApiVideoService';
+import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
-interface VerifyApiKeyBody {
+export type VerifyApiKeyRequestBody = {
     apiKey: string;
 }
 
-interface VerifyApiKeyResponse {
+export type VerifyApiKeyRequestResponse = {
+    ok: boolean;
+};
 
-}
-
-export default function handler(
+export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<VerifyApiKeyResponse | string>
+    res: NextApiResponse<ApiResponse<VerifyApiKeyRequestResponse>>
 ) {
     if (req.method === "POST") {
-        const body = JSON.parse(req.body) as VerifyApiKeyBody;
+        try {
+            const body = JSON.parse(req.body) as VerifyApiKeyRequestBody;
 
-        const client = new ApiVideoClient({ apiKey: body.apiKey, applicationName: "vimeo-migration-tool", applicationVersion: packageJson.version });
+            const apiVideoService = new ApiVideoService(body.apiKey);
 
-        client.getAccessToken()
-            .then(r => res.status(201).send(""))
-            .catch(e => res.status(403).send(""));
+            const ok = await apiVideoService.apiKeyIsValid();
 
-
+            res.status(200).json(SuccessResponse({ ok }));
+        } catch (e: any) {
+            res.status(500).send(ErrorResponse(e.message));
+        }
     } else {
-        res.status(405).send("");
+        res.status(405).send(MethodNotAllowedResponse);
     }
 }
