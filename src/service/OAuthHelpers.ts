@@ -4,12 +4,12 @@ export type OauthAccessToken = {
     token_type: string;
 }
 
-export const getOauthAccessTokenCall = async (clientId: string, clientSecret: string, redirectUrl: string, code: string): Promise<OauthAccessToken> => {
+export const getOauthAccessTokenCall = async (tokenApiUrl: string, clientId: string, clientSecret: string, redirectUrl: string, code: string): Promise<OauthAccessToken> => {
     const headers = new Headers();
     headers.append("Authorization", `Basic ${btoa(clientId + ":" + clientSecret)}`);
     headers.append("Content-Type", "application/x-www-form-urlencoded");
 
-    const res = await fetch("https://api.dropbox.com/oauth2/token", {
+    const res = await fetch(tokenApiUrl, {
         method: "POST",
         body: `code=${code}&grant_type=authorization_code&redirect_uri=${redirectUrl}`,
         headers

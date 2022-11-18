@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { ValidateProviderCredentialsRequestBody, ValidateProviderCredentialsRequestResponse } from "../pages/api/providers/validate-provider-credentials";
+import { OptionalFeatureFlag, ProviderName, Providers } from "../providers";
+import { callValidateProviderCredentialsApi, callVerifyApiVideoApiKeyApi } from "../service/ClientApiHelpers";
 import { AuthenticationContext } from "../types/common";
-import { MigrationProvider, ProviderLoginProps, ProviderName, Providers } from "../providers";
 
 interface AuthenticateProps {
   onSubmit: (authenticationContext: AuthenticationContext) => void;
@@ -25,44 +25,43 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
     if (apiVideoApiKey.trim() === "") {
       errorMessage = "Please enter your api.video API key";
     }
-    errorMessage = await fetch("/api/apivideo/verify-api-key", {
-      method: "POST",
-      body: JSON.stringify({
-        apiKey: apiVideoApiKey
-      })
-    }).then((e) => e.status == 403 ? "Please verify your api key" : null)
+    const res = await callVerifyApiVideoApiKeyApi({ apiKey: apiVideoApiKey });
+
+    if (!res.ok) {
+      errorMessage = "Please verify your api key";
+    }
 
     setApiVideoErrorMessage(errorMessage);
+
     return errorMessage;
-  } 
+  }
 
   const validateProviderAuthentication = async (): Promise<string | null> => {
-    if(!props.providerName) {
+    if (!props.providerName) {
       return null;
     }
 
     const provider = Providers[props.providerName];
 
-    if(!providerAccessToken) {
+    if (!providerAccessToken) {
       return `Missing ${provider.displayName} authentication`;
     }
 
-    if(provider.backendFeatures.indexOf("validateProviderCredentials") === -1) {
+    if (!provider.hasFeature(OptionalFeatureFlag.ProviderCredentialsBackendValidation)) {
       return null;
     }
 
-    const body: ValidateProviderCredentialsRequestBody = {
-      authenticationContext: {
-        providerAccessToken
-      },
-      provider: props.providerName 
+    try {
+      const res =await callValidateProviderCredentialsApi({
+        authenticationContext: {
+          providerAccessToken
+        },
+        provider: props.providerName
+      });
+      return res.error;
+    } catch (e: any) {
+      return e.message;
     }
-    const apiRes = await fetch(`/api/providers/validate-provider-credentials`, {
-      method: "POST",
-      body: JSON.stringify(body)
-    });
-    const res: ValidateProviderCredentialsRequestResponse = await apiRes.json();
-    return res.error;
   }
 
   const provider = props.providerName ? Providers[props.providerName] : undefined;
@@ -82,7 +81,7 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
 
       {provider &&
         <div>
-          <provider.loginComponent 
+          <provider.loginComponent
             onAccessTokenChanged={(providerAccessToken) => setProviderAccessToken(providerAccessToken)}
             errorMessage={providerErrorMessage || undefined} />
         </div>
@@ -91,17 +90,17 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
       <div>
         <button disabled={loading} onClick={async () => {
           setLoading(true);
-          
-          const authentValidation: (string | null)[] = await Promise.all(provider 
-              ? [validateApiVideoAuthentication(), validateProviderAuthentication()]
-              : [validateApiVideoAuthentication()]);
+
+          const authentValidation: (string | null)[] = await Promise.all(provider
+            ? [validateApiVideoAuthentication(), validateProviderAuthentication()]
+            : [validateApiVideoAuthentication()]);
 
           setApiVideoErrorMessage(authentValidation[0]);
 
-          if(authentValidation.length > 1) {
+          if (authentValidation.length > 1) {
             setProviderErrorMessage(authentValidation[1]);
           }
-          
+
           if (authentValidation.filter(v => v !== null).length > 0) {
             setLoading(false);
             return;
