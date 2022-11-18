@@ -1,39 +1,33 @@
-import ApiVideoClient from '@api.video/nodejs-client';
 import Video from '@api.video/nodejs-client/lib/model/Video';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { VideoWithStatus } from '../../../types/videoWithStatus';
-import packageJson from '../../../../package.json';
+import ApiVideoService from '../../../service/ApiVideoService';
+import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
-interface GetStatusBody {
+export type GetMigrationsRequestBody = {
     apiKey: string;
-    videos: Video[]
 }
 
-interface GetStatusResponse {
+export type GetMigrationsRequestResponse = {
     videos: Video[];
-}
+};
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<GetStatusResponse | string>
+    res: NextApiResponse<ApiResponse<GetMigrationsRequestResponse>>
 ) {
     if (req.method === "POST") {
-        const body = JSON.parse(req.body) as GetStatusBody;
+        try {
+            const body = JSON.parse(req.body) as GetMigrationsRequestBody;
 
-        const client = new ApiVideoClient({ apiKey: body.apiKey, applicationName: "vimeo-migration-tool", applicationVersion: packageJson.version });
+            const apiVideoService = new ApiVideoService(body.apiKey);
 
-        let allVideos: Video[] = [];
+            const videos = await apiVideoService.getMigrations();
 
-        for (let currentPage = 1; ; currentPage++) {
-            const res = await client.videos.list({ metadata: { "x-apivideo-is-migration": "1" }, currentPage });
-            allVideos = [...allVideos, ...res.data];
-            if (currentPage >= (res?.pagination?.pagesTotal || 0)) {
-                break;
-            }
+            res.status(200).json(SuccessResponse({ videos }));
+        } catch (e: any) {
+            res.status(500).send(ErrorResponse(e.message));
         }
-
-        res.status(200).json({ videos: allVideos });
     } else {
-        res.status(405).send("");
+        res.status(405).send(MethodNotAllowedResponse);
     }
 }

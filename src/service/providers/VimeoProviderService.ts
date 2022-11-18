@@ -1,9 +1,9 @@
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
-import { OauthAccessToken } from "../oauth";
+import { OauthAccessToken } from "../OAuthHelpers";
 import AbstractProviderService from "./AbstractProviderService";
 
 
-interface VimeoVideo {
+type VimeoVideo = {
     uri: string;
     name: string;
     duration: number;
@@ -25,7 +25,7 @@ interface VimeoVideo {
 }
 
 
-interface VimeoApiResult {
+type VimeoApiResult = {
     data: VimeoVideo[];
     total: number,
     page: number,
@@ -44,16 +44,20 @@ class VimeoProviderService implements AbstractProviderService {
         this.authenticationContext = authenticationContext;
     }
 
+    public getPublicMp4Url(videoSource: VideoSource): Promise<VideoSource> {
+        throw new Error("Method not implemented.");
+    }
+
     public getOauthAccessToken(code: string): Promise<OauthAccessToken> {
         throw new Error("Method not implemented.");
     }
 
-    public beforeVideoCreationHook(videoSource: VideoSource): Promise<VideoSource> {
+    public generatePublicMp4(videoSource: VideoSource): Promise<VideoSource> {
         throw new Error("Method not implemented.");
     }
 
     public async getImportableVideos(nextPageFetchDetails?: any): Promise<Page<VideoSource>> {
-        const videos: VimeoApiResult = await this.callVimeoApi(`https://api.vimeo.com/me/videos?page=${nextPageFetchDetails?.page || 1}`)
+        const videos: VimeoApiResult = await this.callApi(`https://api.vimeo.com/me/videos?page=${nextPageFetchDetails?.page || 1}`)
 
         return {
             data: videos.data.map((video) => this.vimeoVideoToVideoSource(video)),
@@ -65,19 +69,19 @@ class VimeoProviderService implements AbstractProviderService {
     };
 
     public async validateCredentials(): Promise<string | null> {
-        if(!this.authenticationContext?.providerAccessToken) { 
+        if (!this.authenticationContext?.providerAccessToken) {
             return "Vimeo access token is required";
         }
-        let error = await this.callVimeoApi("https://api.vimeo.com/me").then(res => {
-            if (res.error) {
-                return "Your access token seems to be invalid";
-            }
-            if (res.account === "basic" || res.account === "plus") {
-                return "Basic and Plus Vimeo account are not compatible with the migration tool";
-            }
-            return null;
-        });
-        return error;
+        try {
+            return await this.callApi("https://api.vimeo.com/me").then(res => {
+                if (res.account === "basic" || res.account === "plus") {
+                    return "Basic and Plus Vimeo account are not compatible with the migration tool";
+                }
+                return null;
+            });
+        } catch (e) {
+            return "Your access token seems to be invalid";
+        }
     }
 
     vimeoVideoToVideoSource(vimeoVideo: VimeoVideo): VideoSource {
@@ -95,10 +99,10 @@ class VimeoProviderService implements AbstractProviderService {
         };
     }
 
-    private callVimeoApi(url: string): Promise<any> {
+    private async callApi(url: string): Promise<any> {
         const headers = new Headers();
 
-        if(!this.authenticationContext) {
+        if (!this.authenticationContext) {
             throw new Error("Authentication context is required");
         }
 
@@ -106,11 +110,16 @@ class VimeoProviderService implements AbstractProviderService {
         headers.append("Content-Type", "application/json");
         headers.append("Accept", "application/vnd.vimeo.*+json;version=3.4");
 
-        return fetch(url, {
+        const res = await fetch(url, {
             method: "GET",
             headers,
-        })
-            .then((response) => response.json());
+        });
+
+        if (!res.ok) {
+            throw new Error("Dropbox API call failed: " + res.statusText);
+        }
+
+        return await res.json();
 
     }
 }

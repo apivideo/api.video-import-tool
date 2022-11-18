@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { DROPBOX_CLIENT_ID, DROPBOX_REDIRECT_URL } from "../../env";
-import { GetOauthAccessTokenRequestBody, GetOauthAccessTokenRequestResponse } from "../../pages/api/providers/get-oauth-access-token";
-import { ProviderLoginProps, Providers } from "../../providers";
+import { GetOauthAccessTokenRequestResponse } from "../../pages/api/providers/get-oauth-access-token";
+import { ProviderLoginProps } from "../../providers";
+import { callGetOAuthAccessTokenApi } from "../../service/ClientApiHelpers";
 
 
 const DropboxLogin = (props: ProviderLoginProps) => {
@@ -15,15 +16,10 @@ const DropboxLogin = (props: ProviderLoginProps) => {
     setDropboxAccessToken(accessToken);
 
     if (!accessToken && router.query.code) {
-      const body: GetOauthAccessTokenRequestBody = {
+      callGetOAuthAccessTokenApi({
         provider: "DROPBOX",
         code: router.query.code as string,
-      }
-      fetch(`/api/providers/get-oauth-access-token`, {
-        method: "POST",
-        body: JSON.stringify(body)
       })
-        .then(res => res.json())
         .then((res: GetOauthAccessTokenRequestResponse) => {
           if (res.access_token) {
             sessionStorage.setItem("dropboxAccessToken", res.access_token);

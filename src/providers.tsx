@@ -1,8 +1,10 @@
 import { ProviderProps } from "react";
 import DropboxLogin from "./components/provider-login/DropboxLogin";
+import MuxLogin from "./components/provider-login/MuxLogin";
 import VimeoLogin from "./components/provider-login/VimeoLogin";
 import AbstractProviderService from "./service/providers/AbstractProviderService";
 import DropboxProviderService from "./service/providers/DropboxProviderService";
+import MuxProviderService from "./service/providers/MuxProviderService";
 import VimeoProviderService from "./service/providers/VimeoProviderService";
 import VideoSource, { ProviderAuthenticationContext } from "./types/common";
 
@@ -14,7 +16,13 @@ export interface ProviderLoginProps {
     errorMessage?: string;
 }
 
-export type OptionalBackendFeatures = "validateProviderCredentials" | "beforeVideoCreationHook";
+export type OptionalBackendFeatures = "validateProviderCredentials" | "beforeVideoCreationHook" | "waitForPublicUrl";
+
+export enum OptionalFeatureFlag {
+    ProviderCredentialsBackendValidation,
+    GeneratePublicMp4UrlBeforeVideoCreation,
+    WaitForPublicMp4Availibility,
+}
 
 export type MigrationProvider = {
     displayName: string;
@@ -23,7 +31,7 @@ export type MigrationProvider = {
     color: string;
     loginComponent: React.FC<ProviderLoginProps>;
     backendService: { new(authenticationContext?: ProviderAuthenticationContext): AbstractProviderService };
-    backendFeatures: OptionalBackendFeatures[];
+    hasFeature: (feature: OptionalFeatureFlag) => boolean;
 };
 
 export const Providers: { [name: string]: MigrationProvider } = {
@@ -34,7 +42,9 @@ export const Providers: { [name: string]: MigrationProvider } = {
         color: "rgb(0, 173, 239)",
         loginComponent: VimeoLogin,
         backendService: VimeoProviderService,
-        backendFeatures: ["validateProviderCredentials"],
+        hasFeature: (feature: OptionalFeatureFlag) => [
+            OptionalFeatureFlag.ProviderCredentialsBackendValidation
+        ].indexOf(feature) !== -1,
     },
     DROPBOX: {
         displayName: "Dropbox",
@@ -42,6 +52,22 @@ export const Providers: { [name: string]: MigrationProvider } = {
         color: "#0061fe",
         loginComponent: DropboxLogin,
         backendService: DropboxProviderService,
-        backendFeatures: ["beforeVideoCreationHook"],
+        hasFeature: (feature: OptionalFeatureFlag) => [
+            OptionalFeatureFlag.GeneratePublicMp4UrlBeforeVideoCreation
+        ].indexOf(feature) !== -1,
+    },
+    MUX: {
+        displayName: "Mux",
+        title: <>Welcome to the <span style={{ color: "rgb(223, 40, 104)" }}>Mux</span> to <span className="orange">api.video</span> migration tool</>,
+        color: "rgb(223, 40, 104)",
+        loginComponent: MuxLogin,
+        backendService: MuxProviderService,
+        hasFeature: (feature: OptionalFeatureFlag) => [
+            OptionalFeatureFlag.ProviderCredentialsBackendValidation,
+            OptionalFeatureFlag.GeneratePublicMp4UrlBeforeVideoCreation,
+            OptionalFeatureFlag.WaitForPublicMp4Availibility
+        ].indexOf(feature) !== -1,
+
+
     }
 }  

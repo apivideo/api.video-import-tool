@@ -1,9 +1,9 @@
 import { DROPBOX_CLIENT_ID, DROPBOX_CLIENT_SECRET, DROPBOX_REDIRECT_URL } from "../../env";
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
-import { getOauthAccessTokenCall, OauthAccessToken } from "../oauth";
+import { getOauthAccessTokenCall, OauthAccessToken } from "../OAuthHelpers";
 import AbstractProviderService from "./AbstractProviderService";
 
-interface DropboxSearchApiResponse {
+type DropboxSearchApiResponse = {
     has_more: boolean;
     cursor: string;
     matches: Array<{
@@ -24,10 +24,6 @@ interface DropboxSearchApiResponse {
     }>
 }
 
-interface DropboxDownloadLinkResponse {
-    link: string;
-}
-
 
 class DropboxProviderService implements AbstractProviderService {
     authenticationContext?: ProviderAuthenticationContext;
@@ -36,12 +32,16 @@ class DropboxProviderService implements AbstractProviderService {
         this.authenticationContext = authenticationContext;
     }
 
-    public async getOauthAccessToken(code: string): Promise<OauthAccessToken> {
-        return await getOauthAccessTokenCall(DROPBOX_CLIENT_ID, DROPBOX_CLIENT_SECRET, DROPBOX_REDIRECT_URL, code);
+    public getPublicMp4Url(videoSource: VideoSource): Promise<VideoSource> {
+        throw new Error("Method not implemented.");
     }
 
-    public async beforeVideoCreationHook(videoSource: VideoSource): Promise<VideoSource> {
-        const dropboxRes = await this.callDropboxApi("https://api.dropboxapi.com/2/files/get_temporary_link", "POST", {
+    public async getOauthAccessToken(code: string): Promise<OauthAccessToken> {
+        return await getOauthAccessTokenCall("https://api.dropbox.com/oauth2/token", DROPBOX_CLIENT_ID, DROPBOX_CLIENT_SECRET, DROPBOX_REDIRECT_URL, code);
+    }
+
+    public async generatePublicMp4(videoSource: VideoSource): Promise<VideoSource> {
+        const dropboxRes = await this.callApi("https://api.dropboxapi.com/2/files/get_temporary_link", "POST", {
             "path": videoSource.url
         });
 
@@ -54,11 +54,11 @@ class DropboxProviderService implements AbstractProviderService {
     public async validateCredentials(): Promise<string | null> {
         throw new Error("Method not implemented.");
     }
-
+ 
     public async getImportableVideos(nextPageFetchDetails?: any): Promise<Page<VideoSource>> {
         const dropboxRes: DropboxSearchApiResponse = nextPageFetchDetails
-            ? await this.callDropboxApi("https://api.dropboxapi.com/2/files/search/continue_v2", "POST", nextPageFetchDetails)
-            : await this.callDropboxApi("https://api.dropboxapi.com/2/files/search_v2", "POST", {
+            ? await this.callApi("https://api.dropboxapi.com/2/files/search/continue_v2", "POST", nextPageFetchDetails)
+            : await this.callApi("https://api.dropboxapi.com/2/files/search_v2", "POST", {
                 options: {
                     file_status: "active",
                     filename_only: false,
@@ -80,7 +80,7 @@ class DropboxProviderService implements AbstractProviderService {
         };
     };
 
-    private async callDropboxApi(path: string, method: string, body?: any): Promise<any> {
+    private async callApi(path: string, method: string, body?: any): Promise<any> {
         if(!this.authenticationContext) {
             throw new Error("No authentication context provided");
         }
@@ -89,17 +89,22 @@ class DropboxProviderService implements AbstractProviderService {
         headers.append("Authorization", "Bearer " + this.authenticationContext.providerAccessToken)
         headers.append("Content-Type", "application/json");
 
-        const dropboxRes = await fetch(path, {
+        const res = await fetch(path, {
             headers,
             method,
             body: JSON.stringify(body)
         });
-        return await dropboxRes.json();
+
+        if(!res.ok) {
+            throw new Error("Dropbox API call failed: " + res.statusText);
+        }
+
+        return await res.json();
     }
 
 
     private async getThumbnails(searchResponse: DropboxSearchApiResponse): Promise<VideoSource[]> {
-        const thumbnails = await this.callDropboxApi("https://content.dropboxapi.com/2/files/get_thumbnail_batch", "POST", {
+        const thumbnails = await this.callApi("https://content.dropboxapi.com/2/files/get_thumbnail_batch", "POST", {
             entries: searchResponse.matches.map(match => ({
                 format: "jpeg",
                 mode: "strict",
@@ -115,7 +120,6 @@ class DropboxProviderService implements AbstractProviderService {
                 id: match.metadata.metadata.path_lower,
                 name: match.metadata.metadata.name,
                 thumbnail: thumbnail && thumbnail.thumbnail ? `data:image/jpg;base64, ${thumbnail.thumbnail}` : "",
-                url: match.metadata.metadata.path_lower,
                 size: match.metadata.metadata.size
             }
         });

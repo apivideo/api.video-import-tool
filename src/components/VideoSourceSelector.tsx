@@ -1,11 +1,10 @@
 import Video from "@api.video/nodejs-client/lib/model/Video";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import { BeforeVideoCreationHookRequestBody } from "../pages/api/providers/before-video-creation-hook";
-import { GetImportableVideosRequestBody } from "../pages/api/providers/get-importable-videos";
 
-import VideoSource, { AuthenticationContext, Page } from "../types/common";
-import { MigrationProvider, ProviderName, Providers } from "../providers";
+import { OptionalFeatureFlag, ProviderName, Providers } from "../providers";
+import { callCreateApiVideoVideoApi, callGeneratePublicMp4Api, callGetImportableVideosApi, callGetPublicMp4UrlApi } from "../service/ClientApiHelpers";
+import VideoSource, { AuthenticationContext } from "../types/common";
 
 interface VideoSourceSelectorProps {
   authenticationContext: AuthenticationContext;
@@ -22,7 +21,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<ColumnName>("name");
   const [sortOrder, setSortOrder] = useState<1 | -1>(1);
-  const [createdCount, setCreatedCount] = useState<number | undefined>();
+  const [createdCount, setCreatedCount] = useState<number>(0);
   const [fetchingVideos, setFetchingVideos] = useState<boolean>(true);
 
   useEffect(() => {
@@ -31,30 +30,26 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
 
 
   const fetchVideos = async (authenticationContext: AuthenticationContext, videos: VideoSource[] = [], nextPageFetchDetails?: any) => {
-    if (nextPageFetchDetails) {
-      console.log(nextPageFetchDetails);
+    try {
+      const res = (await callGetImportableVideosApi({
+        authenticationContext,
+        provider: props.providerName,
+        nextPageFetchDetails,
+      }));
 
-    }
-    const body: GetImportableVideosRequestBody = {
-      authenticationContext,
-      provider: props.providerName,
-      nextPageFetchDetails,
-    }
-    const apiRes = await fetch(`/api/providers/get-importable-videos`, {
-      method: "POST",
-      body: JSON.stringify(body)
-    });
-    const res: Page<VideoSource> = await apiRes.json();
+      videos = videos.concat(res.data);
 
-    videos = videos.concat(res.data);
+      setVideoSources(videos);
+      setSelectedIds(videos.map((video) => video.id));
 
-    setVideoSources(videos);
-    setSelectedIds(videos.map((video) => video.id));
-
-    if (res.hasMore) {
-      fetchVideos(authenticationContext, videos, res.nextPageFetchDetails);
-    } else {
-      setFetchingVideos(false);
+      if (res.hasMore) {
+        fetchVideos(authenticationContext, videos, res.nextPageFetchDetails);
+      } else {
+        setFetchingVideos(false);
+      }
+    } catch (e) {
+      //TODO properly display error message
+      console.error(e);
     }
   }
 
@@ -70,7 +65,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
   }
 
   const formatDuration = (durationSec: number) => {
-    const seconds = durationSec % 60;
+    const seconds = Math.round(durationSec % 60 * 100) / 100;
     const minutes = Math.floor(durationSec / 60) % 60;
     const hours = Math.floor(durationSec / 3600) % 3600;
 
@@ -89,54 +84,85 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
     return videoSources.filter(a => selectedIds.indexOf(a.id) > -1);
   }
 
+  const timeout = async (ms: number) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+
+  const createApiVideoVideo = async (video: VideoSource): Promise<{ result: Video | Error, source: VideoSource }> => {
+    try {
+      if (Providers[props.providerName].hasFeature(OptionalFeatureFlag.GeneratePublicMp4UrlBeforeVideoCreation)) {
+        video = (await callGeneratePublicMp4Api({
+          providerName: props.providerName,
+          authenticationContext: props.authenticationContext,
+          video: video
+        })).video;
+      }
+
+      if (Providers[props.providerName].hasFeature(OptionalFeatureFlag.WaitForPublicMp4Availibility)) {
+        while (true) {
+          const url = (await callGetPublicMp4UrlApi({
+            authenticationContext: props.authenticationContext,
+            provider: props.providerName,
+            video: video,
+          })).video?.url || null;
+          if (url) {
+            video.url = url;
+            break;
+          }
+          await (timeout(5000));
+        }
+      }
+
+      const res = (await callCreateApiVideoVideoApi({
+        apiKey: props.authenticationContext.apiVideoApiKey,
+        migrationId: props.migrationId,
+        providerName: props.providerName,
+        videoSource: video,
+      })).video;
+
+      setCreatedCount(createdCount + 1);
+
+      return {
+        result: res,
+        source: video
+      };
+    } catch (e: any) {
+      return {
+        result: e,
+        source: video
+      }
+    }
+  }
+
   const createApiVideoVideos = async (): Promise<{ successes: Video[], fails: VideoSource[] }> => {
     const selectedVideos = getSelectedVideos();
     const successes: Video[] = [];
     const fails: VideoSource[] = [];
 
-    for (let selectedVideo of selectedVideos) {
+    const results = await Promise.all(selectedVideos.map(selectedVideo => createApiVideoVideo(selectedVideo)));
 
-      if (Providers[props.providerName].backendFeatures.indexOf("beforeVideoCreationHook") > -1) {
-        const body: BeforeVideoCreationHookRequestBody = {
-          provider: props.providerName,
-          authenticationContext: props.authenticationContext,
-          video: selectedVideo
-        }
-
-        selectedVideo = await fetch("/api/providers/before-video-creation-hook", {
-          method: "POST",
-          body: JSON.stringify(body)
-        }).then(a => a.json());
+    results.forEach((result, index) => {
+      if (result.result instanceof Error) {
+        fails.push(result.source);
+      } else {
+        successes.push(result.result);
       }
+    });
 
-      await fetch("/api/apivideo/create-video", {
-        method: "POST",
-        body: JSON.stringify({
-          apiKey: props.authenticationContext.apiVideoApiKey,
-          migrationId: props.migrationId,
-          provider: props.providerName,
-          videoSource: selectedVideo,
-        })
-      })
-        .then(response => {
-          if (!response.ok) {
-            fails.push(selectedVideo)
-          }
-          response.json().then(v => successes.push(v))
-        });
-
-      setCreatedCount(successes.length);
-    }
-
-    return { successes, fails };
+    return {
+      successes,
+      fails
+    };
   }
+
 
   const getButtonLabel = () => {
     if (createdCount) return `Please wait... ${createdCount} / ${selectedIds.length} videos created`;
     if (loading) return `Please wait...`;
     if (selectedIds.length === 0) return "First select some videos to import";
-    const selectedVideosSize = getSelectedVideos().map(v => v.size).reduce((partialSum, a) => partialSum + a, 0);
-    return `Import ${selectedIds.length} video${selectedIds.length > 1 ? "s" : ""} (${formatSize(selectedVideosSize)})`;
+    const selectedVideosSize = getSelectedVideos().map(v => v.size).reduce((partialSum, a) => (partialSum || 0) + (a || 0), 0) || 0;
+    return `Import ${selectedIds.length} video${selectedIds.length > 1 ? "s" : ""}` + (selectedVideosSize > 0 ? ` (${formatSize(selectedVideosSize)})` : "");
   }
 
   const onSortClick = (column: ColumnName) => {
@@ -163,6 +189,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
   }
 
   const hasDurations = !!videoSources.find(v => !!v.duration);
+  const hasSizes = !!videoSources.find(v => !!v.size);
 
   return (
     <>
@@ -175,7 +202,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
               <tr>
                 <th></th>
                 <th colSpan={2}><a href="#" className={sortBy === "name" ? "current" : ""} onClick={() => onSortClick("name")}>Video</a></th>
-                <th><a href="#" className={sortBy === "size" ? "current" : ""} onClick={() => onSortClick("size")}>Size</a></th>
+                {hasSizes && <th><a href="#" className={sortBy === "size" ? "current" : ""} onClick={() => onSortClick("size")}>Size</a></th>}
                 {hasDurations && <th><a href="#" className={sortBy === "duration" ? "current" : ""} onClick={() => onSortClick("duration")}>Duration</a></th>}
               </tr>
             </thead>
@@ -187,7 +214,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
                     ? <img height="75px" width="100px" src={videoSource.thumbnail} alt={videoSource.name} />
                     : <Image height="75" width="100" alt={videoSource.name} src={videoSource.thumbnail} />)}</td>
                   <td>{videoSource.name}</td>
-                  <td>{formatSize(videoSource.size)}</td>
+                  {videoSource.size && <td>{formatSize(videoSource.size)}</td>}
                   {hasDurations && <td>{videoSource.duration && formatDuration(videoSource.duration)}</td>}
                 </tr>
               )}

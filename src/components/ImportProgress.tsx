@@ -1,9 +1,10 @@
 import Video from "@api.video/nodejs-client/lib/model/Video";
-import React, { useEffect, useRef, useState } from "react";
-import { VideoWithStatus } from "../types/videoWithStatus";
-import { unparse } from 'papaparse';
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { unparse } from 'papaparse';
+import React, { useEffect, useRef, useState } from "react";
+import { VideoWithStatus } from "../service/ApiVideoService";
+import { callGetVideosStatusApi } from "../service/ClientApiHelpers";
 
 interface ImportProgressProps {
   videos: Video[];
@@ -13,13 +14,11 @@ interface ImportProgressProps {
 
 
 const useInterval = (callback: () => Promise<boolean>, delay: number) => {
-
   const savedCallback = useRef<() => Promise<boolean>>();
 
   useEffect(() => {
     savedCallback.current = callback;
   }, [callback]);
-
 
   useEffect(() => {
     const tick = async () => {
@@ -42,26 +41,20 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
     return !v?.status?.encoding?.qualities || v?.status?.encoding?.qualities.length == 0 || v?.status?.encoding?.qualities?.find(s => s.status !== "encoded");
   }
 
-
-  useInterval(() => {
-
+  useInterval(async () => {
     const notDoneVideos = videoWithStatus.filter(isNotTotallyEncoded);
 
-    return fetch("/api/apivideo/status", {
-      method: "POST",
-      body: JSON.stringify({
-        videos: notDoneVideos,
-        apiKey: props.apiVideoApiKey
-      })
-    })
-      .then(v => v.json())
-      .then(res => {
-        setVideoWithStatus([
-          ...videoWithStatus.filter(v => !(res.videos as VideoWithStatus[]).find(r => r.videoId == v.videoId)),
-          ...res.videos
-        ]);
-        return res.videos.length == 0 || res.videos.filter(isNotTotallyEncoded).length > 0;
-      });
+    const res = await callGetVideosStatusApi({
+      videos: notDoneVideos,
+      apiKey: props.apiVideoApiKey
+    });
+
+    setVideoWithStatus([
+      ...videoWithStatus.filter(v_1 => !(res.videos as VideoWithStatus[]).find(r => r.videoId == v_1.videoId)),
+      ...res.videos
+    ]);
+
+    return res.videos.length == 0 || res.videos.filter(isNotTotallyEncoded).length > 0;
   }, 5000);
 
   const statusCellContent = (video: VideoWithStatus) => {

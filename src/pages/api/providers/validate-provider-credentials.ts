@@ -1,32 +1,33 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import AbstractProviderService from '../../../service/providers/AbstractProviderService';
-import { ProviderAuthenticationContext } from '../../../types/common';
 import { ProviderName, Providers } from '../../../providers';
+import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, ProviderAuthenticationContext, SuccessResponse } from '../../../types/common';
 
 
-export interface ValidateProviderCredentialsRequestBody {
+export type ValidateProviderCredentialsRequestBody = {
     authenticationContext: ProviderAuthenticationContext,
     provider: ProviderName,
 }
 
-export interface ValidateProviderCredentialsRequestResponse {
+export type ValidateProviderCredentialsRequestResponse = {
     error: string | null;
-}
+};
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<ValidateProviderCredentialsRequestResponse | string>
+    res: NextApiResponse<ApiResponse<ValidateProviderCredentialsRequestResponse>>
 ) {
     if (req.method === "POST") {
-        const body = JSON.parse(req.body) as ValidateProviderCredentialsRequestBody;
+        try {
+            const body = JSON.parse(req.body) as ValidateProviderCredentialsRequestBody;
 
-        const providerService = new Providers[body.provider].backendService(body.authenticationContext);
-        
-        providerService.validateCredentials()
-            .then(message => res.status(201).send({
-                error: message
-            }));
+            const providerService = new Providers[body.provider].backendService(body.authenticationContext);
+
+            const errorMessage = await providerService.validateCredentials();
+            res.status(201).send(SuccessResponse({ error: errorMessage }));
+        } catch (e: any) {
+            res.status(500).send(ErrorResponse(e.message));
+        }
     } else {
-        res.status(405).send("");
+        res.status(405).send(MethodNotAllowedResponse);
     }
 }
