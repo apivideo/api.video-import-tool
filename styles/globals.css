@@ -1,9 +1,14 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+/* @import './base.css'; */
+@import 'tailwindcss/utilities';
+
 html,
 body {
   padding: 0;
   margin: 0;
-  background-color: rgb(6, 12, 25);
-  color: rgb(195, 184, 216);
+  background-color: white;
+  color: #0b0f17;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
@@ -17,23 +22,11 @@ a {
   box-sizing: border-box;
 }
 
-.container {
-  padding: 0 2rem;
-}
 
 b {
   color: white;
 }
 
-.main {
-  min-height: 100vh;
-  padding: 4rem 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
 
 .grid {
   display: flex;
@@ -43,18 +36,16 @@ b {
   max-width: 800px;
 }
 
-
 .content {
   width: 960px;
 }
 
-
 #content {
   display: flex;
   flex-direction: column;
-  background-color: rgba(9,20,41, 1);
+  background-color: rgba(9, 20, 41, 1);
   width: 700px;
-  padding: 32px 50px ;
+  padding: 32px 50px;
   border-radius: 20px;
 }
 
@@ -71,17 +62,16 @@ b {
   table td {
     font-size: 14px;
   }
-} 
+}
 
 h1 {
-  color: white;
+  /* color: white; */
   text-align: center;
 }
 
 .orange {
   color: rgb(250, 91, 48);
 }
-
 
 #content div {
   display: flex;
@@ -91,14 +81,16 @@ h1 {
   padding: 10px 0;
 }
 
-input[type="password"], input[type="text"] {
+input[type='password'],
+input[type='text'] {
   padding: 6px;
   width: 100%;
   border-radius: 5px;
   border: 2px solid white;
 }
 
-input[type="password"].error, input[type="text"].error {
+input[type='password'].error,
+input[type='text'].error {
   border: 2px solid red;
 }
 
@@ -139,10 +131,6 @@ td.thumbnail img {
   height: 75px;
 }
 
-a {
-  color: rgb(250, 91, 48);
-  text-decoration: underline;
-}
 
 tr th a {
   color: white;
@@ -203,16 +191,15 @@ span.icon.loading {
 }
 
 span.icon.loading::after {
-  content: "◡";
+  content: '◡';
 }
 
 span.icon.done {
   color: green;
 }
 
-
 span.icon.done::after {
-  content: "✓";
+  content: '✓';
 }
 
 @keyframes rotation {
@@ -223,7 +210,6 @@ span.icon.done::after {
     transform: rotate(359deg);
   }
 }
-
 
 .stepper {
   display: flex;
@@ -256,11 +242,13 @@ span.icon.done::after {
   text-align: center;
 }
 
-.stepper .active .label, .stepper .done .label {
+.stepper .active .label,
+.stepper .done .label {
   color: rgb(250, 91, 48);
 }
 
-.stepper .done .circle, .stepper .active .circle {
+.stepper .done .circle,
+.stepper .active .circle {
   background-color: rgb(250, 91, 48);
   color: white;
 }
@@ -276,11 +264,13 @@ span.icon.done::after {
   border: 1px solid rgb(250, 91, 48);
 }
 
-.help-page h1, .help-page h2 {
+.help-page h1,
+.help-page h2 {
   color: white;
 }
 
-.help-page p, .help-page li {
+.help-page p,
+.help-page li {
   font-size: 1.1em;
   line-height: 1.4em;
 }
@@ -291,12 +281,12 @@ span.icon.done::after {
 
 @media (max-width: 1024px) {
   .content {
-    width: 90%
+    width: 90%;
   }
 }
 
 .migrationsList li {
-  line-height: 1.6em
+  line-height: 1.6em;
 }
 
 .migrationsList a {
