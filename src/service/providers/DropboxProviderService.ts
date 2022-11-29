@@ -42,7 +42,7 @@ class DropboxProviderService implements AbstractProviderService {
 
     public async generatePublicMp4(videoSource: VideoSource): Promise<VideoSource> {
         const dropboxRes = await this.callApi("https://api.dropboxapi.com/2/files/get_temporary_link", "POST", {
-            "path": videoSource.url
+            "path": videoSource.id
         });
 
         return {
@@ -95,8 +95,9 @@ class DropboxProviderService implements AbstractProviderService {
             body: JSON.stringify(body)
         });
 
-        if(!res.ok) {
-            throw new Error("Dropbox API call failed: " + res.statusText);
+        if (!res.ok) {
+            const responseText = await res.text();
+            throw new Error(`Dropbox API call failed: ${res.statusText}. Response: ${responseText}`);
         }
 
         return await res.json();
