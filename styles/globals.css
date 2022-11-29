@@ -40,14 +40,14 @@ b {
   width: 960px;
 }
 
-#content {
+/* #content {
   display: flex;
   flex-direction: column;
   background-color: rgba(9, 20, 41, 1);
   width: 700px;
   padding: 32px 50px;
   border-radius: 20px;
-}
+} */
 
 @media (max-width: 700px) {
   .grid {
@@ -73,13 +73,13 @@ h1 {
   color: rgb(250, 91, 48);
 }
 
-#content div {
+/* #content div {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: left;
   padding: 10px 0;
-}
+} */
 
 input[type='password'],
 input[type='text'] {
