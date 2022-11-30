@@ -40,20 +40,21 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
     link: `/${(provider as string).toLowerCase()}`,
     displayName: Providers[provider].displayName,
     name: provider,
-    color: Providers[provider].color,
+    imgSrc: Providers[provider].imgSrc,
+    description: Providers[provider].description,
   }));
 
   return (
     <div className="py-36 flex justify-center">
       <div>
-      <Image
-      className="absolute top-10"
-              src="/api-video.svg"
-              width={100}
-              height={100}
-              alt="logo"
-            />
-        {!getStarted ? (
+        <Image
+          className="absolute top-10"
+          src="/api-video.svg"
+          width={100}
+          height={100}
+          alt="logo"
+        />
+        {!getStarted && step === 0 ? (
           <div className="flex items-center flex-col max-w-2xl">
             <Image
               src="/migration-logo.svg"
@@ -63,7 +64,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
               className="pb-8"
             />
             <h1 className="text-2xl font-semibold text-center">
-              {provider ? provider.title : 'Video migration tool'}
+              Video migration tool
             </h1>
             <p className="text-gray-500 font-semibold py-2">
               Import your videos from vimeo or dropbox directly to api.video
@@ -83,10 +84,18 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
               >
                 Get started
               </button>
-              <a href="https://github.com/apivideo/api.video-migration-tool" target="_blank" rel="noreferrer">
+              <a
+                href="https://github.com/apivideo/api.video-migration-tool"
+                target="_blank"
+                rel="noreferrer"
+              >
                 <button className="w-44 flex items-center justify-center gap-2 border rounded-md bg-black text-white text-sm font-semibold">
-
-                  <Image src="/github.svg" height={14} width={14} alt="github" />
+                  <Image
+                    src="/github.svg"
+                    height={14}
+                    width={14}
+                    alt="github"
+                  />
                   View on Github
                 </button>
               </a>
@@ -97,9 +106,13 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
             <div>
               <div className="flex justify-between pb-4">
                 <h1 className="text-left text-2xl font-semibold">
-                  {provider ? provider.title : 'Video migration tool'}
+                  Video migration tool
                 </h1>
-                <a href="https://github.com/apivideo/api.video-migration-tool" target="_blank" rel="noreferrer">
+                <a
+                  href="https://github.com/apivideo/api.video-migration-tool"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   <button className="flex items-center gap-2 border rounded-md bg-black text-white text-sm font-semibold py-1">
                     <Image
                       src="/github.svg"
@@ -109,7 +122,6 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
                     />
                     View on Github
                   </button>
-
                 </a>
               </div>
 
@@ -129,27 +141,47 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
               ></Stepper>
             </div>
             <div className="h-px w-full bg-slate-300"></div>
-            <div id="content">
+            <div className="pt-10">
               {step === 0 && (
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                  {providers.map(({ displayName, link, name, color }) => (
-                    <div style={{ flex: 1, textAlign: 'center' }} key={name}>
-                      <Link
-                        style={{
-                          flex: 1,
-                          margin: '0 10px',
-                          backgroundColor: color,
-                          color: 'white',
-                          borderRadius: 6,
-                          padding: '10px 0',
-                          textDecoration: 'none',
-                        }}
-                        href={link}
-                      >
-                        {displayName}
-                      </Link>
-                    </div>
-                  ))}
+                <div className="flex flex-col justify-between">
+                  <div className="flex flex-row gap-4 pb-8">
+                    {providers.map(
+                      ({ displayName, link, name, imgSrc, description }) => (
+                        <Link href={link} key={name}>
+                          <div className="w-72 border border-slate-200 rounded-lg shadow flex gap-4 p-6">
+                            <Image
+                              src={imgSrc}
+                              height={40}
+                              width={40}
+                              alt={displayName}
+                            />
+                            <div>
+                              <p className="text-sm font-semibold">
+                                {displayName}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {description}
+                              </p>
+                            </div>
+                          </div>
+                        </Link>
+                      )
+                    )}
+                  </div>
+                  <p className="text-sm">
+                    We will be adding support for other platforms in the future.
+                    If you would like to contribute, feel free to open a pull
+                    request on{' '}
+                    <a
+                      href="https://github.com/apivideo/api.video-migration-tool"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-500 underline"
+                    >
+                      Github
+                    </a>
+                    .{' '}
+                  </p>
                 </div>
               )}
 
@@ -184,20 +216,21 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
                 />
               )}
             </div>
-            {step === 0 && (
-              <p>
-                <Link href="/migrations">Your previous migrations</Link>
-              </p>
-            )}
           </div>
         )}
 
         <p className="text-sm absolute bottom-8 left-8">
-          If you have any questions or need help, <a href='https://twitter.com/api_video' className="text-blue-500 underline">tweet</a> us or email
-          us at{' '}
-
-          <a href="mailto:help@api.video" className="text-blue-500 underline">help@api.video</a>
-
+          If you have any questions or need help,{' '}
+          <a
+            href="https://twitter.com/api_video"
+            className="text-blue-500 underline"
+          >
+            tweet
+          </a>{' '}
+          us or email us at{' '}
+          <a href="mailto:help@api.video" className="text-blue-500 underline">
+            help@api.video
+          </a>
         </p>
       </div>
     </div>

@@ -21,9 +21,10 @@ export enum OptionalFeatureFlag {
 
 export type MigrationProvider = {
     displayName: string;
+    description?: string;
     title: JSX.Element;
+    imgSrc: string;
     intro?: JSX.Element;
-    color: string;
     loginComponent: React.FC<ProviderLoginProps>;
     backendService: { new(authenticationContext?: ProviderAuthenticationContext): AbstractProviderService };
     hasFeature: (feature: OptionalFeatureFlag) => boolean;
@@ -32,9 +33,10 @@ export type MigrationProvider = {
 export const Providers: { [name: string]: MigrationProvider } = {
     VIMEO: {
         displayName: "Vimeo",
+        description: "⚠️ Pro Vimeo plan required",
         intro: <><b>Note</b>: you need at least a <b>Pro</b> Vimeo plan to use this tool. <b>Basic</b> and <b>Plus</b> plans are not supported.</>,
         title: <>Welcome to the <span style={{ color: "rgb(0, 173, 239)" }}>Vimeo</span> to <span className="orange">api.video</span> migration tool</>,
-        color: "rgb(0, 173, 239)",
+        imgSrc: '/vimeo.svg',
         loginComponent: VimeoLogin,
         backendService: VimeoProviderService,
         hasFeature: (feature: OptionalFeatureFlag) => [
@@ -43,8 +45,9 @@ export const Providers: { [name: string]: MigrationProvider } = {
     },
     DROPBOX: {
         displayName: "Dropbox",
+        description: "Import from Dropbox",
         title: <>Welcome to the <span style={{ color: "#0061fe" }}>Dropbox</span> to <span className="orange">api.video</span> migration tool</>,
-        color: "#0061fe",
+        imgSrc: '/dropbox.svg',
         loginComponent: DropboxLogin,
         backendService: DropboxProviderService,
         hasFeature: (feature: OptionalFeatureFlag) => [
