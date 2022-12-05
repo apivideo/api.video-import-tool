@@ -6,6 +6,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        dropbox: '#0061FF',
+        vimeo: '#32B8E8',
+      },
     },
   },
   plugins: [],

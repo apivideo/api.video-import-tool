@@ -47,13 +47,16 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
   return (
     <div className="py-36 flex justify-center">
       <div>
-        <Image
-          className="absolute top-10"
-          src="/api-video.svg"
-          width={100}
-          height={100}
-          alt="logo"
-        />
+        {getStarted && (
+          <Image
+            className="absolute top-10"
+            src="/api-video.svg"
+            width={100}
+            height={100}
+            alt="logo"
+          />
+        )}
+
         {!getStarted && step === 0 ? (
           <div className="flex items-center flex-col max-w-2xl">
             <Image
