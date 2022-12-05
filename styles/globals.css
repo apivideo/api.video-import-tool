@@ -7,6 +7,8 @@ body {
   padding: 0;
   margin: 0;
   background-color: white;
+  position: relative;
+  height: 100vh;
   color: #0b0f17;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
@@ -77,17 +79,6 @@ input[type='text'].error {
   border: 2px solid red;
 }
 
-p.inputError {
-  margin: 6px 0 0;
-  padding: 0;
-  color: red;
-  font-size: 0.9em;
-}
-
-label {
-  margin-bottom: 6px;
-}
-
 button {
   background-color: rgb(250, 91, 48);
   border: none;
@@ -112,12 +103,6 @@ p.explanation {
 }
 td.thumbnail img {
   height: 75px;
-}
-
-
-tr th a {
-  color: white;
-  font-weight: normal;
 }
 
 tr th a.current {
