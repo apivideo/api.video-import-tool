@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { MigrationProvider, OptionalFeatureFlag, ProviderName, Providers } from '../providers';
+import {
+  MigrationProvider,
+  OptionalFeatureFlag,
+  ProviderName,
+  Providers,
+} from '../providers';
 import {
   callValidateProviderCredentialsApi,
   callVerifyApiVideoApiKeyApi,
@@ -82,16 +87,38 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
     }
   };
 
-  const provider: MigrationProvider = props.providerName
+  const provider: MigrationProvider | undefined = props.providerName
     ? Providers[props.providerName]
     : undefined;
 
-  const buttonColors: any = {
-    Dropbox: 'bg-black',
-    Vimeo: 'bg-vimeo'
-  }
+  const handleAuthClick = async () => {
+    setLoading(true);
 
-  const providerConfig = {};
+    const authentValidation: (string | null)[] = await Promise.all(
+      provider
+        ? [validateApiVideoAuthentication(), validateProviderAuthentication()]
+        : [validateApiVideoAuthentication()]
+    );
+
+    setApiVideoErrorMessage(authentValidation[0]);
+
+    if (authentValidation.length > 1) {
+      setProviderErrorMessage(authentValidation[1]);
+    }
+
+    if (authentValidation.filter((v) => v !== null).length > 0) {
+      setLoading(false);
+      return;
+    }
+
+    props.onSubmit({
+      apiVideoApiKey: apiVideoApiKey,
+      providerAccessToken: providerAccessToken!,
+    });
+
+    setLoading(false);
+  };
+
   return (
     <>
       {props.introMessage && (
@@ -125,12 +152,11 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
               <ul className="list-disc  ml-5">
                 <li>private: Access private member data.</li>
                 <li>
-                  video_files: Access video files belonging to members with Vimeo
-                  Pro membership or higher.
+                  video_files: Access video files belonging to members with
+                  Vimeo Pro membership or higher.
                 </li>
               </ul>
             )}
-
           </div>
 
           <p>
@@ -142,13 +168,13 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
         </div>
         <div className="flex flex-col w-2/4">
           <div className="flex flex-col gap-4">
-
             <label htmlFor="apiVideoApiKey">Enter your api.video API key</label>
             <input
-              className={`h-10 ${apiVideoErrorMessage
-                ? 'outline outline-red-500 outline-2'
-                : 'outline outline-slate-300 rounded-lg shadow outline-1'
-                }`}
+              className={`h-10 ${
+                apiVideoErrorMessage
+                  ? 'outline outline-red-500 outline-2'
+                  : 'outline outline-slate-300 rounded-lg shadow outline-1'
+              }`}
               id="apiVideoApiKey"
               type={'password'}
               value={apiVideoApiKey}
@@ -165,52 +191,13 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
                 setProviderAccessToken(providerAccessToken)
               }
               errorMessage={providerErrorMessage || undefined}
+              buttonDisabled={loading || !providerAccessToken}
+              onClick={handleAuthClick}
+              loading={loading}
             />
           )}
-
-          <div>
-            {!providerAccessToken && provider.displayName.toUpperCase() === ProviderNames.DROPBOX ? null : <button
-              className={`${buttonColors[provider.displayName]} text-sm font-semibold w-full`}
-              disabled={loading}
-              onClick={async () => {
-                setLoading(true);
-
-                const authentValidation: (string | null)[] = await Promise.all(
-                  provider
-                    ? [
-                      validateApiVideoAuthentication(),
-                      validateProviderAuthentication(),
-                    ]
-                    : [validateApiVideoAuthentication()]
-                );
-
-                setApiVideoErrorMessage(authentValidation[0]);
-
-                if (authentValidation.length > 1) {
-                  setProviderErrorMessage(authentValidation[1]);
-                }
-
-                if (authentValidation.filter((v) => v !== null).length > 0) {
-                  setLoading(false);
-                  return;
-                }
-
-                props.onSubmit({
-                  apiVideoApiKey: apiVideoApiKey,
-                  providerAccessToken: providerAccessToken!,
-                });
-
-                setLoading(false);
-              }}
-            >
-              {loading ? 'Please wait...' : provider?.loginButton.text}
-            </button>}
-
-          </div>
         </div>
       </div>
-
-
     </>
   );
 };

@@ -26,11 +26,10 @@ const VimeoLogin = (props: ProviderLoginProps) => {
           </i>
         </label>
         <input
-          className={`h-10 ${
-            props.errorMessage
+          className={`h-10 ${props.errorMessage
               ? 'outline outline-red-500 outline-2'
               : 'outline outline-slate-300 rounded-lg shadow outline-1'
-          }`}
+            }`}
           id="vimeoAccessToken"
           type={'password'}
           value={vimeoAccessToken}
@@ -42,6 +41,14 @@ const VimeoLogin = (props: ProviderLoginProps) => {
         ></input>
       </div>
       <p className="text-sm text-red-600">{props.errorMessage}&nbsp;</p>
+      <button
+        className={`${props.buttonDisabled ? 'bg-slate-300' : 'bg-vimeo'} text-sm font-semibold w-full`}
+        disabled={props.buttonDisabled}
+        onClick={props.onClick}
+      >
+        {props.loading ? 'Please wait...' : 'Authorize access to Vimeo account'}
+      </button>
+
     </div>
   );
 };
