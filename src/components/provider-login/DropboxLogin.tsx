@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { Check } from 'react-feather';
+import { ArrowRight, Check } from 'react-feather';
 import { DROPBOX_CLIENT_ID, DROPBOX_REDIRECT_URL } from '../../env';
 import { GetOauthAccessTokenRequestResponse } from '../../pages/api/providers/get-oauth-access-token';
 import { ProviderLoginProps } from '../../providers';
@@ -54,6 +54,20 @@ const DropboxLogin = (props: ProviderLoginProps) => {
       </div>
 
       <p className="text-sm text-red-600">{props.errorMessage}</p>
+      {dropboxAccessToken && <button
+        className={`bg-black text-sm font-semibold w-full mt-3`}
+        disabled={props.buttonDisabled}
+        onClick={props.onClick}
+      >
+        {props.loading ? (
+          'Please wait...'
+        ) : (
+          <div className="flex justify-center items-center gap-2">
+            Proceed to migration <ArrowRight size={14} strokeWidth={'.2rem'} />
+          </div>
+        )}
+      </button>}
+
     </div>
   );
 };

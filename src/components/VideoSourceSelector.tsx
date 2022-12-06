@@ -28,7 +28,6 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
   const [sortOrder, setSortOrder] = useState<1 | -1>(1);
   const [createdCount, setCreatedCount] = useState<number>(0);
   const [fetchingVideos, setFetchingVideos] = useState<boolean>(true);
-  // const [videoList, setVideoList] = useState<Video[]>([])
 
   useEffect(() => {
     fetchVideos(props.authenticationContext);
@@ -67,6 +66,21 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
     } else {
       setSelectedIds(selectedIds.filter((i) => i !== id));
     }
+  };
+
+
+  const multiSelectionToggle = () => {
+    if (selectedIds.length) {
+      setSelectedIds([]);
+    } else {
+      let arrSelected: string[] = []
+      videoSources.map(({ id }) => {
+        arrSelected.push(id)
+
+      })
+      setSelectedIds(arrSelected)
+    }
+
   };
 
   const formatDuration = (durationSec: number) => {
@@ -233,7 +247,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
         </p>
       ) : (
         <>
-          <div>
+          <div className="pb-2">
             <h1 className="text-left font-semibold">
               Select videos to migrate
             </h1>
@@ -249,12 +263,18 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
               <thead className="border-b border-slate-300">
                 <tr className="text-sm font-semibold pb-2">
                   <th colSpan={2}>
-                    <input
-                      type="checkbox"
-                    />
-                    <a href="#" onClick={() => onSortClick('name')}>
-                      Video
-                    </a>
+                    <div className="flex gap-2">
+                      <input
+                        className="h-4 w-4 cursor-pointer"
+                        type="checkbox"
+                        checked={videoSources.length === selectedIds.length}
+                        onChange={() => multiSelectionToggle()
+                        }
+                      />
+                      <a href="#" onClick={() => onSortClick('name')}>
+                        Video
+                      </a>
+                    </div>
                   </th>
                   {hasSizes && (
                     <th>
@@ -273,50 +293,51 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
                 </tr>
               </thead>
 
-              <tbody className="pt-2">
+              <tbody>
                 {videoSources
                   .sort((a, b) => compareFn(a, b))
                   .map((videoSource) => (
                     <tr
-                      className="text-sm align-top font-semibold"
+                      className="text-sm align-top font-semibold border-b border-slate-300 cursor-pointer"
                       key={videoSource.id}
                       onClick={() => toggleSelection(videoSource.id)}
                     >
-                      <td>
+                      <td className="w-6 pt-2.5">
                         <input
                           type="checkbox"
+                          className="h-4 w-4"
                           checked={selectedIds.indexOf(videoSource.id) !== -1}
                           onChange={(a) => toggleSelection(videoSource.id)}
                         />
                       </td>
-                      <td>
+                      <td className="py-2.5">
                         {videoSource.thumbnail &&
-                        <div className="flex">
-                          {videoSource.thumbnail.startsWith('data') ? (
-                          
-                            <img
-                              height="75px"
-                              width="100px"
-                              src={videoSource.thumbnail}
-                              alt={videoSource.name}
-                            />
-                          ) : (
-                            <Image
-                              height="75"
-                              width="100"
-                              alt={videoSource.name}
-                              src={videoSource.thumbnail}
-                            />
-                          )}
-                          {videoSource.name}
-                        </div>}
+                          <div className="flex gap-2">
+                            {videoSource.thumbnail.startsWith('data') ? (
+
+                              <img
+                                height="75px"
+                                width="100px"
+                                src={videoSource.thumbnail}
+                                alt={videoSource.name}
+                              />
+                            ) : (
+                              <Image
+                                height="75"
+                                width="100"
+                                alt={videoSource.name}
+                                src={videoSource.thumbnail}
+                              />
+                            )}
+                            {videoSource.name}
+                          </div>}
                       </td>
-              
+
                       {videoSource.size && (
-                        <td>{formatSize(videoSource.size)}</td>
+                        <td className="py-2.5">{formatSize(videoSource.size)}</td>
                       )}
                       {hasDurations && (
-                        <td>
+                        <td className="py-2.5">
                           {videoSource.duration &&
                             formatDuration(videoSource.duration)}
                         </td>
