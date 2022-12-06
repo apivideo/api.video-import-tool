@@ -11,6 +11,9 @@ export type ProviderName = keyof typeof Providers;
 export interface ProviderLoginProps {
     onAccessTokenChanged: (accessToken: string | null) => void;
     errorMessage?: string;
+    buttonDisabled?: boolean
+    onClick?: () => void
+    loading?: boolean
 }
 
 export enum OptionalFeatureFlag {

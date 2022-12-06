@@ -616,12 +616,6 @@ input[type='text'].error {
   border: 2px solid red;
 }
 
-p.inputError {
-  margin: 6px 0 0;
-  padding: 0;
-  color: red;
-  font-size: 0.9em;
-}
 
 label {
   margin-bottom: 6px;
