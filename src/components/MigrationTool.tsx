@@ -45,67 +45,59 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
   }));
 
   return (
-    <div className="py-36 flex justify-center">
-      <div>
-        {getStarted && (
+    <div className="flex min-h-screen flex-col">
+      {!getStarted && step === 0 ? (
+        <div className="flex items-center flex-col max-w-2xl pt-36 self-center mb-auto">
           <Image
-            className="absolute top-10"
+            src="/migration-logo.svg"
+            width={300}
+            height={100}
+            alt="logo"
+            className="pb-8"
+          />
+          <h1 className="text-2xl font-semibold text-center">
+            Video migration tool
+          </h1>
+          <p className="text-gray-500 font-semibold py-2">
+            Import your videos from vimeo or dropbox directly to api.video
+          </p>
+          <p className="text-sm text-center">
+            We built this tool to help you quickly import your already hosted
+            videos to the api.video platform.
+          </p>
+          <p className="text-sm text-center">
+            {' '}
+            Take advantage of our API with your existing content.
+          </p>
+          <div className="flex gap-4 pt-6">
+            <button
+              onClick={() => setGetStarted(true)}
+              className="text-sm font-semibold w-44"
+            >
+              Get started
+            </button>
+            <a
+              href="https://github.com/apivideo/api.video-migration-tool"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <button className="w-44 flex items-center justify-center gap-2 border rounded-md bg-black text-white text-sm font-semibold">
+                <Image src="/github.svg" height={14} width={14} alt="github" />
+                View on Github
+              </button>
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div className="mb-auto mt-40">
+          <div className="border border-slate-200 rounded-lg w-3/4 p-8 shadow max-w-5xl mx-auto relative">
+          <Image
+            className="absolute -top-36 pt-8"
             src="/api-video.svg"
             width={100}
             height={100}
             alt="logo"
           />
-        )}
-
-        {!getStarted && step === 0 ? (
-          <div className="flex items-center flex-col max-w-2xl">
-            <Image
-              src="/migration-logo.svg"
-              width={300}
-              height={100}
-              alt="logo"
-              className="pb-8"
-            />
-            <h1 className="text-2xl font-semibold text-center">
-              Video migration tool
-            </h1>
-            <p className="text-gray-500 font-semibold py-2">
-              Import your videos from vimeo or dropbox directly to api.video
-            </p>
-            <p className="text-sm text-center">
-              We built this tool to help you quickly import your already hosted
-              videos to the api.video platform.
-            </p>
-            <p className="text-sm text-center">
-              {' '}
-              Take advantage of our API with your existing content.
-            </p>
-            <div className="flex gap-4 pt-6">
-              <button
-                onClick={() => setGetStarted(true)}
-                className="text-sm font-semibold w-44"
-              >
-                Get started
-              </button>
-              <a
-                href="https://github.com/apivideo/api.video-migration-tool"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <button className="w-44 flex items-center justify-center gap-2 border rounded-md bg-black text-white text-sm font-semibold">
-                  <Image
-                    src="/github.svg"
-                    height={14}
-                    width={14}
-                    alt="github"
-                  />
-                  View on Github
-                </button>
-              </a>
-            </div>
-          </div>
-        ) : (
-          <div className="border border-slate-200 rounded-lg w-fit p-8 shadow">
             <div>
               <div className="flex justify-between pb-4">
                 <h1 className="text-left text-2xl font-semibold">
@@ -129,8 +121,8 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
               </div>
 
               <p className="text-sm">
-                This tool helps you quickly import your already hosted videos to
-                api.video and take advantage of our API with your existing
+                This tool helps you quickly import your already hosted videos
+                to api.video and take advantage of our API with your existing
                 content.
               </p>
               <Stepper
@@ -172,9 +164,9 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
                     )}
                   </div>
                   <p className="text-sm">
-                    We will be adding support for other platforms in the future.
-                    If you would like to contribute, feel free to open a pull
-                    request on{' '}
+                    We will be adding support for other platforms in the
+                    future. If you would like to contribute, feel free to open
+                    a pull request on{' '}
                     <a
                       href="https://github.com/apivideo/api.video-migration-tool"
                       target="_blank"
@@ -220,9 +212,10 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
               )}
             </div>
           </div>
-        )}
-
-        <p className="text-sm absolute bottom-8 left-8">
+        </div>
+      )}
+      <div className="p-5">
+        <p className="text-sm">
           If you have any questions or need help,{' '}
           <a
             href="https://twitter.com/api_video"

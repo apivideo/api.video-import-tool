@@ -260,10 +260,10 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
 
           {!createdCount && (
             <table className="w-full">
-              <thead className="border-b border-slate-300">
+              <thead className="border-b">
                 <tr className="text-sm font-semibold pb-2">
                   <th colSpan={2}>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
                       <input
                         className="h-4 w-4 cursor-pointer"
                         type="checkbox"
@@ -298,19 +298,19 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
                   .sort((a, b) => compareFn(a, b))
                   .map((videoSource) => (
                     <tr
-                      className="text-sm align-top font-semibold border-b border-slate-300 cursor-pointer"
+                      className="text-sm align-top font-semibold border-b border-slate-300 cursor-pointer last:border-0"
                       key={videoSource.id}
                       onClick={() => toggleSelection(videoSource.id)}
                     >
                       <td className="w-6 pt-2.5">
                         <input
                           type="checkbox"
-                          className="h-4 w-4"
+                          className="h-4 w-4 border-red-500"
                           checked={selectedIds.indexOf(videoSource.id) !== -1}
                           onChange={(a) => toggleSelection(videoSource.id)}
                         />
                       </td>
-                      <td className="py-2.5">
+                      <td className="py-2.5 w-6/12">
                         {videoSource.thumbnail &&
                           <div className="flex gap-2">
                             {videoSource.thumbnail.startsWith('data') ? (
@@ -348,7 +348,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
             </table>
           )}
           <button
-            className="submitButton"
+            className="text-sm mt-4 font-semibold"
             disabled={selectedIds.length == 0 || loading || !!createdCount}
             onClick={() => {
               setLoading(true);
