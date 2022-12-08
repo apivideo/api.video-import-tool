@@ -21,14 +21,14 @@ const Stepper: React.FC<StepperProps> = (props) => {
 
       res.push(
         <div key={'step' + i} className="flex gap-2 align-middle">
-          <p
-            className={`rounded-full ${
+          <div
+            className={`rounded-full px-3 py-0.5 ${
               i === props.activeStep ? 'bg-blue-500' : `${i < props.activeStep ? 'bg-emerald-500' : 'bg-gray-300'}`
             } h-6 w-6 text-white text-center text-sm flex justify-center align-middle p-0.5`}
           >
             {i + 1}
-          </p>
-          <p className="text-base font-semibold" key={step}>
+          </div>
+          <p className={`text-base font-semibold lg:block ${props.activeStep !== i ? 'hidden' : 'block'}`} key={step}>
             {step}
           </p>
         </div>
@@ -37,7 +37,7 @@ const Stepper: React.FC<StepperProps> = (props) => {
     return res;
   };
 
-  return <div className="flex gap-4 py-4 align-middle">{getSteps()}</div>;
+  return <div className="flex gap-4 py-4 align-middle overflow-x-scroll md:overflow-hidden whitespace-nowrap">{getSteps()}</div>;
 };
 
 export default Stepper;

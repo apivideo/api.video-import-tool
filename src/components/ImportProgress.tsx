@@ -13,7 +13,7 @@ import Quality from '@api.video/nodejs-client/lib/model/Quality';
 
 interface ImportProgressProps {
   videos: Video[];
-  sourceVideos: VideoSource[];
+  sourceVideos?: VideoSource[];
   apiVideoApiKey: string;
 }
 
@@ -99,7 +99,7 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
     const isPlayable = video.status?.encoding?.playable;
     return (
       <div className="pl-4 flex flex-col gap-4 relative">
-        <div className="grid grid-cols-[170px_1fr]">
+        <div className="flex flex-col gap-2 md:grid grid-cols-[170px_1fr]">
           <div className="flex gap-2 items-start">
             {ingested ? (
               <Check color={'#10B981'} size={18} strokeWidth={'.2rem'} />
@@ -118,7 +118,7 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
             </div>
           ) : null}
         </div>
-        <div className="grid grid-cols-[170px_1fr]">
+        <div className="flex flex-col gap-2 md:grid grid-cols-[170px_1fr]">
           <div className="flex gap-2 items-start">
             {allQualitiesEncoded ? (
               <Check color={'#10B981'} size={18} strokeWidth={'.2rem'} />
@@ -166,7 +166,7 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
           </div>
         </div>
         {isPlayable ? (
-          <button className="bg-white text-sky-900 border border-slate-300 rounded-md absolute right-0 text-sm p-1 font-semibold">
+          <button className="bg-white text-sky-900 border border-slate-300 rounded-md lg:absolute right-0 text-sm p-1 font-semibold w-fit">
             <a
               href={video.assets?.player}
               target="_blank"
@@ -266,20 +266,24 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
       <table className="w-full mt-6">
         <thead className="border-b">
           <tr className="text-sm font-semibold pb-2">
-            <th>Video</th>
-            <th>Progress</th>
+            <th className="hidden lg:table-cell">Video</th>
+            <th className="lg:hidden">Videos</th>
+            <th className="hidden lg:table-cell">Progress</th>
           </tr>
         </thead>
 
         <tbody>
-          {videoWithStatus
-            .map((videoSource) => (
-              <tr
-                className="text-sm align-top font-semibold border-b border-slate-300 last:border-0"
-                key={videoSource.videoId}
-              >
-                <td className="py-2.5 w-5/12">
-                  {videoSource.assets?.thumbnail && (
+          {videoWithStatus.map((videoSource) => (
+            <tr
+              className="flex flex-col lg:table-row text-sm align-top font-semibold border-b border-slate-300 last:border-0"
+              key={videoSource.videoId}
+            >
+              <td className="py-2.5 w-full lg:w-5/12">
+                {videoSource.status?.encoding?.qualities &&
+                  videoSource.status?.encoding?.qualities.some(
+                    (q) => q.status === 'encoded'
+                  ) &&
+                  videoSource.assets?.thumbnail && (
                     <div className="grid grid-cols-[110px_1fr_1fr]">
                       {videoSource.assets?.thumbnail.startsWith('data') ? (
                         <img
@@ -300,14 +304,14 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
                       <span>{getFileSize(videoSource)}</span>
                     </div>
                   )}
-                </td>
-                <td className="py-2.5 font-medium">
-                  <div className="border-l border-slate-300">
-                    {statusCellContent(videoSource)}
-                  </div>
-                </td>
-              </tr>
-            ))}
+              </td>
+              <td className="py-2.5 font-medium">
+                <div className="border-l border-slate-300">
+                  {statusCellContent(videoSource)}
+                </div>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </>

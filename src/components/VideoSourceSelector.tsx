@@ -268,20 +268,23 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
                         onChange={() => multiSelectionToggle()
                         }
                       />
-                      <a href="#" onClick={() => onSortClick('name')}>
+                      <a href="#" className="hidden md:block" onClick={() => onSortClick('name')}>
                         Video
+                      </a>
+                      <a href="#" className="block md:hidden" onClick={() => onSortClick('name')}>
+                        Select all
                       </a>
                     </div>
                   </th>
                   {hasSizes && (
-                    <th>
+                    <th className="hidden md:block">
                       <a href="#" onClick={() => onSortClick('size')}>
                         Size
                       </a>
                     </th>
                   )}
                   {hasDurations && (
-                    <th>
+                    <th className="hidden md:table-cell">
                       <a href="#" onClick={() => onSortClick('duration')}>
                         Duration
                       </a>
@@ -307,9 +310,9 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
                           onChange={(a) => toggleSelection(videoSource.id)}
                         />
                       </td>
-                      <td className="py-2.5 w-6/12">
+                      <td className="py-2.5 md:w-6/12">
                         {videoSource.thumbnail &&
-                          <div className="flex gap-2">
+                          <div className="flex flex-col md:flex-row gap-2">
                             {videoSource.thumbnail.startsWith('data') ? (
 
                               <img
@@ -327,18 +330,28 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
                               />
                             )}
                             {videoSource.name}
+                            {videoSource.size && (
+                              <span className="block md:hidden">{formatSize(videoSource.size)}</span>
+                            )}
+                            {hasDurations && (
+                              <span className="block md:hidden">
+                                {videoSource.duration &&
+                                  formatDuration(videoSource.duration)}
+                              </span>
+                            )}
                           </div>}
                       </td>
 
                       {videoSource.size && (
-                        <td className="py-2.5">{formatSize(videoSource.size)}</td>
+                        <td className="py-2.5 hidden md:table-cell">{formatSize(videoSource.size)}</td>
                       )}
                       {hasDurations && (
-                        <td className="py-2.5">
+                        <td className="py-2.5 hidden md:table-cell">
                           {videoSource.duration &&
                             formatDuration(videoSource.duration)}
                         </td>
                       )}
+
                     </tr>
                   ))}
               </tbody>

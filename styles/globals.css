@@ -21,35 +21,6 @@ a {
   box-sizing: border-box;
 }
 
-
-b {
-  color: white;
-}
-
-
-.content {
-  width: 960px;
-}
-
-@media (max-width: 700px) {
-  .grid {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  #content {
-    width: 100%;
-  }
-
-  table td {
-    font-size: 14px;
-  }
-}
-
-h1 {
-  text-align: center;
-}
-
 .orange {
   color: rgb(250, 91, 48);
 }
@@ -176,12 +147,6 @@ span.icon.loading::after {
 
 .help-page img {
   border-radius: 5px;
-}
-
-@media (max-width: 1024px) {
-  .content {
-    width: 90%;
-  }
 }
 
 .migrationsList li {
