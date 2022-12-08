@@ -10,16 +10,12 @@ import {
   callVerifyApiVideoApiKeyApi,
 } from '../service/ClientApiHelpers';
 import { AuthenticationContext } from '../types/common';
+import AuthDisclaimer from './commons/AuthDisclaimer';
 
 interface AuthenticateProps {
   onSubmit: (authenticationContext: AuthenticationContext) => void;
   introMessage?: JSX.Element;
   providerName?: ProviderName;
-}
-
-enum ProviderNames {
-  VIMEO = 'VIMEO',
-  DROPBOX = 'DROPBOX',
 }
 
 const Authenticate: React.FC<AuthenticateProps> = (props) => {
@@ -125,56 +121,19 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
         <p className="explanation">{props.introMessage}</p>
       )}
 
-      <div className="flex text-sm gap-10">
-        <div className="flex flex-col w-2/4 gap-4">
+      <div className="flex flex-col md:flex-row text-sm gap-2 md:gap-10">
+        <div className="flex flex-col md:w-2/4 gap-4">
           <h1 className="text-left font-semibold">Authentication</h1>
-          <p>
-            Authorize access to your Dropbox account to access the videos you
-            would like to import to api.video.
-          </p>
-          <div className="flex flex-col">
-            <p>
-              This application will access the following data from your account:
-            </p>
-            {props.providerName === ProviderNames.DROPBOX && (
-              <ul className="list-disc ml-5">
-                <li>
-                  files.content.read: View content of your Dropbox files and
-                  folders
-                </li>
-                <li>
-                  files.metadata.read: View information about your Dropbox files
-                  and folders
-                </li>
-              </ul>
-            )}
-            {props.providerName === ProviderNames.VIMEO && (
-              <ul className="list-disc  ml-5">
-                <li>private: Access private member data.</li>
-                <li>
-                  video_files: Access video files belonging to members with
-                  Vimeo Pro membership or higher.
-                </li>
-              </ul>
-            )}
-          </div>
-
-          <p>
-            {`No sensitive data from your ${props.providerName
-              ?.toString()
-              .toLocaleLowerCase()} account will be sent to
-            api.video.`}
-          </p>
+          <div className="hidden md:block"> <AuthDisclaimer providerName={props.providerName} /></div>
         </div>
-        <div className="flex flex-col w-2/4">
+        <div className="flex flex-col md:w-2/4">
           <div className="flex flex-col gap-4">
             <label htmlFor="apiVideoApiKey">Enter your api.video API key</label>
             <input
-              className={`h-10 ${
-                apiVideoErrorMessage
-                  ? 'outline outline-red-500 outline-2'
-                  : 'outline outline-slate-300 rounded-lg shadow outline-1'
-              }`}
+              className={`h-10 ${apiVideoErrorMessage
+                ? 'outline outline-red-500 outline-2'
+                : 'outline outline-slate-300 rounded-lg shadow outline-1'
+                }`}
               id="apiVideoApiKey"
               type={'password'}
               value={apiVideoApiKey}
@@ -196,6 +155,8 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
               loading={loading}
             />
           )}
+          <div className="block pt-4 md:hidden">   <AuthDisclaimer providerName={props.providerName} /></div>
+
         </div>
       </div>
     </>
