@@ -48,7 +48,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
   return (
     <div className="flex min-h-screen flex-col">
       {!getStarted && step === 0 ? (
-        <div className="flex items-center flex-col max-w-2xl pt-36 self-center mb-auto">
+        <div className="flex items-center flex-col max-w-xs sm:max-w-2xl pt-36 self-center mb-auto">
           <Image
             src="/migration-logo.svg"
             width={300}
@@ -59,7 +59,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
           <h1 className="text-2xl font-semibold text-center">
             Video migration tool
           </h1>
-          <p className="text-gray-500 font-semibold py-2">
+          <p className="text-gray-500 font-semibold py-2 text-center">
             Import your videos from vimeo or dropbox directly to api.video
           </p>
           <p className="text-sm text-center">
@@ -70,7 +70,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
             {' '}
             Take advantage of our API with your existing content.
           </p>
-          <div className="flex gap-4 pt-6">
+          <div className="flex gap-4 pt-6 flex-wrap justify-center">
             <button
               onClick={() => setGetStarted(true)}
               className="text-sm font-semibold w-44"
@@ -218,7 +218,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
         </div>
       )}
       <div className="p-5">
-        <p className="text-sm">
+        <p className="text-sm text-center md:text-left">
           If you have any questions or need help,{' '}
           <a
             href="https://twitter.com/api_video"

@@ -273,7 +273,6 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
 
         <tbody>
           {videoWithStatus
-            // .sort((a, b) => compareFn(a, b))
             .map((videoSource) => (
               <tr
                 className="text-sm align-top font-semibold border-b border-slate-300 last:border-0"
