@@ -23,7 +23,7 @@ const Stepper: React.FC<StepperProps> = (props) => {
         <div key={'step' + i} className="flex gap-2 align-middle">
           <p
             className={`rounded-full ${
-              i === props.activeStep ? 'bg-blue-500' : `${i < props.activeStep ? 'bg-green-600' : 'bg-gray-300'}`
+              i === props.activeStep ? 'bg-blue-500' : `${i < props.activeStep ? 'bg-emerald-500' : 'bg-gray-300'}`
             } h-6 w-6 text-white text-center text-sm flex justify-center align-middle p-0.5`}
           >
             {i + 1}

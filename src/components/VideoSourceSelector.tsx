@@ -10,12 +10,13 @@ import {
   callGetPublicMp4UrlApi,
 } from '../service/ClientApiHelpers';
 import VideoSource, { AuthenticationContext } from '../types/common';
+import { formatSize } from '../utils/functions';
 
 interface VideoSourceSelectorProps {
   authenticationContext: AuthenticationContext;
   migrationId: string;
   providerName: ProviderName;
-  onSubmit: (videoSources: Video[]) => void;
+  onSubmit: (apiVideoList: Video[], videoSources: VideoSource[]) => void;
 }
 
 type ColumnName = 'name' | 'size' | 'duration';
@@ -94,10 +95,6 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
       return `${hours}h ${twoDigits(minutes)}m ${twoDigits(seconds)}s`;
     if (minutes > 0) return `${minutes}m ${twoDigits(seconds)}s`;
     return `${twoDigits(seconds)}s`;
-  };
-
-  const formatSize = (size: number) => {
-    return Math.round((size / 1024 / 1024) * 100) / 100 + ' MB';
   };
 
   const getSelectedVideos = (): VideoSource[] => {
@@ -305,7 +302,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
                       <td className="w-6 pt-2.5">
                         <input
                           type="checkbox"
-                          className="h-4 w-4 border-red-500"
+                          className="h-4 w-4 cursor-pointer"
                           checked={selectedIds.indexOf(videoSource.id) !== -1}
                           onChange={(a) => toggleSelection(videoSource.id)}
                         />
@@ -355,7 +352,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
               createApiVideoVideos()
                 .then((result) => {
                   // TODO manage video creation fails in result.failed
-                  props.onSubmit(result.successes);
+                  props.onSubmit(result.successes, videoSources);
                 })
                 .catch((e) => {
                   alert('Video creation failed.');

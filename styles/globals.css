@@ -27,14 +27,6 @@ b {
 }
 
 
-.grid {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  max-width: 800px;
-}
-
 .content {
   width: 960px;
 }
@@ -78,7 +70,6 @@ input[type='text'].error {
 
 button {
   background-color: rgb(250, 91, 48);
-  border: none;
   color: white;
   border-radius: 5px;
   font-size: 16px;
@@ -86,61 +77,20 @@ button {
   font-weight: bold;
 }
 
-p.explanation {
-  color: white;
-  line-height: 1.3em;
-}
 td.thumbnail img {
   height: 75px;
 }
 
-tr th a.current {
-  font-weight: bold;
-}
 
 th {
   text-align: left;
   padding-bottom: 10px;
 }
 
-table.result {
-  margin-top: 20px;
-}
-
-table.result td {
-  padding: 10px 0;
-}
-
-table.result tr td:first-child {
-  width: 40%;
-}
-
-td.status p {
-  padding: 0;
-  margin: 0;
-}
-
-td.status span.status {
-  padding: 2px 4px;
-  color: white;
-  border-radius: 3px;
-  margin: 0;
-  display: inline;
-  background-color: grey;
-  margin: 0 2px;
-  font-size: 10px;
-  top: -1px;
-  position: relative;
-}
-
-td.status span.status.encoded {
-  background-color: green;
-}
 
 span.icon {
   font-weight: 900;
   display: inline-block;
-  margin-right: 6px;
 }
 
 span.icon.loading {
@@ -149,14 +99,6 @@ span.icon.loading {
 
 span.icon.loading::after {
   content: '◡';
-}
-
-span.icon.done {
-  color: green;
-}
-
-span.icon.done::after {
-  content: '✓';
 }
 
 @keyframes rotation {

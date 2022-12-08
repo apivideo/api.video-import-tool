@@ -6,7 +6,7 @@ import ImportProgress from '../components/ImportProgress';
 import Stepper from '../components/stepper/Stepper';
 import VideoSourceSelector from '../components/VideoSourceSelector';
 import { ProviderName, Providers } from '../providers';
-import { AuthenticationContext } from '../types/common';
+import VideoSource, { AuthenticationContext } from '../types/common';
 import Image from 'next/image';
 interface MigrationToolProps {
   providerName?: ProviderName;
@@ -27,6 +27,7 @@ const buildId = (length: number) => {
 const MigrationTool: React.FC<MigrationToolProps> = (props) => {
   const [step, setStep] = useState<number>(props.providerName ? 1 : 0);
   const [importedVideos, setImportedVideos] = useState<Video[]>();
+  const [sourceVideos, setSourceVideos] = useState<VideoSource[]>();
   const [migrationId, _] = useState<string>(buildId(9));
   const [authenticationContext, setAuthenticationContext] =
     useState<AuthenticationContext>();
@@ -91,13 +92,13 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
       ) : (
         <div className="mb-auto mt-40">
           <div className="border border-slate-200 rounded-lg w-3/4 p-8 shadow max-w-5xl mx-auto relative">
-          <Image
-            className="absolute -top-36 pt-8"
-            src="/api-video.svg"
-            width={100}
-            height={100}
-            alt="logo"
-          />
+            <Image
+              className="absolute -top-36 pt-8"
+              src="/api-video.svg"
+              width={100}
+              height={100}
+              alt="logo"
+            />
             <div>
               <div className="flex justify-between pb-4">
                 <h1 className="text-left text-2xl font-semibold">
@@ -197,8 +198,9 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
                   migrationId={migrationId}
                   providerName={props.providerName!}
                   authenticationContext={authenticationContext!}
-                  onSubmit={(videos) => {
+                  onSubmit={(videos, videoSources) => {
                     setImportedVideos(videos);
+                    setSourceVideos(videoSources)
                     setStep(3);
                   }}
                 />
@@ -208,6 +210,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
                 <ImportProgress
                   apiVideoApiKey={authenticationContext?.apiVideoApiKey!}
                   videos={importedVideos || []}
+                  sourceVideos={sourceVideos || []}
                 />
               )}
             </div>
