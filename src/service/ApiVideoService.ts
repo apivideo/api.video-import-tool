@@ -3,6 +3,7 @@ import Video from "@api.video/nodejs-client/lib/model/Video";
 import VideoStatus from "@api.video/nodejs-client/lib/model/VideoStatus";
 import packageJson from '../../package.json';
 import { ProviderName } from "../providers";
+import VideoSource from "../types/common";
 
 export type VideoCreationOptions = {
     title: string;

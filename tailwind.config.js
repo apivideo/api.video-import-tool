@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+const defaultTheme = require('tailwindcss/defaultTheme');
 module.exports = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx}',
@@ -9,6 +10,13 @@ module.exports = {
       colors: {
         dropbox: '#0061FF',
         vimeo: '#32B8E8',
+        waiting: '',
+        encoding: '',
+        encoded: '',
+        failed: '',
+      },
+      fontFamily: {
+        jetbrains: ['JetBrains Mono', 'monospace'],
       },
     },
   },
