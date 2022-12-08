@@ -13,7 +13,7 @@ const Stepper: React.FC<StepperProps> = (props) => {
       const step = props.steps[i];
       if (i > 0) {
         res.push(
-          <div key={'step' + i}>
+          <div key={'c-step' + i}>
             <ChevronRight size={'1.3rem'} strokeWidth={2.5} />
           </div>
         );
