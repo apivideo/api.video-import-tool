@@ -10,10 +10,6 @@ module.exports = {
       colors: {
         dropbox: '#0061FF',
         vimeo: '#32B8E8',
-        waiting: '',
-        encoding: '',
-        encoded: '',
-        failed: '',
       },
       fontFamily: {
         jetbrains: ['JetBrains Mono', 'monospace'],
