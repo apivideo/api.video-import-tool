@@ -78,11 +78,22 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
     waiting: 'bg-slate-200 text-slate-500',
     missing: 'bg-slate-200 text-slate-500',
     encoding: 'bg-yellow-100 text-amber-700',
-    uploading: 'bg-yellow-100 text-amber-700',
+    ingesting: 'bg-yellow-100 text-amber-700',
     encoded: 'bg-green-200 text-teal-700',
     uploaded: 'bg-green-200 text-teal-700',
     ingested: 'bg-green-200 text-teal-700',
     failed: 'bg-rose-200 text-rose-700',
+  };
+
+  const formatIngestStatus = (status: string) => {
+    switch (status) {
+      case 'ingesting':
+        return 'uploading';
+      case 'ingested':
+        return 'uploaded';
+      default:
+        return status;
+    }
   };
 
   const statusCellContent = (video: VideoWithStatus) => {
@@ -97,6 +108,7 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
       qualities?.length > 0 &&
       !qualities?.find((q) => q.status !== 'encoded');
     const isPlayable = video.status?.encoding?.playable;
+    // const formatIngestStatus = video?.status?.ingest?.status === 'ingesting'
     return (
       <div className="pl-4 flex flex-col gap-4 relative">
         <div className="flex flex-col gap-2 md:grid grid-cols-[170px_1fr]">
@@ -110,11 +122,10 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
           </div>
           {video.status?.ingest?.status ? (
             <div
-              className={`${
-                statusColors[`${video.status.ingest.status}`]
-              } font-jetbrains font-medium p-1 rounded-md text-xs w-fit`}
+              className={`${statusColors[`${video.status.ingest.status}`]
+                } font-jetbrains font-medium p-1 rounded-md text-xs w-fit`}
             >
-              {video.status.ingest.status}
+              {formatIngestStatus(video.status.ingest.status)}
             </div>
           ) : null}
         </div>
@@ -134,9 +145,8 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
                 <div className="flex gap-2">
                   {hlsQualities.map((q, i) => (
                     <span
-                      className={`${
-                        statusColors[`${q.status}`]
-                      } font-medium p-1 rounded-md text-xs`}
+                      className={`${statusColors[`${q.status}`]
+                        } font-medium p-1 rounded-md text-xs`}
                       key={`hls-${i}`}
                     >
                       {q.quality}
@@ -152,9 +162,8 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
                 <div className="flex gap-2">
                   {mp4Qualities.map((q, i) => (
                     <span
-                      className={`${
-                        statusColors[`${q.status}`]
-                      } font-medium p-1 rounded-md text-xs`}
+                      className={`${statusColors[`${q.status}`]
+                        } font-medium p-1 rounded-md text-xs`}
                       key={`mp4-${i}`}
                     >
                       {q.quality}
@@ -205,9 +214,9 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
     element.setAttribute(
       'href',
       `data:${mimeType};charset=utf-8,` +
-        encodeURIComponent(
-          stringify(videoWithStatus.map((v) => generateExportVideoItem(v)))
-        )
+      encodeURIComponent(
+        stringify(videoWithStatus.map((v) => generateExportVideoItem(v)))
+      )
     );
     element.setAttribute('download', `api-video-migration-report.${format}`);
 
