@@ -13,10 +13,9 @@ const VimeoLogin = (props: ProviderLoginProps) => {
   return (
     <div>
       <div className="flex flex-col gap-4">
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <label htmlFor="vimeoAccessToken" className="flex gap-4">
             Enter your Vimeo access token
-
           </label>
           <i>
             <a
@@ -29,10 +28,11 @@ const VimeoLogin = (props: ProviderLoginProps) => {
           </i>
         </div>
         <input
-          className={`h-10 ${props.errorMessage
-            ? 'outline outline-red-500 outline-2'
-            : 'outline outline-slate-300 rounded-lg shadow outline-1'
-            }`}
+          className={`h-10 ${
+            props.errorMessage
+              ? 'outline outline-red-500 outline-2'
+              : 'outline outline-slate-300 rounded-lg shadow outline-1'
+          }`}
           id="vimeoAccessToken"
           type={'password'}
           value={vimeoAccessToken}
@@ -45,13 +45,14 @@ const VimeoLogin = (props: ProviderLoginProps) => {
       </div>
       <p className="text-sm text-red-600">{props.errorMessage}&nbsp;</p>
       <button
-        className={`${props.buttonDisabled ? 'bg-slate-300' : 'bg-vimeo'} text-sm font-semibold w-full`}
+        className={`${
+          props.buttonDisabled ? 'bg-slate-300' : 'bg-vimeo'
+        } text-sm font-semibold w-full`}
         disabled={props.buttonDisabled}
         onClick={props.onClick}
       >
         {props.loading ? 'Please wait...' : 'Authorize access to Vimeo account'}
       </button>
-
     </div>
   );
 };

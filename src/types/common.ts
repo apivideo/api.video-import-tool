@@ -1,3 +1,6 @@
+import Video from "@api.video/nodejs-client/lib/model/Video";
+import { ProviderName } from "../providers";
+
 export default interface VideoSource {
     id: string;
     name: string;
@@ -28,8 +31,14 @@ export type ApiResponse<T> = {
     error?: string;
 }
 
+export type Migration = {
+    id: string;
+    date: Date;
+    videos: Video[];
+    providerName: ProviderName;
+};
 
-export const SuccessResponse = <T> (data: T) => ({
+export const SuccessResponse = <T>(data: T) => ({
     data
 });
 
