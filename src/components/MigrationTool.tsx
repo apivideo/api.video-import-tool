@@ -6,7 +6,7 @@ import ImportProgress from '../components/ImportProgress';
 import Stepper from '../components/stepper/Stepper';
 import VideoSourceSelector from '../components/VideoSourceSelector';
 import { ProviderName, Providers } from '../providers';
-import { AuthenticationContext } from '../types/common';
+import VideoSource, { AuthenticationContext } from '../types/common';
 import Image from 'next/image';
 interface MigrationToolProps {
   providerName?: ProviderName;
@@ -27,6 +27,7 @@ const buildId = (length: number) => {
 const MigrationTool: React.FC<MigrationToolProps> = (props) => {
   const [step, setStep] = useState<number>(props.providerName ? 1 : 0);
   const [importedVideos, setImportedVideos] = useState<Video[]>();
+  const [sourceVideos, setSourceVideos] = useState<VideoSource[]>();
   const [migrationId, _] = useState<string>(buildId(9));
   const [authenticationContext, setAuthenticationContext] =
     useState<AuthenticationContext>();
@@ -47,7 +48,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
   return (
     <div className="flex min-h-screen flex-col">
       {!getStarted && step === 0 ? (
-        <div className="flex items-center flex-col max-w-2xl pt-36 self-center mb-auto">
+        <div className="flex items-center flex-col max-w-xs sm:max-w-2xl pt-36 self-center mb-auto">
           <Image
             src="/migration-logo.svg"
             width={300}
@@ -58,7 +59,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
           <h1 className="text-2xl font-semibold text-center">
             Video migration tool
           </h1>
-          <p className="text-gray-500 font-semibold py-2">
+          <p className="text-gray-500 font-semibold py-2 text-center">
             Import your videos from vimeo or dropbox directly to api.video
           </p>
           <p className="text-sm text-center">
@@ -69,7 +70,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
             {' '}
             Take advantage of our API with your existing content.
           </p>
-          <div className="flex gap-4 pt-6">
+          <div className="flex gap-4 pt-6 flex-wrap justify-center">
             <button
               onClick={() => setGetStarted(true)}
               className="text-sm font-semibold w-44"
@@ -89,17 +90,17 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
           </div>
         </div>
       ) : (
-        <div className="mb-auto mt-40">
-          <div className="border border-slate-200 rounded-lg w-3/4 p-8 shadow max-w-5xl mx-auto relative">
-          <Image
-            className="absolute -top-36 pt-8"
-            src="/api-video.svg"
-            width={100}
-            height={100}
-            alt="logo"
-          />
+        <div className="mb-8 md:mb-auto mt-24 md:mt-40">
+          <div className="border border-slate-200 rounded-lg w-full md:w-3/4 p-8 shadow max-w-5xl mx-auto relative">
+            <Image
+              className="absolute -top-10 md:-top-36 md:pt-8"
+              src="/api-video.svg"
+              width={100}
+              height={100}
+              alt="logo"
+            />
             <div>
-              <div className="flex justify-between pb-4">
+              <div className="flex flex-col gap-2 md:flex-row justify-between pb-4">
                 <h1 className="text-left text-2xl font-semibold">
                   Video migration tool
                 </h1>
@@ -139,11 +140,11 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
             <div className="pt-10">
               {step === 0 && (
                 <div className="flex flex-col justify-between">
-                  <div className="flex flex-row gap-4 pb-8">
+                  <div className="flex flex-row gap-4 pb-8 flex-wrap lg:flex-nowrap w-full">
                     {providers.map(
                       ({ displayName, link, name, imgSrc, description }) => (
-                        <Link href={link} key={name}>
-                          <div className="w-72 border border-slate-200 rounded-lg shadow flex gap-4 p-6">
+                        <Link href={link} key={name} className="w-full sm:w-72">
+                          <div className="border border-slate-200 rounded-lg shadow flex gap-4 p-6">
                             <Image
                               src={imgSrc}
                               height={40}
@@ -197,8 +198,9 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
                   migrationId={migrationId}
                   providerName={props.providerName!}
                   authenticationContext={authenticationContext!}
-                  onSubmit={(videos) => {
+                  onSubmit={(videos, videoSources) => {
                     setImportedVideos(videos);
+                    setSourceVideos(videoSources)
                     setStep(3);
                   }}
                 />
@@ -208,6 +210,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
                 <ImportProgress
                   apiVideoApiKey={authenticationContext?.apiVideoApiKey!}
                   videos={importedVideos || []}
+                  sourceVideos={sourceVideos || []}
                 />
               )}
             </div>
@@ -215,7 +218,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
         </div>
       )}
       <div className="p-5">
-        <p className="text-sm">
+        <p className="text-sm text-left">
           If you have any questions or need help,{' '}
           <a
             href="https://twitter.com/api_video"

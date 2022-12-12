@@ -11,7 +11,7 @@ const Home: NextPage = () => {
                     How to generate a Vimeo access token
                 </h1>
 
-                <div className="content">
+                <div>
                     <p>To work, the Vimeo migration tool needs you to provide it with a Vimeo access token. This access token is used to retrieve the list of your videos, and to access the video source files.</p>
                     <p>The generation of an access token is done in two quick steps:</p>
                     <ul>

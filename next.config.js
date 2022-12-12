@@ -2,8 +2,8 @@
 const nextConfig = {
   reactStrictMode: false,
   images: {
-    domains: ['i.vimeocdn.com'],
+    domains: ['i.vimeocdn.com', 'cdn.api.video'],
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

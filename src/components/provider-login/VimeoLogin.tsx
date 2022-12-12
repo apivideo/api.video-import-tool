@@ -13,8 +13,11 @@ const VimeoLogin = (props: ProviderLoginProps) => {
   return (
     <div>
       <div className="flex flex-col gap-4">
-        <label htmlFor="vimeoAccessToken" className="flex gap-4">
-          Enter your Vimeo access token
+        <div className="flex gap-2">
+          <label htmlFor="vimeoAccessToken" className="flex gap-4">
+            Enter your Vimeo access token
+
+          </label>
           <i>
             <a
               target="_blank"
@@ -24,11 +27,11 @@ const VimeoLogin = (props: ProviderLoginProps) => {
               how to generate your access token
             </a>
           </i>
-        </label>
+        </div>
         <input
           className={`h-10 ${props.errorMessage
-              ? 'outline outline-red-500 outline-2'
-              : 'outline outline-slate-300 rounded-lg shadow outline-1'
+            ? 'outline outline-red-500 outline-2'
+            : 'outline outline-slate-300 rounded-lg shadow outline-1'
             }`}
           id="vimeoAccessToken"
           type={'password'}

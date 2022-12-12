@@ -10,12 +10,13 @@ import {
   callGetPublicMp4UrlApi,
 } from '../service/ClientApiHelpers';
 import VideoSource, { AuthenticationContext } from '../types/common';
+import { formatSize } from '../utils/functions';
 
 interface VideoSourceSelectorProps {
   authenticationContext: AuthenticationContext;
   migrationId: string;
   providerName: ProviderName;
-  onSubmit: (videoSources: Video[]) => void;
+  onSubmit: (apiVideoList: Video[], videoSources: VideoSource[]) => void;
 }
 
 type ColumnName = 'name' | 'size' | 'duration';
@@ -94,10 +95,6 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
       return `${hours}h ${twoDigits(minutes)}m ${twoDigits(seconds)}s`;
     if (minutes > 0) return `${minutes}m ${twoDigits(seconds)}s`;
     return `${twoDigits(seconds)}s`;
-  };
-
-  const formatSize = (size: number) => {
-    return Math.round((size / 1024 / 1024) * 100) / 100 + ' MB';
   };
 
   const getSelectedVideos = (): VideoSource[] => {
@@ -271,20 +268,23 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
                         onChange={() => multiSelectionToggle()
                         }
                       />
-                      <a href="#" onClick={() => onSortClick('name')}>
+                      <a href="#" className="hidden md:block" onClick={() => onSortClick('name')}>
                         Video
+                      </a>
+                      <a href="#" className="block md:hidden" onClick={() => onSortClick('name')}>
+                        Select all
                       </a>
                     </div>
                   </th>
                   {hasSizes && (
-                    <th>
+                    <th className="hidden md:block">
                       <a href="#" onClick={() => onSortClick('size')}>
                         Size
                       </a>
                     </th>
                   )}
                   {hasDurations && (
-                    <th>
+                    <th className="hidden md:table-cell">
                       <a href="#" onClick={() => onSortClick('duration')}>
                         Duration
                       </a>
@@ -305,14 +305,14 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
                       <td className="w-6 pt-2.5">
                         <input
                           type="checkbox"
-                          className="h-4 w-4 border-red-500"
+                          className="h-4 w-4 cursor-pointer"
                           checked={selectedIds.indexOf(videoSource.id) !== -1}
                           onChange={(a) => toggleSelection(videoSource.id)}
                         />
                       </td>
-                      <td className="py-2.5 w-6/12">
+                      <td className="py-2.5 md:w-6/12">
                         {videoSource.thumbnail &&
-                          <div className="flex gap-2">
+                          <div className="flex flex-col md:flex-row gap-2">
                             {videoSource.thumbnail.startsWith('data') ? (
 
                               <img
@@ -330,18 +330,28 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
                               />
                             )}
                             {videoSource.name}
+                            {videoSource.size && (
+                              <span className="block md:hidden">{formatSize(videoSource.size)}</span>
+                            )}
+                            {hasDurations && (
+                              <span className="block md:hidden">
+                                {videoSource.duration &&
+                                  formatDuration(videoSource.duration)}
+                              </span>
+                            )}
                           </div>}
                       </td>
 
                       {videoSource.size && (
-                        <td className="py-2.5">{formatSize(videoSource.size)}</td>
+                        <td className="py-2.5 hidden md:table-cell">{formatSize(videoSource.size)}</td>
                       )}
                       {hasDurations && (
-                        <td className="py-2.5">
+                        <td className="py-2.5 hidden md:table-cell">
                           {videoSource.duration &&
                             formatDuration(videoSource.duration)}
                         </td>
                       )}
+
                     </tr>
                   ))}
               </tbody>
@@ -355,7 +365,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
               createApiVideoVideos()
                 .then((result) => {
                   // TODO manage video creation fails in result.failed
-                  props.onSubmit(result.successes);
+                  props.onSubmit(result.successes, videoSources);
                 })
                 .catch((e) => {
                   alert('Video creation failed.');

@@ -45,7 +45,7 @@ const MigrationsHome: NextPage = () => {
             <main className="main">
                 <h1 className="title">Welcome to the <span className="orange">api.video</span> migration tool</h1>
 
-                <div id="content">
+                <div>
                     {!migrations && <Authenticate
                         introMessage={<>From here you will be able to see the migrations you&apos;ve done using the migration tool.</>}
                         onSubmit={(authenticationContext) => {
