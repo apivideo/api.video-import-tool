@@ -8,6 +8,8 @@ import VideoSourceSelector from '../components/VideoSourceSelector';
 import { ProviderName, Providers } from '../providers';
 import VideoSource, { AuthenticationContext } from '../types/common';
 import Image from 'next/image';
+import Footer from './commons/Footer';
+import MigrationCard from './commons/MigrationCard';
 interface MigrationToolProps {
   providerName?: ProviderName;
 }
@@ -27,15 +29,10 @@ const buildId = (length: number) => {
 const MigrationTool: React.FC<MigrationToolProps> = (props) => {
   const [step, setStep] = useState<number>(props.providerName ? 1 : 0);
   const [importedVideos, setImportedVideos] = useState<Video[]>();
-  const [sourceVideos, setSourceVideos] = useState<VideoSource[]>();
   const [migrationId, _] = useState<string>(buildId(9));
   const [authenticationContext, setAuthenticationContext] =
     useState<AuthenticationContext>();
   const [getStarted, setGetStarted] = useState<boolean>(false);
-
-  const provider = props.providerName
-    ? Providers[props.providerName]
-    : undefined;
 
   const providers = Object.keys(Providers).map((provider: ProviderName) => ({
     link: `/${(provider as string).toLowerCase()}`,
@@ -46,7 +43,7 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
   }));
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
       {!getStarted && step === 0 ? (
         <div className="flex items-center flex-col max-w-xs sm:max-w-2xl pt-36 self-center mb-auto">
           <Image
@@ -90,149 +87,104 @@ const MigrationTool: React.FC<MigrationToolProps> = (props) => {
           </div>
         </div>
       ) : (
-        <div className="mb-8 md:mb-auto mt-24 md:mt-40">
-          <div className="border border-slate-200 rounded-lg w-full md:w-3/4 p-8 shadow max-w-5xl mx-auto relative">
-            <Image
-              className="absolute -top-10 md:-top-36 md:pt-8"
-              src="/api-video.svg"
-              width={100}
-              height={100}
-              alt="logo"
-            />
-            <div>
-              <div className="flex flex-col gap-2 md:flex-row justify-between pb-4">
-                <h1 className="text-left text-2xl font-semibold">
-                  Video migration tool
-                </h1>
-                <a
-                  href="https://github.com/apivideo/api.video-migration-tool"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <button className="flex items-center gap-2 border rounded-md bg-black text-white text-sm font-semibold py-1">
-                    <Image
-                      src="/github.svg"
-                      height={14}
-                      width={14}
-                      alt="github"
-                    />
-                    View on Github
-                  </button>
-                </a>
-              </div>
-
-              <p className="text-sm">
-                This tool helps you quickly import your already hosted videos
-                to api.video and take advantage of our API with your existing
-                content.
-              </p>
-              <Stepper
-                activeStep={step}
-                steps={[
-                  'Select source',
-                  'Authentication',
-                  'Video Selection',
-                  'Import Progress',
-                ]}
-              ></Stepper>
-            </div>
-            <div className="h-px w-full bg-slate-300"></div>
-            <div className="pt-10">
-              {step === 0 && (
-                <div className="flex flex-col justify-between">
-                  <div className="flex flex-row gap-4 pb-8 flex-wrap lg:flex-nowrap w-full">
-                    {providers.map(
-                      ({ displayName, link, name, imgSrc, description }) => (
-                        <Link href={link} key={name} className="w-full sm:w-72">
-                          <div className="border border-slate-200 rounded-lg shadow flex gap-4 p-6">
-                            <Image
-                              src={imgSrc}
-                              height={40}
-                              width={40}
-                              alt={displayName}
-                            />
-                            <div>
-                              <p className="text-sm font-semibold">
-                                {displayName}
-                              </p>
-                              <p className="text-xs text-slate-500">
-                                {description}
-                              </p>
-                            </div>
-                          </div>
-                        </Link>
-                      )
-                    )}
-                  </div>
-                  <p className="text-sm">
-                    We will be adding support for other platforms in the
-                    future. If you would like to contribute, feel free to open
-                    a pull request on{' '}
-                    <a
-                      href="https://github.com/apivideo/api.video-migration-tool"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-blue-500 underline"
-                    >
-                      Github
-                    </a>
-                    .{' '}
-                  </p>
-                </div>
-              )}
-
-              {step === 1 && (
-                <Authenticate
-                  providerName={props.providerName}
-                  onSubmit={async (
-                    authenticationContext: AuthenticationContext
-                  ) => {
-                    setAuthenticationContext(authenticationContext);
-                    setStep(2);
-                  }}
-                />
-              )}
-
-              {step === 2 && (
-                <VideoSourceSelector
-                  migrationId={migrationId}
-                  providerName={props.providerName!}
-                  authenticationContext={authenticationContext!}
-                  onSubmit={(videos, videoSources) => {
-                    setImportedVideos(videos);
-                    setSourceVideos(videoSources)
-                    setStep(3);
-                  }}
-                />
-              )}
-
-              {step === 3 && (
-                <ImportProgress
-                  apiVideoApiKey={authenticationContext?.apiVideoApiKey!}
-                  videos={importedVideos || []}
-                  sourceVideos={sourceVideos || []}
-                />
-              )}
-            </div>
+        <MigrationCard>
+          <div>
+            <p className="text-sm">
+              This tool helps you quickly import your already hosted videos to
+              api.video and take advantage of our API with your existing
+              content.
+            </p>
+            <Stepper
+              activeStep={step}
+              steps={[
+                'Select source',
+                'Authentication',
+                'Video Selection',
+                'Import Progress',
+              ]}
+            ></Stepper>
           </div>
-        </div>
+          <div className="h-px w-full bg-slate-300"></div>
+          <div className="pt-10">
+            {step === 0 && (
+              <div className="flex flex-col justify-between">
+                <div className="flex flex-row gap-4 pb-8 flex-wrap lg:flex-nowrap w-full">
+                  {providers.map(
+                    ({ displayName, link, name, imgSrc, description }) => (
+                      <Link href={link} key={name} className="w-full sm:w-72">
+                        <div className="border border-slate-200 rounded-lg shadow flex gap-4 p-6">
+                          <Image
+                            src={imgSrc}
+                            height={40}
+                            width={40}
+                            alt={displayName}
+                          />
+                          <div>
+                            <p className="text-sm font-semibold">
+                              {displayName}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {description}
+                            </p>
+                          </div>
+                        </div>
+                      </Link>
+                    )
+                  )}
+                </div>
+                <p className="text-sm">
+                  We will be adding support for other platforms in the future.
+                  If you would like to contribute, feel free to open a pull
+                  request on{' '}
+                  <a
+                    href="https://github.com/apivideo/api.video-migration-tool"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    Github
+                  </a>
+                  .{' '}
+                </p>
+              </div>
+            )}
+
+            {step === 1 && (
+              <Authenticate
+                providerName={props.providerName}
+                onSubmit={async (
+                  authenticationContext: AuthenticationContext
+                ) => {
+                  setAuthenticationContext(authenticationContext);
+                  setStep(2);
+                }}
+              />
+            )}
+
+            {step === 2 && (
+              <VideoSourceSelector
+                migrationId={migrationId}
+                providerName={props.providerName!}
+                authenticationContext={authenticationContext!}
+                onSubmit={(videos) => {
+                  setImportedVideos(videos);
+                  setStep(3);
+                }}
+              />
+            )}
+
+            {step === 3 && (
+              <ImportProgress
+                apiVideoApiKey={authenticationContext?.apiVideoApiKey!}
+                videos={importedVideos || []}
+                migrationId={migrationId}
+                providerName={props.providerName!}
+              />
+            )}
+          </div>
+        </MigrationCard>
       )}
-      <div className="p-5">
-        <p className="text-sm text-left">
-          If you have any questions or need help,{' '}
-          <a
-            href="https://twitter.com/api_video"
-            className="text-blue-500 underline"
-          >
-            tweet
-          </a>{' '}
-          us or email us at{' '}
-          <a href="mailto:help@api.video" className="text-blue-500 underline">
-            help@api.video
-          </a>
-        </p>
-      </div>
-    </div>
+    </>
   );
 };
 

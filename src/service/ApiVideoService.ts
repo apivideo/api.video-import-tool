@@ -77,6 +77,20 @@ class ApiVideoService {
 
         return allVideos;
     }
+
+    public async getMigrationById(migrationId: string): Promise<Video[]> {
+        let allVideos: Video[] = [];
+
+        for (let currentPage = 1; ; currentPage++) {
+            const res = await this.client.videos.list({ metadata: { "x-apivideo-migration-id": migrationId }, currentPage });
+            allVideos = [...allVideos, ...res.data];
+            if (currentPage >= (res?.pagination?.pagesTotal || 0)) {
+                break;
+            }
+        }
+
+        return allVideos;
+    }
 }
 
 export default ApiVideoService;

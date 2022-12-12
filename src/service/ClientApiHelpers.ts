@@ -1,4 +1,5 @@
 import { CreateApiVideoVideoRequestBody, CreateApiVideoVideoRequestResponse } from "../pages/api/apivideo/create-video";
+import { GetMigrationRequestBody, GetMigrationRequestResponse } from "../pages/api/apivideo/get-migration";
 import { GetMigrationsRequestBody, GetMigrationsRequestResponse } from "../pages/api/apivideo/get-migrations";
 import { GetVideosStatusRequestBody, GetVideosStatusRequestResponse } from "../pages/api/apivideo/get-videos-status";
 import { VerifyApiKeyRequestBody, VerifyApiKeyRequestResponse } from "../pages/api/apivideo/verify-api-key";
@@ -15,7 +16,7 @@ export const callGeneratePublicMp4Api = async (body: GeneratePublicMp4RequestBod
 
 export const callGetPublicMp4UrlApi = async (body: GetPublicMp4UrlRequestBody) =>
     callApi<GetPublicMp4UrlRequestResponse, GetPublicMp4UrlRequestBody>("/api/providers/get-public-mp4-url", "POST", body);
-    
+
 export const callCreateApiVideoVideoApi = async (body: CreateApiVideoVideoRequestBody) =>
     callApi<CreateApiVideoVideoRequestResponse, CreateApiVideoVideoRequestBody>("/api/apivideo/create-video", "POST", body);
 
@@ -28,13 +29,16 @@ export const callGetImportableVideosApi = async (body: GetImportableVideosReques
 export const callGetMigrationsApi = async (body: GetMigrationsRequestBody) =>
     callApi<GetMigrationsRequestResponse, GetMigrationsRequestBody>("/api/apivideo/get-migrations", "POST", body);
 
+export const callGetMigrationApi = async (body: GetMigrationRequestBody) =>
+    callApi<GetMigrationRequestResponse, GetMigrationRequestBody>("/api/apivideo/get-migration", "POST", body);
+
 export const callGetVideosStatusApi = async (body: GetVideosStatusRequestBody) =>
     callApi<GetVideosStatusRequestResponse, GetVideosStatusRequestBody>("/api/apivideo/get-videos-status", "POST", body);
 
 export const callVerifyApiVideoApiKeyApi = async (body: VerifyApiKeyRequestBody) =>
     callApi<VerifyApiKeyRequestResponse, VerifyApiKeyRequestBody>("/api/apivideo/verify-api-key", "POST", body);
 
-export const callValidateProviderCredentialsApi = async (body: ValidateProviderCredentialsRequestBody) => 
+export const callValidateProviderCredentialsApi = async (body: ValidateProviderCredentialsRequestBody) =>
     callApi<ValidateProviderCredentialsRequestResponse, ValidateProviderCredentialsRequestBody>("/api/providers/validate-provider-credentials", "POST", body);
 
 const callApi = async <U, T>(url: string, method: "POST" | "GET" = "POST", body?: T): Promise<U> => {
@@ -43,7 +47,7 @@ const callApi = async <U, T>(url: string, method: "POST" | "GET" = "POST", body?
         body: JSON.stringify(body)
     }).then(a => a.json());
 
-    if(res.error) {
+    if (res.error) {
         throw new Error(res.error);
     }
     return res.data!;

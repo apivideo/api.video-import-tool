@@ -1,7 +1,7 @@
 import React from 'react';
 import { ProviderName } from '../../providers';
 
-interface AuthenticateProps {
+interface AuthDisclaimerProps {
   providerName?: ProviderName;
 }
 
@@ -10,7 +10,7 @@ enum ProviderNames {
   DROPBOX = 'DROPBOX',
 }
 
-const AuthDisclaimer: React.FC<AuthenticateProps> = (props) => {
+const AuthDisclaimer: React.FC<AuthDisclaimerProps> = (props) => {
   return (
     <div className="flex flex-col gap-4">
       <p>
