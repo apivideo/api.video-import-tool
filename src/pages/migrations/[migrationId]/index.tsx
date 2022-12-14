@@ -46,7 +46,7 @@ const MigrationView: NextPage = () => {
   }, [router]);
 
   return (
-    <MigrationCard>
+    <MigrationCard hideDescription>
       <h1 className="text-left font-semibold pb-4">My migrations</h1>
       <div className="h-px w-full bg-slate-300"></div>
       <Link
@@ -56,7 +56,7 @@ const MigrationView: NextPage = () => {
         <ArrowLeft size={16} strokeWidth={'.2rem'} />
         Back to my migrations
       </Link>
-      {selectedMigration && <MigrationInfo migrations={[selectedMigration]} />}
+      {selectedMigration && <MigrationInfo migrations={[selectedMigration]} showDate />}
       {videos?.length ? (
         <VideoImportTable
           videos={videos}

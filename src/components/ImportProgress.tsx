@@ -1,32 +1,29 @@
-import Video from '@api.video/nodejs-client/lib/model/Video';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { unparse } from 'papaparse';
-import React, { useEffect, useRef, useState } from 'react';
-import { VideoWithStatus } from '../service/ApiVideoService';
-import { callGetVideosStatusApi } from '../service/ClientApiHelpers';
-import Image from 'next/image';
-import { formatSize } from '../utils/functions';
-import { Check, Eye } from 'react-feather';
-import Quality from '@api.video/nodejs-client/lib/model/Quality';
-import { ProviderName, Providers } from '../providers';
+import React, { useEffect, useState } from 'react';
 import MigrationInfo from './commons/MigrationInfo';
-import { useInterval } from '../utils/hooks';
 import VideoImportTable from './commons/VideoImportTable';
+import MigrationCard from './commons/MigrationCard';
+import { useGlobalContext } from './context/Global';
 
-interface ImportProgressProps {
-  videos: Video[];
-  apiVideoApiKey: string;
-  migrationId: string;
-  providerName: ProviderName;
-}
 
-const ImportProgress: React.FC<ImportProgressProps> = (props) => {
+
+const ImportProgress: React.FC = () => {
+  const [apiVideoApiKey, setApiVideoApiKey] = useState('')
   const router = useRouter();
+  const { videos, migrationId, providerName } = useGlobalContext()
 
+  useEffect(() => {
+    const apiKey = sessionStorage.getItem('apiVideoApiKey') || ''
+    setApiVideoApiKey(apiKey)
+    if (!migrationId) {
+      const mId = router.query.migrationId
+      router.push(`/migrations/${mId}`)
+    }
+  }, [migrationId])
 
   return (
-    <>
+    <MigrationCard activeStep={4} paddingTop>
       <div className="text-sm flex flex-col gap-4">
         <p>
           Your videos have been created. You can close this tab at any moment,
@@ -42,9 +39,12 @@ const ImportProgress: React.FC<ImportProgressProps> = (props) => {
           </p>
         )}
       </div>
-      <MigrationInfo migrations={[{ id: props.migrationId, providerName: props.providerName, videos: props.videos, date: new Date() }]} />
-      <VideoImportTable videos={props.videos} apiVideoApiKey={props.apiVideoApiKey} />
-    </>
+      {videos?.length && migrationId && apiVideoApiKey && <>
+        <MigrationInfo migrations={[{ id: migrationId, providerName: providerName, videos: videos, date: new Date() }]} />
+        <VideoImportTable videos={videos} apiVideoApiKey={apiVideoApiKey} />
+      </>}
+
+    </MigrationCard>
   );
 };
 

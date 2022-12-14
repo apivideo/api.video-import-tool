@@ -62,7 +62,7 @@ const MigrationsHome: NextPage = () => {
   };
 
   return (
-    <MigrationCard>
+    <MigrationCard hideDescription>
       <h1 className="text-left font-semibold pb-4">My migrations</h1>
       <div className="h-px w-full bg-slate-300"></div>
       <div className="flex flex-col lg:flex-row lg:items-start pt-8 gap-4">

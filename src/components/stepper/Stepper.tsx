@@ -3,6 +3,7 @@ import { ChevronRight } from 'react-feather';
 
 interface StepperProps {
   activeStep: number;
+  stepLink: string;
   steps: string[];
 }
 
@@ -20,15 +21,14 @@ const Stepper: React.FC<StepperProps> = (props) => {
       }
 
       res.push(
-        <div key={'step' + i} className="flex gap-2 align-middle">
+        <div key={`step${i + 1}`} className="flex gap-2 align-middle">
           <div
-            className={`rounded-full px-3 py-0.5 ${
-              i === props.activeStep ? 'bg-blue-500' : `${i < props.activeStep ? 'bg-emerald-500' : 'bg-gray-300'}`
-            } h-6 w-6 text-white text-center text-sm flex justify-center align-middle p-0.5`}
+            className={`rounded-full px-3 py-0.5 ${i + 1 === props.activeStep ? 'bg-blue-500' : `${i < props.activeStep ? 'bg-emerald-500' : 'bg-gray-300'}`
+              } h-6 w-6 text-white text-center text-sm flex justify-center align-middle p-0.5`}
           >
             {i + 1}
           </div>
-          <p className={`text-base font-semibold lg:block ${props.activeStep !== i ? 'hidden' : 'block'}`} key={step}>
+          <p className={`text-base font-semibold lg:block ${props.activeStep !== i ? 'hidden' : 'block'}`}>
             {step}
           </p>
         </div>
