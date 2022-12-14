@@ -11,23 +11,17 @@ const DropboxLogin = (props: ProviderLoginProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    const accessToken = sessionStorage.getItem('dropboxAccessToken') || '';
-    setDropboxAccessToken(accessToken);
-
-    if (!accessToken && router.query.code) {
+    if (router.query.code) {
       callGetOAuthAccessTokenApi({
         provider: 'DROPBOX',
         code: router.query.code as string,
       }).then((res: GetOauthAccessTokenRequestResponse) => {
         if (res.access_token) {
-          sessionStorage.setItem('dropboxAccessToken', res.access_token);
           setDropboxAccessToken(res.access_token);
           props.onAccessTokenChanged(res.access_token);
         }
       });
     }
-
-    props.onAccessTokenChanged(accessToken);
   }, [router.query.code]);
 
   return (

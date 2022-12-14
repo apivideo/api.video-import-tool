@@ -1,24 +1,19 @@
+import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import {
   MigrationProvider,
   OptionalFeatureFlag,
-  ProviderName,
   Providers,
 } from '../providers';
 import {
   callValidateProviderCredentialsApi,
   callVerifyApiVideoApiKeyApi,
 } from '../service/ClientApiHelpers';
-import { AuthenticationContext } from '../types/common';
 import AuthDisclaimer from './commons/AuthDisclaimer';
+import MigrationCard from './commons/MigrationCard';
+import { useGlobalContext } from './context/Global';
 
-interface AuthenticateProps {
-  onSubmit: (authenticationContext: AuthenticationContext) => void;
-  introMessage?: JSX.Element;
-  providerName?: ProviderName;
-}
-
-const Authenticate: React.FC<AuthenticateProps> = (props) => {
+const Authenticate: React.FC = () => {
   const [apiVideoApiKey, setApiVideoApiKey] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [apiVideoErrorMessage, setApiVideoErrorMessage] = useState<
@@ -31,9 +26,19 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
     string | null
   >();
 
+  const { providerName, setProviderName, setProviderAccessToken: globalSetProviderAccessToken } = useGlobalContext();
+
+  const router = useRouter();
+
   useEffect(() => {
-    setApiVideoApiKey(sessionStorage.getItem('apiVideoApiKey') || '');
-  }, []);
+    const apiKey = sessionStorage.getItem('apiVideoApiKey') || ''
+    if (apiKey) setApiVideoApiKey(apiKey)
+  }, [])
+
+  useEffect(() => {
+    if (router?.query?.provider)
+      setProviderName(router.query.provider.toString().toUpperCase());
+  }, [router, setProviderName]);
 
   const validateApiVideoAuthentication = async (): Promise<string | null> => {
     let errorMessage = null;
@@ -52,11 +57,11 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
   };
 
   const validateProviderAuthentication = async (): Promise<string | null> => {
-    if (!props.providerName) {
+    if (!providerName) {
       return null;
     }
 
-    const provider = Providers[props.providerName];
+    const provider = Providers[providerName];
 
     if (!providerAccessToken) {
       return `Missing ${provider.displayName} authentication`;
@@ -75,7 +80,7 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
         authenticationContext: {
           providerAccessToken,
         },
-        provider: props.providerName,
+        provider: providerName,
       });
       return res.error;
     } catch (e: any) {
@@ -83,8 +88,8 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
     }
   };
 
-  const provider: MigrationProvider | undefined = props.providerName
-    ? Providers[props.providerName]
+  const provider: MigrationProvider | undefined = providerName
+    ? Providers[providerName]
     : undefined;
 
   const handleAuthClick = async () => {
@@ -95,71 +100,86 @@ const Authenticate: React.FC<AuthenticateProps> = (props) => {
         ? [validateApiVideoAuthentication(), validateProviderAuthentication()]
         : [validateApiVideoAuthentication()]
     );
-
+    setLoading(false);
     setApiVideoErrorMessage(authentValidation[0]);
 
     if (authentValidation.length > 1) {
-      setProviderErrorMessage(authentValidation[1]);
-    }
-
-    if (authentValidation.filter((v) => v !== null).length > 0) {
+      if (authentValidation[1]) {
+        setProviderErrorMessage(authentValidation[1]);
+      } else {
+        router.push(
+          `${providerName?.toString().toLocaleLowerCase()}/video-selection`
+        );
+      }
+    } else if (authentValidation.filter((v) => v !== null).length > 0) {
       setLoading(false);
       return;
+    } else {
+      !providerErrorMessage &&
+        router.push(
+          `${providerName?.toString().toLocaleLowerCase()}/video-selection`
+        );
     }
-
-    props.onSubmit({
-      apiVideoApiKey: apiVideoApiKey,
-      providerAccessToken: providerAccessToken!,
-    });
-
-    setLoading(false);
   };
 
   return (
-    <>
-      {props.introMessage && (
-        <p className="explanation">{props.introMessage}</p>
-      )}
-
+    <MigrationCard activeStep={2} paddingTop>
       <div className="flex flex-col md:flex-row text-sm gap-2 md:gap-10">
         <div className="flex flex-col md:w-2/4 gap-4">
           <h1 className="text-left font-semibold">Authentication</h1>
-          <div className="hidden md:block"> <AuthDisclaimer providerName={props.providerName} /></div>
+          <div className="hidden md:block">
+            {' '}
+            <AuthDisclaimer providerName={providerName as string} />
+          </div>
         </div>
         <div className="flex flex-col md:w-2/4">
           <div className="flex flex-col gap-4">
             <label htmlFor="apiVideoApiKey">Enter your api.video API key</label>
-            <input
-              className={`h-10 ${apiVideoErrorMessage
-                ? 'outline outline-red-500 outline-2'
-                : 'outline outline-slate-300 rounded-lg shadow outline-1'
-                }`}
-              id="apiVideoApiKey"
-              type={'password'}
-              value={apiVideoApiKey}
-              onChange={(v) => {
-                sessionStorage.setItem('apiVideoApiKey', v.target.value);
-                setApiVideoApiKey(v.target.value);
-              }}
-            ></input>
+            <div className={'mb-4'}>
+              <input
+                className={`h-10 ${apiVideoErrorMessage
+                  ? 'outline outline-red-500 outline-2'
+                  : 'outline outline-slate-300 rounded-lg shadow outline-1'
+                  }`}
+                id="apiVideoApiKey"
+                type={'password'}
+                value={apiVideoApiKey}
+                onChange={(v) => {
+                  setApiVideoErrorMessage('');
+                  sessionStorage.setItem('apiVideoApiKey', v.target.value);
+                  setApiVideoApiKey(v.target.value);
+                }}
+              ></input>
+              {apiVideoErrorMessage && (
+                <p className="text-sm text-red-600 pt-2">
+                  {apiVideoErrorMessage}&nbsp;
+                </p>
+              )}
+            </div>
           </div>
-          <p className="text-sm text-red-600">{apiVideoErrorMessage}&nbsp;</p>
+
           {provider && (
             <provider.loginComponent
-              onAccessTokenChanged={(providerAccessToken) =>
-                setProviderAccessToken(providerAccessToken)
-              }
+              onAccessTokenChanged={(providerAccessToken) => {
+                setLoading(false);
+                setProviderErrorMessage('');
+                setProviderAccessToken(providerAccessToken);
+                globalSetProviderAccessToken(providerAccessToken as string)
+              }}
+              providerAccessToken={providerAccessToken as string}
               errorMessage={providerErrorMessage || undefined}
               buttonDisabled={loading || !providerAccessToken}
               onClick={handleAuthClick}
               loading={loading}
             />
           )}
-          <div className="block pt-4 md:hidden">   <AuthDisclaimer providerName={props.providerName} /></div>
-
+          <div className="block pt-4 md:hidden">
+            {' '}
+            <AuthDisclaimer providerName={providerName as string} />
+          </div>
         </div>
       </div>
-    </>
+    </MigrationCard>
   );
 };
 

@@ -1,5 +1,6 @@
 import Video from '@api.video/nodejs-client/lib/model/Video';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 
 import { OptionalFeatureFlag, ProviderName, Providers } from '../providers';
@@ -9,19 +10,18 @@ import {
   callGetImportableVideosApi,
   callGetPublicMp4UrlApi,
 } from '../service/ClientApiHelpers';
-import VideoSource, { AuthenticationContext } from '../types/common';
-import { formatSize } from '../utils/functions';
+import VideoSource, { AuthenticationContext, ProviderAuthenticationContext } from '../types/common';
+import { buildId, formatSize } from '../utils/functions';
+import MigrationCard from './commons/MigrationCard';
+import { useGlobalContext } from './context/Global';
 
-interface VideoSourceSelectorProps {
-  authenticationContext: AuthenticationContext;
-  migrationId: string;
-  providerName: ProviderName;
-  onSubmit: (apiVideoList: Video[], videoSources: VideoSource[]) => void;
-}
+
 
 type ColumnName = 'name' | 'size' | 'duration';
 
-const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
+const VideoSourceSelector: React.FC = () => {
+  const [authenticationContext, setAuthenticationContext] =
+    useState<AuthenticationContext>();
   const [videoSources, setVideoSources] = useState<VideoSource[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -29,10 +29,22 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
   const [sortOrder, setSortOrder] = useState<1 | -1>(1);
   const [createdCount, setCreatedCount] = useState<number>(0);
   const [fetchingVideos, setFetchingVideos] = useState<boolean>(true);
+  const [migrationId, _] = useState<string>(buildId(9));
+  const { providerName, providerAccessToken, setVideos, setMigrationId } = useGlobalContext()
+  const router = useRouter()
 
   useEffect(() => {
-    fetchVideos(props.authenticationContext);
-  }, []);
+    if (!providerName || !providerAccessToken) {
+      const pName = router.query.provider
+      router.push(`/${pName}`)
+    } else {
+      const apiVideoApiKey = sessionStorage.getItem('apiVideoApiKey') || ''
+      const authenticationContext: AuthenticationContext = { apiVideoApiKey, providerAccessToken }
+      setAuthenticationContext(authenticationContext)
+      fetchVideos(authenticationContext);
+    }
+  }, [router, providerName]);
+
 
   const fetchVideos = async (
     authenticationContext: AuthenticationContext,
@@ -42,7 +54,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
     try {
       const res = await callGetImportableVideosApi({
         authenticationContext,
-        provider: props.providerName,
+        provider: providerName,
         nextPageFetchDetails,
       });
 
@@ -110,21 +122,21 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
   ): Promise<{ result: Video | Error; source: VideoSource }> => {
     try {
       if (
-        Providers[props.providerName].hasFeature(
+        Providers[providerName].hasFeature(
           OptionalFeatureFlag.GeneratePublicMp4UrlBeforeVideoCreation
         )
       ) {
         video = (
           await callGeneratePublicMp4Api({
-            providerName: props.providerName,
-            authenticationContext: props.authenticationContext,
+            providerName,
+            authenticationContext: authenticationContext as ProviderAuthenticationContext,
             video: video,
           })
         ).video;
       }
 
       if (
-        Providers[props.providerName].hasFeature(
+        Providers[providerName].hasFeature(
           OptionalFeatureFlag.WaitForPublicMp4Availibility
         )
       ) {
@@ -132,8 +144,8 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
           const url =
             (
               await callGetPublicMp4UrlApi({
-                authenticationContext: props.authenticationContext,
-                provider: props.providerName,
+                authenticationContext: authenticationContext as ProviderAuthenticationContext,
+                provider: providerName,
                 video: video,
               })
             ).video?.url || null;
@@ -147,9 +159,9 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
 
       const res = (
         await callCreateApiVideoVideoApi({
-          apiKey: props.authenticationContext.apiVideoApiKey,
-          migrationId: props.migrationId,
-          providerName: props.providerName,
+          apiKey: authenticationContext?.apiVideoApiKey as string,
+          migrationId,
+          providerName,
           videoSource: video,
         })
       ).video;
@@ -236,11 +248,11 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
   const hasSizes = !!videoSources.find((v) => !!v.size);
 
   return (
-    <>
+    <MigrationCard activeStep={3} paddingTop>
       {fetchingVideos ? (
-        <p>
-          Retrieving videos from {Providers[props.providerName].displayName}.{' '}
-          {videoSources.length} retrieved so far...
+        <p className="text-sm">
+          {`Retrieving videos from ${Providers[providerName]?.displayName}
+          ${videoSources.length} retrieved so far...`}
         </p>
       ) : (
         <>
@@ -364,8 +376,10 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
               setLoading(true);
               createApiVideoVideos()
                 .then((result) => {
+                  setVideos(result.successes)
+                  setMigrationId(migrationId)
+                  router.push(`/${providerName.toString().toLowerCase()}/${migrationId}`)
                   // TODO manage video creation fails in result.failed
-                  props.onSubmit(result.successes, videoSources);
                 })
                 .catch((e) => {
                   alert('Video creation failed.');
@@ -377,7 +391,7 @@ const VideoSourceSelector: React.FC<VideoSourceSelectorProps> = (props) => {
           </button>
         </>
       )}
-    </>
+    </MigrationCard>
   );
 };
 
