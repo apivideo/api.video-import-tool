@@ -13,9 +13,10 @@ import { Migration } from '../../../types/common';
 
 const MigrationView: NextPage = () => {
   const [apiVideoApiKey, setApiVideoApiKey] = useState<string>();
-
+  const [migrationsError, setMigrationsError] = useState<string>('');
   const [videos, setVideos] = useState<Video[]>([]);
   const [selectedMigration, setSelectedMigration] = useState<Migration>();
+  const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -24,21 +25,29 @@ const MigrationView: NextPage = () => {
     if (router?.query?.migrationId) {
       const getMigratedVideos = async (apiKey: string) => {
         const migrationId = router.query.migrationId as string;
-
         if (migrationId) {
-          await callGetMigrationApi({ apiKey, migrationId }).then((res) => {
-            setVideos(res.videos);
-            const video: Video = res.videos[0];
-            const videoMigration: Migration = {
-              date: new Date(video.createdAt! as unknown as string),
-              id: router.query.migrationId as string,
-              videos: res.videos,
-              providerName: video.metadata
-                ?.find((a) => a.key === 'x-apivideo-migration-provider')
-                ?.value?.toUpperCase() as ProviderName,
-            };
-            setSelectedMigration(videoMigration);
-          });
+          try {
+            setLoading(true);
+            await callGetMigrationApi({ apiKey, migrationId }).then((res) => {
+              setVideos(res.videos);
+              const video: Video = res.videos[0];
+              const videoMigration: Migration = {
+                date: new Date(video.createdAt! as unknown as string),
+                id: router.query.migrationId as string,
+                videos: res.videos,
+                providerName: video.metadata
+                  ?.find((a) => a.key === 'x-apivideo-migration-provider')
+                  ?.value?.toUpperCase() as ProviderName,
+              };
+              setSelectedMigration(videoMigration);
+            });
+            setLoading(false);
+          } catch (err) {
+            setMigrationsError(
+              'Could not find migrations for the requested Migration-id.'
+            );
+            console.error(err);
+          }
         }
       };
       getMigratedVideos(apiKey);
@@ -56,13 +65,21 @@ const MigrationView: NextPage = () => {
         <ArrowLeft size={16} strokeWidth={'.2rem'} />
         Back to my migrations
       </Link>
-      {selectedMigration && <MigrationInfo migrations={[selectedMigration]} showDate />}
-      {videos?.length ? (
+      {selectedMigration && (
+        <MigrationInfo migrations={[selectedMigration]} showDate />
+      )}
+      {!loading && videos?.length ? (
         <VideoImportTable
           videos={videos}
           apiVideoApiKey={apiVideoApiKey as string}
         />
       ) : null}
+      {loading && (
+        <div className="flex justify-center text-2xl mt-8">
+          <span className="icon loading"></span>
+        </div>
+      )}
+      {migrationsError && <p className="text-sm pt-8">{migrationsError}</p>}
     </MigrationCard>
   );
 };

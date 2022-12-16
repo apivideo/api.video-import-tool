@@ -36,7 +36,7 @@ const VideoSourceSelector: React.FC = () => {
   useEffect(() => {
     if (!providerName || !providerAccessToken) {
       const pName = router.query.provider
-      router.push(`/${pName}`)
+      pName && router.push(`/${pName}`)
     } else {
       const apiVideoApiKey = sessionStorage.getItem('apiVideoApiKey') || ''
       const authenticationContext: AuthenticationContext = { apiVideoApiKey, providerAccessToken }
@@ -57,7 +57,6 @@ const VideoSourceSelector: React.FC = () => {
         provider: providerName,
         nextPageFetchDetails,
       });
-
       videos = videos.concat(res.data);
       setVideoSources(videos);
       setSelectedIds(videos.map((video) => video.id));
@@ -68,7 +67,6 @@ const VideoSourceSelector: React.FC = () => {
         setFetchingVideos(false);
       }
     } catch (e) {
-      //TODO properly display error message
       console.error(e);
     }
   };

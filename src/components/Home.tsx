@@ -27,22 +27,23 @@ const HomePage: React.FC = () => {
         Take advantage of our API with your existing content.
       </p>
       <div className="flex gap-4 pt-6 flex-wrap justify-center">
-        <Link href={'/providers'} passHref>
-            <button className="text-sm font-semibold w-44">
-            Get started
+            <Link href={'/providers'} passHref>
+                <button className="text-sm font-semibold w-44">
+                Get started
+                </button>
+            </Link>
+            <a
+            href="https://github.com/apivideo/api.video-migration-tool"
+            target="_blank"
+            rel="noreferrer"
+            >
+            <button className="w-44 flex items-center justify-center gap-2 border rounded-md bg-black text-white text-sm font-semibold">
+                <Image src="/github.svg" height={14} width={14} alt="github" />
+                View on Github
             </button>
-        </Link>
-        <a
-          href="https://github.com/apivideo/api.video-migration-tool"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button className="w-44 flex items-center justify-center gap-2 border rounded-md bg-black text-white text-sm font-semibold">
-            <Image src="/github.svg" height={14} width={14} alt="github" />
-            View on Github
-          </button>
-        </a>
+            </a>
       </div>
+      <p className="text-sm mt-8">Access <Link className="text-blue-500 underline" href={'/migrations'}>previous migrations</Link>.</p>
     </div>
   );
 };

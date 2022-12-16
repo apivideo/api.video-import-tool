@@ -6,8 +6,6 @@ import VideoImportTable from './commons/VideoImportTable';
 import MigrationCard from './commons/MigrationCard';
 import { useGlobalContext } from './context/Global';
 
-
-
 const ImportProgress: React.FC = () => {
   const [apiVideoApiKey, setApiVideoApiKey] = useState('')
   const router = useRouter();
@@ -20,7 +18,7 @@ const ImportProgress: React.FC = () => {
       const mId = router.query.migrationId
       router.push(`/migrations/${mId}`)
     }
-  }, [migrationId])
+  }, [router, migrationId])
 
   return (
     <MigrationCard activeStep={4} paddingTop>

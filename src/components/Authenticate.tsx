@@ -108,7 +108,7 @@ const Authenticate: React.FC = () => {
         setProviderErrorMessage(authentValidation[1]);
       } else {
         router.push(
-          `${providerName?.toString().toLocaleLowerCase()}/video-selection`
+          `/${providerName?.toString().toLocaleLowerCase()}/video-selection`
         );
       }
     } else if (authentValidation.filter((v) => v !== null).length > 0) {
@@ -117,7 +117,7 @@ const Authenticate: React.FC = () => {
     } else {
       !providerErrorMessage &&
         router.push(
-          `${providerName?.toString().toLocaleLowerCase()}/video-selection`
+          `/${providerName?.toString().toLocaleLowerCase()}/video-selection`
         );
     }
   };
