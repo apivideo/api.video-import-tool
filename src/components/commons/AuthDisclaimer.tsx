@@ -1,5 +1,6 @@
 import React from 'react';
 import { ProviderName } from '../../providers';
+import { uppercaseFirstLetter } from '../../utils/functions';
 
 interface AuthDisclaimerProps {
   providerName: ProviderName;
@@ -11,13 +12,14 @@ enum ProviderNames {
 }
 
 const AuthDisclaimer: React.FC<AuthDisclaimerProps> = (props) => {
-
-  const providerDisplayName = props?.providerName.toString().toLowerCase()
+  const providerDisplayName = props?.providerName.toString().toLowerCase();
 
   return (
     <div className="flex flex-col gap-4">
       <p>
-        {`Authorize access to your ${providerDisplayName.charAt(0).toUpperCase() + providerDisplayName.slice(1)} account to access the videos you would
+        {`Authorize access to your ${uppercaseFirstLetter(
+          providerDisplayName
+        )} account to access the videos you would
         like to import to api.video.`}
       </p>
       <div className="flex flex-col">
@@ -47,7 +49,9 @@ const AuthDisclaimer: React.FC<AuthDisclaimerProps> = (props) => {
       </div>
 
       <p>
-        {`No sensitive data from your ${providerDisplayName.charAt(0).toUpperCase() + providerDisplayName.slice(1)} account will be sent to
+        {`No sensitive data from your ${uppercaseFirstLetter(
+          providerDisplayName
+        )} account will be sent to
     api.video.`}
       </p>
     </div>

@@ -1,10 +1,9 @@
-
 export const formatSize = (size: number) => {
-    return Math.round((size / 1024 / 1024) * 100) / 100 + ' MB';
-  };
+  return Math.round((size / 1024 / 1024) * 100) / 100 + ' MB';
+};
 
 export const formatDate = (date: Date) => {
-    return `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
+  return `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
 };
 
 export const buildId = (length: number) => {
@@ -17,4 +16,8 @@ export const buildId = (length: number) => {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
+};
+
+export const uppercaseFirstLetter = (word: string) => {
+  return word.charAt(0).toUpperCase() + word.slice(1);
 };
