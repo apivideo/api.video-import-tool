@@ -62,7 +62,7 @@ class DropboxProviderService implements AbstractProviderService {
                 options: {
                     file_status: "active",
                     filename_only: false,
-                    max_results: 200,
+                    max_results: 20,
                     path: "/",
                     file_categories: ["video"]
                 },
