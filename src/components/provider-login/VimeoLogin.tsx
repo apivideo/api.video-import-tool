@@ -1,14 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ProviderLoginProps } from '../../providers';
 
 const VimeoLogin = (props: ProviderLoginProps) => {
   const [vimeoAccessToken, setVimeoAccessToken] = React.useState<string>('');
-
-  useEffect(() => {
-    const accessToken = sessionStorage.getItem('vimeoAccessToken') || '';
-    setVimeoAccessToken(accessToken);
-    props.onAccessTokenChanged(accessToken);
-  }, []);
 
   return (
     <div>
@@ -27,27 +21,27 @@ const VimeoLogin = (props: ProviderLoginProps) => {
             </a>
           </i>
         </div>
-        <input
-          className={`h-10 ${
-            props.errorMessage
-              ? 'outline outline-red-500 outline-2'
-              : 'outline outline-slate-300 rounded-lg shadow outline-1'
-          }`}
-          id="vimeoAccessToken"
-          type={'password'}
-          value={vimeoAccessToken}
-          onChange={(v) => {
-            setVimeoAccessToken(v.target.value);
-            props.onAccessTokenChanged(v.target.value);
-            sessionStorage.setItem('vimeoAccessToken', v.target.value);
-          }}
-        ></input>
+        <div className={'mb-4'}>
+          <input
+            className={`h-10 ${props.errorMessage
+                ? 'outline outline-red-500 outline-2'
+                : 'outline outline-slate-300 rounded-lg shadow outline-1'
+              }`}
+            id="vimeoAccessToken"
+            type={'password'}
+            value={vimeoAccessToken}
+            onChange={(v) => {
+              setVimeoAccessToken(v.target.value);
+              props.onAccessTokenChanged(v.target.value);
+            }}
+          ></input>
+          {props.errorMessage && <p className="text-sm text-red-600 pt-2">{props.errorMessage}&nbsp;</p>}
+        </div>
       </div>
-      <p className="text-sm text-red-600">{props.errorMessage}&nbsp;</p>
+
       <button
-        className={`${
-          props.buttonDisabled ? 'bg-slate-300' : 'bg-vimeo'
-        } text-sm font-semibold w-full`}
+        className={`${props.buttonDisabled ? 'bg-slate-300' : 'bg-vimeo'
+          } text-sm font-semibold w-full`}
         disabled={props.buttonDisabled}
         onClick={props.onClick}
       >

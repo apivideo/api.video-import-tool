@@ -1,4 +1,5 @@
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
+import { uppercaseFirstLetter } from "../../utils/functions";
 import { OauthAccessToken } from "../OAuthHelpers";
 import AbstractProviderService from "./AbstractProviderService";
 
@@ -60,7 +61,7 @@ class VimeoProviderService implements AbstractProviderService {
         const videos: VimeoApiResult = await this.callApi(`https://api.vimeo.com/me/videos?page=${nextPageFetchDetails?.page || 1}`)
 
         return {
-            data: videos.data.map((video) => this.vimeoVideoToVideoSource(video)),
+            data: videos.data.filter((video) => video?.files?.length).map((video) => this.vimeoVideoToVideoSource(video)),
             hasMore: !!videos.paging.next,
             nextPageFetchDetails: {
                 page: videos.page + 1
@@ -74,8 +75,8 @@ class VimeoProviderService implements AbstractProviderService {
         }
         try {
             return await this.callApi("https://api.vimeo.com/me").then(res => {
-                if (res.account === "basic" || res.account === "plus") {
-                    return "Basic and Plus Vimeo account are not compatible with the migration tool";
+                if (res.account === "basic" || res.account === "plus" || res.account === "free") {
+                    return `${uppercaseFirstLetter(res.account)} Vimeo account is not compatible with the migration tool`;
                 }
                 return null;
             });

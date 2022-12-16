@@ -22,6 +22,7 @@ export default async function handler(
             const providerService = new Providers[body.provider].backendService(body.authenticationContext);
 
             const videos = await providerService.getImportableVideos(body.nextPageFetchDetails);
+
             res.status(201).send(SuccessResponse(videos));
         } catch (e: any) {
             res.status(500).send(ErrorResponse(e.message));

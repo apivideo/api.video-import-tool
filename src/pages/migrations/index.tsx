@@ -1,6 +1,6 @@
 import Video from '@api.video/nodejs-client/lib/model/Video';
 import type { NextPage } from 'next';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { callGetMigrationsApi } from '../../service/ClientApiHelpers';
 import MigrationInfo from '../../components/commons/MigrationInfo';
 import { ProviderName } from '../../providers';
@@ -12,12 +12,24 @@ const MigrationsHome: NextPage = () => {
   const [apiVideoErrorMessage, setApiVideoErrorMessage] = useState<string>('');
   const [noResults, setNoResults] = useState<string>('');
   const [migrations, setMigrations] = useState<Migration[]>();
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const getMigratedVideos = () => {
-    apiVideoApiKey &&
-      callGetMigrationsApi({ apiKey: apiVideoApiKey })
+  useEffect(() => {
+    const apiKey = sessionStorage.getItem('apiVideoApiKey');
+    if (apiKey) {
+      setApiVideoApiKey(apiVideoApiKey);
+      getMigratedVideos(apiKey);
+    }
+  }, []);
+
+  const getMigratedVideos = (apiKey: string) => {
+    setLoading(true);
+    setMigrations([]);
+    apiKey &&
+      callGetMigrationsApi({ apiKey })
         .then((res) => {
           if (!res?.videos?.length) {
+            setLoading(false);
             setNoResults('No migrations were found for this API key.');
           } else {
             const migratedVideosByMigration: { [id: string]: Video[] } = {};
@@ -48,6 +60,7 @@ const MigrationsHome: NextPage = () => {
                 };
               }
             );
+            setLoading(false);
             setMigrations(
               finalMigrations.sort(
                 (a, b) =>
@@ -62,7 +75,7 @@ const MigrationsHome: NextPage = () => {
   };
 
   return (
-    <MigrationCard>
+    <MigrationCard hideDescription>
       <h1 className="text-left font-semibold pb-4">My migrations</h1>
       <div className="h-px w-full bg-slate-300"></div>
       <div className="flex flex-col lg:flex-row lg:items-start pt-8 gap-4">
@@ -109,13 +122,13 @@ const MigrationsHome: NextPage = () => {
               !apiVideoApiKey ? 'bg-slate-300' : 'bg-black'
             } text-sm font-semibold w-full`}
             disabled={!apiVideoApiKey}
-            onClick={() => getMigratedVideos()}
+            onClick={() => getMigratedVideos(apiVideoApiKey!)}
           >
             See previous migrations
           </button>
         </div>
       </div>
-      {migrations?.length ? (
+      {!loading && migrations?.length ? (
         <div>
           {' '}
           <p className="text-sm pt-6">
@@ -124,7 +137,14 @@ const MigrationsHome: NextPage = () => {
           <MigrationInfo migrations={migrations} allowLink showDate />
         </div>
       ) : null}
-      {noResults ? <p className="text-sm pt-6">{noResults}</p> : null}
+      {loading && (
+        <div className="flex justify-center text-2xl mt-8">
+          <span className="icon loading"></span>
+        </div>
+      )}
+      {!loading && noResults ? (
+        <p className="text-sm pt-6">{noResults}</p>
+      ) : null}
     </MigrationCard>
   );
 };
