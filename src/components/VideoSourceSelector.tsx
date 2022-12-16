@@ -1,9 +1,9 @@
 import Video from '@api.video/nodejs-client/lib/model/Video';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
+import Thumbnail from './commons/Thumbnail';
 
-import { OptionalFeatureFlag, ProviderName, Providers } from '../providers';
+import { OptionalFeatureFlag, Providers } from '../providers';
 import {
   callCreateApiVideoVideoApi,
   callGeneratePublicMp4Api,
@@ -321,39 +321,29 @@ const VideoSourceSelector: React.FC = () => {
                         />
                       </td>
                       <td className="py-2.5 md:w-6/12">
-                        {videoSource.thumbnail &&
-                          <div className="flex flex-col md:flex-row gap-2">
-                            {videoSource.thumbnail.startsWith('data') ? (
+                        <div className="flex flex-col md:flex-row gap-2">
+                          <Thumbnail
+                            className="h-[75px] w-[100px] object-contain bg-black"
+                            width={100}
+                            height={75}
+                            src={videoSource.thumbnail}
+                            alt={videoSource.name} />
 
-                              <img
-                                height="75px"
-                                width="100px"
-                                src={videoSource.thumbnail}
-                                alt={videoSource.name}
-                              />
-                            ) : (
-                              <Image
-                                height="75"
-                                width="100"
-                                alt={videoSource.name}
-                                src={videoSource.thumbnail}
-                              />
-                            )}
-                            {videoSource.name}
-                            {videoSource.size && (
-                              <span className="block md:hidden">{formatSize(videoSource.size)}</span>
-                            )}
-                            {hasDurations && (
-                              <span className="block md:hidden">
-                                {videoSource.duration &&
-                                  formatDuration(videoSource.duration)}
-                              </span>
-                            )}
-                          </div>}
+                          {videoSource.name}
+                          {videoSource.size && (
+                            <span className="block md:hidden">{formatSize(videoSource.size)}</span>
+                          )}
+                          {hasDurations && (
+                            <span className="block md:hidden">
+                              {videoSource.duration &&
+                                formatDuration(videoSource.duration)}
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {videoSource.size && (
-                        <td className="py-2.5 hidden md:table-cell">{formatSize(videoSource.size)}</td>
+                          <td className="py-2.5 hidden md:table-cell">{formatSize(videoSource.size)}</td>
                       )}
                       {hasDurations && (
                         <td className="py-2.5 hidden md:table-cell">
