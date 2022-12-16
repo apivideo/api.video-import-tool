@@ -6,6 +6,7 @@ import { callGetVideosStatusApi } from '../../service/ClientApiHelpers';
 import { formatSize } from '../../utils/functions';
 import { useInterval } from '../../utils/hooks';
 import Image from 'next/image';
+import Thumbnail from './Thumbnail';
 import Video from '@api.video/nodejs-client/lib/model/Video';
 
 interface VideoImportTableProps {
@@ -195,29 +196,14 @@ const VideoImportTable: React.FC<VideoImportTableProps> = (props) => {
             >
               <td className="py-2.5 w-full lg:w-5/12">
                 <div className="grid grid-cols-[110px_1fr_1fr]">
-                  {videoSource.status?.encoding?.qualities &&
-                    videoSource.status?.encoding?.qualities.some(
-                      (q) => q.status === 'encoded'
-                    ) &&
-                    videoSource.assets?.thumbnail && (
-                      <div className="h-[75px] w-[100px]">
-                        {videoSource.assets?.thumbnail.startsWith('data') ? (
-                          <img
-                            className="h-[75px] w-[100px] object-contain bg-black"
-                            src={videoSource.assets?.thumbnail}
-                            alt={videoSource.title}
-                          />
-                        ) : (
-                          <Image
-                            height="75"
-                            width="100"
-                            className="object-contain bg-black h-[75px] w-[100px]"
-                            alt={videoSource.title as string}
-                            src={videoSource.assets?.thumbnail}
-                          />
-                        )}
-                      </div>
-                    )}
+                  <div className="h-[75px] w-[100px]">
+                    <Thumbnail
+                      className="h-[75px] w-[100px] object-contain bg-black"
+                      width={100}
+                      height={75}
+                      src={videoSource.assets?.thumbnail}
+                      alt={videoSource.title as string} />
+                  </div>
                   <span>{videoSource.title}</span>
                   <span>{getFileSize(videoSource)}</span>
                 </div>

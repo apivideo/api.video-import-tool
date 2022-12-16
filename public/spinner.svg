@@ -1,0 +1,52 @@
+<svg width="200" height="150" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" preserveAspectRatio="xMidYMid"
+    class="lds-rolling" style="background: rgba(0,0,0,0);">
+    <circle class="loader-svg" cx="75" cy="75" fill="none" stroke="var(--color)" stroke-width="var(--stroke-width)"
+        r="35" stroke-dasharray="164.93361431346415 56.97787143782138" transform="rotate(159.821 75 75)">
+        <animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 75 75;360 75 75"
+            keyTimes="0;1" dur="0.8s" begin="0s" repeatCount="indefinite"></animateTransform>
+    </circle>
+
+    <style>
+        /* Config */
+        :root {
+            --color: #999;
+            --stroke-width: 3;
+        }
+
+        /* EDGE BROWSER ROTATING SVG ANIMATION FIX */
+        @supports (-ms-ime-align: auto) {
+            .loader-svg {
+                -webkit-animation: rotation 0.8s infinite linear;
+                animation: rotation 0.8s infinite linear;
+                -webkit-transform-origin: center;
+                -ms-transform-origin: center;
+                transform-origin: center;
+            }
+
+            @-webkit-keyframes rotation {
+                from {
+                    -webkit-transform: rotate(0deg);
+                    transform: rotate(0deg);
+                }
+
+                to {
+                    -webkit-transform: rotate(359deg);
+                    transform: rotate(359deg);
+                }
+            }
+
+            @keyframes rotation {
+                from {
+                    -webkit-transform: rotate(0deg);
+                    transform: rotate(0deg);
+                }
+
+                to {
+                    -webkit-transform: rotate(359deg);
+                    transform: rotate(359deg);
+                }
+            }
+        }
+    </style>
+
+</svg>
