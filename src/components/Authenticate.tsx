@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
+import { AlertTriangle } from 'react-feather';
 import {
   MigrationProvider,
   OptionalFeatureFlag,
@@ -178,6 +179,14 @@ const Authenticate: React.FC = () => {
             <AuthDisclaimer providerName={providerName as string} />
           </div>
         </div>
+      </div>
+      <div className="w-full bg-yellow-50 flex gap-10 text-xs p-4 rounded mt-8 text-blue-900">
+        <AlertTriangle color={'#F59E0B'} size={12} strokeWidth={'.2rem'}/>
+        <ul>
+          <li className="list-disc">If you are migrating to a sandbox project, your videos will be watermarked and deleted after 24 hours.</li>
+          <li className="list-disc">If you are migrating to a production project, your videos will count towards your encoding and hosting usage quota.</li>
+          <li>Depending on your plan, this might incur additional usage charges.</li>
+        </ul>
       </div>
     </MigrationCard>
   );
