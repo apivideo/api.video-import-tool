@@ -19,6 +19,8 @@ const MigrationsHome: NextPage = () => {
     if (apiKey) {
       setApiVideoApiKey(apiVideoApiKey);
       getMigratedVideos(apiKey);
+    } else {
+      setLoading(false);
     }
   }, []);
 
