@@ -49,7 +49,6 @@ const Authenticate: React.FC = () => {
     const res = await callVerifyApiVideoApiKeyApi({ apiKey: apiVideoApiKey });
 
     if (!res.ok) {
-      console.log('ress', res)
       errorMessage = 'Please verify your api key';
     }
 
