@@ -10,12 +10,13 @@ import {
   callGetImportableVideosApi,
   callGetPublicMp4UrlApi,
 } from '../service/ClientApiHelpers';
-import VideoSource, { AuthenticationContext, ProviderAuthenticationContext } from '../types/common';
+import VideoSource, {
+  AuthenticationContext,
+  ProviderAuthenticationContext,
+} from '../types/common';
 import { buildId, formatSize } from '../utils/functions';
 import MigrationCard from './commons/MigrationCard';
 import { useGlobalContext } from './context/Global';
-
-
 
 type ColumnName = 'name' | 'size' | 'duration';
 
@@ -30,21 +31,24 @@ const VideoSourceSelector: React.FC = () => {
   const [createdCount, setCreatedCount] = useState<number>(0);
   const [fetchingVideos, setFetchingVideos] = useState<boolean>(true);
   const [migrationId, _] = useState<string>(buildId(9));
-  const { providerName, providerAccessToken, setVideos, setMigrationId } = useGlobalContext()
-  const router = useRouter()
+  const { providerName, providerAccessToken, setVideos, setMigrationId } =
+    useGlobalContext();
+  const router = useRouter();
 
   useEffect(() => {
     if (!providerName || !providerAccessToken) {
-      const pName = router.query.provider
-      pName && router.push(`/${pName}`)
+      const pName = router.query.provider;
+      pName && router.push(`/${pName}`);
     } else {
-      const apiVideoApiKey = sessionStorage.getItem('apiVideoApiKey') || ''
-      const authenticationContext: AuthenticationContext = { apiVideoApiKey, providerAccessToken }
-      setAuthenticationContext(authenticationContext)
+      const apiVideoApiKey = sessionStorage.getItem('apiVideoApiKey') || '';
+      const authenticationContext: AuthenticationContext = {
+        apiVideoApiKey,
+        providerAccessToken,
+      };
+      setAuthenticationContext(authenticationContext);
       fetchVideos(authenticationContext);
     }
   }, [router, providerName]);
-
 
   const fetchVideos = async (
     authenticationContext: AuthenticationContext,
@@ -79,19 +83,16 @@ const VideoSourceSelector: React.FC = () => {
     }
   };
 
-
   const multiSelectionToggle = () => {
     if (selectedIds.length) {
       setSelectedIds([]);
     } else {
-      let arrSelected: string[] = []
+      let arrSelected: string[] = [];
       videoSources.map(({ id }) => {
-        arrSelected.push(id)
-
-      })
-      setSelectedIds(arrSelected)
+        arrSelected.push(id);
+      });
+      setSelectedIds(arrSelected);
     }
-
   };
 
   const formatDuration = (durationSec: number) => {
@@ -127,7 +128,8 @@ const VideoSourceSelector: React.FC = () => {
         video = (
           await callGeneratePublicMp4Api({
             providerName,
-            authenticationContext: authenticationContext as ProviderAuthenticationContext,
+            authenticationContext:
+              authenticationContext as ProviderAuthenticationContext,
             video: video,
           })
         ).video;
@@ -142,7 +144,8 @@ const VideoSourceSelector: React.FC = () => {
           const url =
             (
               await callGetPublicMp4UrlApi({
-                authenticationContext: authenticationContext as ProviderAuthenticationContext,
+                authenticationContext:
+                  authenticationContext as ProviderAuthenticationContext,
                 provider: providerName,
                 video: video,
               })
@@ -239,7 +242,25 @@ const VideoSourceSelector: React.FC = () => {
   };
 
   if (!fetchingVideos && (!videoSources || videoSources.length === 0)) {
-    return <MigrationCard activeStep={3} paddingTop><p>We found no videos that can be imported :(</p></MigrationCard >;
+    return (
+      <MigrationCard activeStep={3} paddingTop>
+        <p>
+          {`No videos could be found in the ${Providers[providerName]?.displayName} account you authenticated.`}
+          <br />
+          {`Make
+          sure there is at least one video in your ${Providers[providerName]?.displayName} account.`}
+          {` Alternatively,`}{' '}
+          <a
+            href={`/${providerName.toString().toLocaleLowerCase()}`}
+            className={'text-blue-500 underline'}
+          >
+            go back to Step 2
+          </a>{' '}
+          {`and authenticate a different ${Providers[providerName]?.displayName}
+          account.`}
+        </p>
+      </MigrationCard>
+    );
   }
 
   const hasDurations = !!videoSources.find((v) => !!v.duration);
@@ -275,13 +296,20 @@ const VideoSourceSelector: React.FC = () => {
                         className="h-4 w-4 cursor-pointer"
                         type="checkbox"
                         checked={videoSources.length === selectedIds.length}
-                        onChange={() => multiSelectionToggle()
-                        }
+                        onChange={() => multiSelectionToggle()}
                       />
-                      <a href="#" className="hidden md:block" onClick={() => onSortClick('name')}>
+                      <a
+                        href="#"
+                        className="hidden md:block"
+                        onClick={() => onSortClick('name')}
+                      >
                         Video
                       </a>
-                      <a href="#" className="block md:hidden" onClick={() => onSortClick('name')}>
+                      <a
+                        href="#"
+                        className="block md:hidden"
+                        onClick={() => onSortClick('name')}
+                      >
                         Select all
                       </a>
                     </div>
@@ -327,11 +355,14 @@ const VideoSourceSelector: React.FC = () => {
                             width={100}
                             height={75}
                             src={videoSource.thumbnail}
-                            alt={videoSource.name} />
+                            alt={videoSource.name}
+                          />
 
                           {videoSource.name}
                           {videoSource.size && (
-                            <span className="block md:hidden">{formatSize(videoSource.size)}</span>
+                            <span className="block md:hidden">
+                              {formatSize(videoSource.size)}
+                            </span>
                           )}
                           {hasDurations && (
                             <span className="block md:hidden">
@@ -343,7 +374,9 @@ const VideoSourceSelector: React.FC = () => {
                       </td>
 
                       {videoSource.size && (
-                        <td className="py-2.5 hidden md:table-cell">{formatSize(videoSource.size)}</td>
+                        <td className="py-2.5 hidden md:table-cell">
+                          {formatSize(videoSource.size)}
+                        </td>
                       )}
                       {hasDurations && (
                         <td className="py-2.5 hidden md:table-cell">
@@ -351,7 +384,6 @@ const VideoSourceSelector: React.FC = () => {
                             formatDuration(videoSource.duration)}
                         </td>
                       )}
-
                     </tr>
                   ))}
               </tbody>
@@ -364,9 +396,11 @@ const VideoSourceSelector: React.FC = () => {
               setLoading(true);
               createApiVideoVideos()
                 .then((result) => {
-                  setVideos(result.successes)
-                  setMigrationId(migrationId)
-                  router.push(`/${providerName.toString().toLowerCase()}/${migrationId}`)
+                  setVideos(result.successes);
+                  setMigrationId(migrationId);
+                  router.push(
+                    `/${providerName.toString().toLowerCase()}/${migrationId}`
+                  );
                   // TODO manage video creation fails in result.failed
                 })
                 .catch((e) => {
