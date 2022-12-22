@@ -239,7 +239,7 @@ const VideoSourceSelector: React.FC = () => {
   };
 
   if (!fetchingVideos && (!videoSources || videoSources.length === 0)) {
-    return <p>We found no video that can be imported :(</p>;
+    return <MigrationCard activeStep={3} paddingTop><p>We found no videos that can be imported :(</p></MigrationCard >;
   }
 
   const hasDurations = !!videoSources.find((v) => !!v.duration);
@@ -306,10 +306,10 @@ const VideoSourceSelector: React.FC = () => {
               <tbody>
                 {videoSources
                   .sort((a, b) => compareFn(a, b))
-                  .map((videoSource) => (
+                  .map((videoSource, i) => (
                     <tr
                       className="text-sm align-top font-semibold border-b border-slate-300 cursor-pointer last:border-0"
-                      key={videoSource.id}
+                      key={`${videoSource.id}${i}`}
                       onClick={() => toggleSelection(videoSource.id)}
                     >
                       <td className="w-6 pt-2.5">
@@ -343,7 +343,7 @@ const VideoSourceSelector: React.FC = () => {
                       </td>
 
                       {videoSource.size && (
-                          <td className="py-2.5 hidden md:table-cell">{formatSize(videoSource.size)}</td>
+                        <td className="py-2.5 hidden md:table-cell">{formatSize(videoSource.size)}</td>
                       )}
                       {hasDurations && (
                         <td className="py-2.5 hidden md:table-cell">
