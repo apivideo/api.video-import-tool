@@ -49,7 +49,8 @@ const DropboxLogin = (props: ProviderLoginProps) => {
 
       <p className="text-sm text-red-600">{props.errorMessage}</p>
       {dropboxAccessToken && <button
-        className={`bg-black text-sm font-semibold w-full mt-3`}
+        className={`text-sm font-semibold w-full mt-3 ${props.buttonDisabled ? 'bg-slate-300' : 'bg-black'
+      }`}
         disabled={props.buttonDisabled}
         onClick={props.onClick}
       >

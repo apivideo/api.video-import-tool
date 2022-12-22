@@ -102,25 +102,19 @@ const Authenticate: React.FC = () => {
         : [validateApiVideoAuthentication()]
     );
     setLoading(false);
-    setApiVideoErrorMessage(authentValidation[0]);
-
     if (authentValidation.length > 1) {
-      if (authentValidation[1]) {
+      setLoading(false);
+      if (authentValidation[0]) {
+        setApiVideoErrorMessage(authentValidation[0]);
+      }
+      else if (authentValidation[1]) {
         setProviderErrorMessage(authentValidation[1]);
       } else {
         router.push(
           `/${providerName?.toString().toLocaleLowerCase()}/video-selection`
         );
       }
-    } else if (authentValidation.filter((v) => v !== null).length > 0) {
-      setLoading(false);
-      return;
-    } else {
-      !providerErrorMessage &&
-        router.push(
-          `/${providerName?.toString().toLocaleLowerCase()}/video-selection`
-        );
-    }
+    } 
   };
 
   return (
@@ -169,7 +163,7 @@ const Authenticate: React.FC = () => {
               }}
               providerAccessToken={providerAccessToken as string}
               errorMessage={providerErrorMessage || undefined}
-              buttonDisabled={loading || !providerAccessToken}
+              buttonDisabled={loading || !providerAccessToken || !apiVideoApiKey}
               onClick={handleAuthClick}
               loading={loading}
             />
@@ -181,7 +175,7 @@ const Authenticate: React.FC = () => {
         </div>
       </div>
       <div className="w-full bg-yellow-50 flex gap-10 text-xs p-4 rounded mt-8 text-blue-900">
-        <AlertTriangle color={'#F59E0B'} size={12} strokeWidth={'.2rem'}/>
+        <AlertTriangle color={'#F59E0B'} size={12} strokeWidth={'.2rem'} />
         <ul>
           <li className="list-disc">If you are migrating to a sandbox project, your videos will be watermarked and deleted after 24 hours.</li>
           <li className="list-disc">If you are migrating to a production project, your videos will count towards your encoding and hosting usage quota.</li>
