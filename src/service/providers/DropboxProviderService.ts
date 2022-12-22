@@ -54,7 +54,7 @@ class DropboxProviderService implements AbstractProviderService {
     public async validateCredentials(): Promise<string | null> {
         throw new Error("Method not implemented.");
     }
- 
+
     public async getImportableVideos(nextPageFetchDetails?: any): Promise<Page<VideoSource>> {
         const dropboxRes: DropboxSearchApiResponse = nextPageFetchDetails
             ? await this.callApi("https://api.dropboxapi.com/2/files/search/continue_v2", "POST", nextPageFetchDetails)
@@ -64,7 +64,8 @@ class DropboxProviderService implements AbstractProviderService {
                     filename_only: false,
                     max_results: 20,
                     path: "/",
-                    file_categories: ["video"]
+                    file_categories: ["video"],
+                    order_by: "last_modified_time"
                 },
                 query: "video"
             });
@@ -81,10 +82,10 @@ class DropboxProviderService implements AbstractProviderService {
     };
 
     private async callApi(path: string, method: string, body?: any): Promise<any> {
-        if(!this.authenticationContext) {
+        if (!this.authenticationContext) {
             throw new Error("No authentication context provided");
         }
-        
+
         const headers = new Headers();
         headers.append("Authorization", "Bearer " + this.authenticationContext.providerAccessToken)
         headers.append("Content-Type", "application/json");
@@ -116,7 +117,7 @@ class DropboxProviderService implements AbstractProviderService {
 
         return searchResponse.matches.map(match => {
             let thumbnail = thumbnails.entries.find((entry: any) => entry.metadata.path_lower === match.metadata.metadata.path_lower);
-            
+
             return {
                 id: match.metadata.metadata.path_lower,
                 name: match.metadata.metadata.name,
