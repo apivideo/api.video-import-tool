@@ -337,7 +337,7 @@ const VideoSourceSelector: React.FC = () => {
                   .map((videoSource, i) => (
                     <tr
                       className="text-sm align-top font-semibold border-b border-slate-300 cursor-pointer last:border-0"
-                      key={`${videoSource.id}${i}`}
+                      key={`${videoSource.id}`}
                       onClick={() => toggleSelection(videoSource.id)}
                     >
                       <td className="w-6 pt-2.5">
