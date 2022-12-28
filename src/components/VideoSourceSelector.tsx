@@ -8,11 +8,12 @@ import {
   callCreateApiVideoVideoApi,
   callGeneratePublicMp4Api,
   callGetImportableVideosApi,
-  callGetPublicMp4UrlApi,
+  callGetMigrationsApi,
+  callGetPublicMp4UrlApi
 } from '../service/ClientApiHelpers';
 import VideoSource, {
   AuthenticationContext,
-  ProviderAuthenticationContext,
+  ProviderAuthenticationContext
 } from '../types/common';
 import { buildId, formatSize } from '../utils/functions';
 import MigrationCard from './commons/MigrationCard';
@@ -20,10 +21,14 @@ import { useGlobalContext } from './context/Global';
 
 type ColumnName = 'name' | 'size' | 'duration';
 
+interface VideoSourceExtended extends VideoSource {
+  alreadyMigrated: boolean;
+}
+
 const VideoSourceSelector: React.FC = () => {
   const [authenticationContext, setAuthenticationContext] =
     useState<AuthenticationContext>();
-  const [videoSources, setVideoSources] = useState<VideoSource[]>([]);
+  const [videoSources, setVideoSources] = useState<VideoSourceExtended[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<ColumnName>('name');
@@ -46,14 +51,35 @@ const VideoSourceSelector: React.FC = () => {
         providerAccessToken,
       };
       setAuthenticationContext(authenticationContext);
-      fetchVideos(authenticationContext);
+
+      (async () => {
+        const alreadyMigrated = await fetchAlreadyMigratedVideos(apiVideoApiKey);
+        fetchVideos(authenticationContext, alreadyMigrated);
+      })();
     }
   }, [router, providerName]);
 
+  const fetchAlreadyMigratedVideos = async (apiVideoApiKey: string) => {
+    const previousMigrations = await callGetMigrationsApi({ apiKey: apiVideoApiKey, provider: providerName });
+
+    return previousMigrations.videos.reduce((acc: { [key: string]: string[]; }, current: Video) => {
+      const providerId = current.metadata?.find(m => m.key === "x-apivideo-migration-video-id") as any;
+      if (providerId) {
+        if (!acc[providerId["value"] as string]) {
+          acc[providerId["value"] as string] = [current.videoId];
+        } else {
+          acc[providerId["value"] as string].push(current.videoId);
+        }
+      }
+      return acc;
+    }, {});
+  }
+
   const fetchVideos = async (
     authenticationContext: AuthenticationContext,
-    videos: VideoSource[] = [],
-    nextPageFetchDetails?: any
+    alreadyMigrated: { [key: string]: string[]; },
+    videos: VideoSourceExtended[] = [],
+    nextPageFetchDetails?: any,
   ) => {
     try {
       const res = await callGetImportableVideosApi({
@@ -61,12 +87,12 @@ const VideoSourceSelector: React.FC = () => {
         provider: providerName,
         nextPageFetchDetails,
       });
-      videos = videos.concat(res.data);
+      videos = videos.concat(res.data.map((video) => ({ ...video, alreadyMigrated: !!alreadyMigrated[video.id] })));
       setVideoSources(videos);
-      setSelectedIds(videos.map((video) => video.id));
+      setSelectedIds(videos.filter(v => !v.alreadyMigrated).map((video) => video.id));
 
       if (res.hasMore) {
-        fetchVideos(authenticationContext, videos, res.nextPageFetchDetails);
+        fetchVideos(authenticationContext, alreadyMigrated, videos, res.nextPageFetchDetails);
       } else {
         setFetchingVideos(false);
       }
@@ -88,7 +114,7 @@ const VideoSourceSelector: React.FC = () => {
       setSelectedIds([]);
     } else {
       let arrSelected: string[] = [];
-      videoSources.map(({ id }) => {
+      videoSources.filter(v => !v.alreadyMigrated).map(({ id }) => {
         arrSelected.push(id);
       });
       setSelectedIds(arrSelected);
@@ -108,7 +134,7 @@ const VideoSourceSelector: React.FC = () => {
     return `${twoDigits(seconds)}s`;
   };
 
-  const getSelectedVideos = (): VideoSource[] => {
+  const getSelectedVideos = (): VideoSourceExtended[] => {
     return videoSources.filter((a) => selectedIds.indexOf(a.id) > -1);
   };
 
@@ -230,7 +256,9 @@ const VideoSourceSelector: React.FC = () => {
     }
   };
 
-  const compareFn = (a: VideoSource, b: VideoSource): number => {
+  const compareFn = (a: VideoSourceExtended, b: VideoSourceExtended): number => {
+    if (a.alreadyMigrated && !b.alreadyMigrated) return 1;
+    if (!a.alreadyMigrated && b.alreadyMigrated) return -1;
     switch (sortBy) {
       case 'name':
         return sortOrder * a.name.localeCompare(b.name);
@@ -295,7 +323,7 @@ const VideoSourceSelector: React.FC = () => {
                       <input
                         className="h-4 w-4 cursor-pointer"
                         type="checkbox"
-                        checked={videoSources.length === selectedIds.length}
+                        checked={!(videoSources.filter(v => !v.alreadyMigrated).filter(v => selectedIds.indexOf(v.id) === -1).length > 0)}
                         onChange={() => multiSelectionToggle()}
                       />
                       <a
@@ -350,13 +378,13 @@ const VideoSourceSelector: React.FC = () => {
                       </td>
                       <td className="py-2.5 md:w-6/12">
                         <div className="flex flex-col md:flex-row gap-2">
-                          <Thumbnail
+                          {!videoSource.alreadyMigrated && <Thumbnail
                             className="h-[75px] w-[100px] object-contain bg-black"
                             width={100}
                             height={75}
                             src={videoSource.thumbnail}
                             alt={videoSource.name}
-                          />
+                          />}
 
                           {videoSource.name}
                           {videoSource.size && (
