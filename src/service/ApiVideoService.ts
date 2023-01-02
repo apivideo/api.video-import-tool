@@ -3,7 +3,6 @@ import Video from "@api.video/nodejs-client/lib/model/Video";
 import VideoStatus from "@api.video/nodejs-client/lib/model/VideoStatus";
 import packageJson from '../../package.json';
 import { ProviderName } from "../providers";
-import VideoSource from "../types/common";
 
 export type VideoCreationOptions = {
     title: string;
@@ -64,11 +63,15 @@ class ApiVideoService {
         }
     }
 
-    public async getMigrations(): Promise<Video[]> {
+    public async getMigrations(provider?: ProviderName): Promise<Video[]> {
         let allVideos: Video[] = [];
 
+        const metadata: { [key: string]: string; } = provider 
+            ? { "x-apivideo-migration-provider": provider as string } 
+            : { "x-apivideo-is-migration": "1" };
+
         for (let currentPage = 1; ; currentPage++) {
-            const res = await this.client.videos.list({ metadata: { "x-apivideo-is-migration": "1" }, currentPage });
+            const res = await this.client.videos.list({ metadata, currentPage });
             allVideos = [...allVideos, ...res.data];
             if (currentPage >= (res?.pagination?.pagesTotal || 0)) {
                 break;

@@ -1,10 +1,12 @@
 import Video from '@api.video/nodejs-client/lib/model/Video';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { ProviderName } from '../../../providers';
 import ApiVideoService from '../../../service/ApiVideoService';
 import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
 export type GetMigrationsRequestBody = {
     apiKey: string;
+    provider?: ProviderName;
 }
 
 export type GetMigrationsRequestResponse = {
@@ -21,7 +23,7 @@ export default async function handler(
 
             const apiVideoService = new ApiVideoService(body.apiKey);
 
-            const videos = await apiVideoService.getMigrations();
+            const videos = await apiVideoService.getMigrations(body.provider);
 
             res.status(200).json(SuccessResponse({ videos }));
         } catch (e: any) {
