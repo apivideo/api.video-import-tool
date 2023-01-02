@@ -9,15 +9,17 @@ import {
   callGeneratePublicMp4Api,
   callGetImportableVideosApi,
   callGetMigrationsApi,
-  callGetPublicMp4UrlApi
+  callGetPublicMp4UrlApi,
 } from '../service/ClientApiHelpers';
 import VideoSource, {
   AuthenticationContext,
-  ProviderAuthenticationContext
+  ProviderAuthenticationContext,
 } from '../types/common';
 import { buildId, formatSize } from '../utils/functions';
 import MigrationCard from './commons/MigrationCard';
 import { useGlobalContext } from './context/Global';
+import Link from 'next/link';
+import { ChevronDown, ChevronUp } from 'react-feather';
 
 type ColumnName = 'name' | 'size' | 'duration';
 
@@ -36,6 +38,7 @@ const VideoSourceSelector: React.FC = () => {
   const [createdCount, setCreatedCount] = useState<number>(0);
   const [fetchingVideos, setFetchingVideos] = useState<boolean>(true);
   const [migrationId, _] = useState<string>(buildId(9));
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const { providerName, providerAccessToken, setVideos, setMigrationId } =
     useGlobalContext();
   const router = useRouter();
@@ -53,33 +56,53 @@ const VideoSourceSelector: React.FC = () => {
       setAuthenticationContext(authenticationContext);
 
       (async () => {
-        const alreadyMigrated = await fetchAlreadyMigratedVideos(apiVideoApiKey);
+        const alreadyMigrated = await fetchAlreadyMigratedVideos(
+          apiVideoApiKey
+        );
         fetchVideos(authenticationContext, alreadyMigrated);
       })();
     }
   }, [router, providerName]);
 
   const fetchAlreadyMigratedVideos = async (apiVideoApiKey: string) => {
-    const previousMigrations = await callGetMigrationsApi({ apiKey: apiVideoApiKey, provider: providerName });
+    const previousMigrations = await callGetMigrationsApi({
+      apiKey: apiVideoApiKey,
+      provider: providerName,
+    });
 
-    return previousMigrations.videos.reduce((acc: { [key: string]: string[]; }, current: Video) => {
-      const providerId = current.metadata?.find(m => m.key === "x-apivideo-migration-video-id") as any;
-      if (providerId) {
-        if (!acc[providerId["value"] as string]) {
-          acc[providerId["value"] as string] = [current.videoId];
-        } else {
-          acc[providerId["value"] as string].push(current.videoId);
+    return previousMigrations.videos.reduce(
+      (
+        acc: { [key: string]: { videoId: string; size: number } },
+        current: Video
+      ) => {
+        const providerId = current.metadata?.find(
+          (m) => m.key === 'x-apivideo-migration-video-id'
+        ) as any;
+        const providerSize = current.metadata?.find(
+          (m) => m.key === 'x-apivideo-migration-video-size'
+        ) as any;
+        if (providerId) {
+          if (!acc[providerId['value'] as string]) {
+            acc[providerId['value'] as string] = {
+              videoId: current.videoId,
+              size: providerSize['value'],
+            };
+          } else {
+            acc[providerId['value'] as string].videoId = current.videoId;
+            acc[providerId['value'] as string].size = providerSize['value'];
+          }
         }
-      }
-      return acc;
-    }, {});
-  }
+        return acc;
+      },
+      {}
+    );
+  };
 
   const fetchVideos = async (
     authenticationContext: AuthenticationContext,
-    alreadyMigrated: { [key: string]: string[]; },
+    alreadyMigrated: { [key: string]: { videoId: string; size: number } },
     videos: VideoSourceExtended[] = [],
-    nextPageFetchDetails?: any,
+    nextPageFetchDetails?: any
   ) => {
     try {
       const res = await callGetImportableVideosApi({
@@ -87,12 +110,24 @@ const VideoSourceSelector: React.FC = () => {
         provider: providerName,
         nextPageFetchDetails,
       });
-      videos = videos.concat(res.data.map((video) => ({ ...video, alreadyMigrated: !!alreadyMigrated[video.id] })));
+      videos = videos.concat(
+        res.data.map((video) => ({
+          ...video,
+          alreadyMigrated: alreadyMigrated[video.id]?.size == video.size,
+        }))
+      );
       setVideoSources(videos);
-      setSelectedIds(videos.filter(v => !v.alreadyMigrated).map((video) => video.id));
+      setSelectedIds(
+        videos.filter((v) => !v.alreadyMigrated).map((video) => video.id)
+      );
 
       if (res.hasMore) {
-        fetchVideos(authenticationContext, alreadyMigrated, videos, res.nextPageFetchDetails);
+        fetchVideos(
+          authenticationContext,
+          alreadyMigrated,
+          videos,
+          res.nextPageFetchDetails
+        );
       } else {
         setFetchingVideos(false);
       }
@@ -114,9 +149,11 @@ const VideoSourceSelector: React.FC = () => {
       setSelectedIds([]);
     } else {
       let arrSelected: string[] = [];
-      videoSources.filter(v => !v.alreadyMigrated).map(({ id }) => {
-        arrSelected.push(id);
-      });
+      videoSources
+        .filter((v) => !v.alreadyMigrated)
+        .map(({ id }) => {
+          arrSelected.push(id);
+        });
       setSelectedIds(arrSelected);
     }
   };
@@ -256,7 +293,10 @@ const VideoSourceSelector: React.FC = () => {
     }
   };
 
-  const compareFn = (a: VideoSourceExtended, b: VideoSourceExtended): number => {
+  const compareFn = (
+    a: VideoSourceExtended,
+    b: VideoSourceExtended
+  ): number => {
     if (a.alreadyMigrated && !b.alreadyMigrated) return 1;
     if (!a.alreadyMigrated && b.alreadyMigrated) return -1;
     switch (sortBy) {
@@ -303,7 +343,7 @@ const VideoSourceSelector: React.FC = () => {
         </p>
       ) : (
         <>
-          <div className="pb-2">
+          <div className="pb-8">
             <h1 className="text-left font-semibold">
               Select videos to migrate
             </h1>
@@ -315,107 +355,229 @@ const VideoSourceSelector: React.FC = () => {
           </div>
 
           {!createdCount && (
-            <table className="w-full">
-              <thead className="border-b">
-                <tr className="text-sm font-semibold pb-2">
-                  <th colSpan={2}>
-                    <div className="flex gap-2 items-center">
-                      <input
-                        className="h-4 w-4 cursor-pointer"
-                        type="checkbox"
-                        checked={!(videoSources.filter(v => !v.alreadyMigrated).filter(v => selectedIds.indexOf(v.id) === -1).length > 0)}
-                        onChange={() => multiSelectionToggle()}
-                      />
-                      <a
-                        href="#"
-                        className="hidden md:block"
-                        onClick={() => onSortClick('name')}
-                      >
-                        Video
-                      </a>
-                      <a
-                        href="#"
-                        className="block md:hidden"
-                        onClick={() => onSortClick('name')}
-                      >
-                        Select all
-                      </a>
-                    </div>
-                  </th>
-                  {hasSizes && (
-                    <th className="hidden md:block">
-                      <a href="#" onClick={() => onSortClick('size')}>
-                        Size
-                      </a>
-                    </th>
-                  )}
-                  {hasDurations && (
-                    <th className="hidden md:table-cell">
-                      <a href="#" onClick={() => onSortClick('duration')}>
-                        Duration
-                      </a>
-                    </th>
-                  )}
-                </tr>
-              </thead>
-
-              <tbody>
-                {videoSources
-                  .sort((a, b) => compareFn(a, b))
-                  .map((videoSource, i) => (
-                    <tr
-                      className="text-sm align-top font-semibold border-b border-slate-300 cursor-pointer last:border-0"
-                      key={`${videoSource.id}`}
-                      onClick={() => toggleSelection(videoSource.id)}
+            <>
+              {/* Already imported videos */}
+              {videoSources.filter((video) => video.alreadyMigrated).length ? (
+                <>
+                  {' '}
+                  <div
+                    onClick={() =>
+                      setIsCollapsed((prevCollapse) => !prevCollapse)
+                    }
+                    className="cursor-pointer flex justify-between border-b border-slate-200 pb-2 mb-2 flex-wrap"
+                  >
+                    <h1 className="font-semibold flex align-middle gap-2">
+                      {isCollapsed ? <ChevronDown /> : <ChevronUp />}
+                      {`Already imported videos (${
+                        videoSources.filter((video) => video.alreadyMigrated)
+                          .length
+                      })`}
+                    </h1>
+                    <Link
+                      href={'/migrations'}
+                      target="_blank"
+                      className="rounded border border-slate-200 text-gray-500 font-semibold px-2"
                     >
-                      <td className="w-6 pt-2.5">
+                      View previous migrations
+                    </Link>
+                  </div>
+                  <table
+                    className={`w-full mb-8 ${
+                      isCollapsed ? 'collapse' : 'visible'
+                    }`}
+                  >
+                    <thead className="border-b">
+                      <tr className="text-sm font-semibold pb-2">
+                        <th>Video</th>
+                        {hasSizes && (
+                          <th className="hidden md:block">
+                            <a href="#" onClick={() => onSortClick('size')}>
+                              Size
+                            </a>
+                          </th>
+                        )}
+                        {hasDurations && (
+                          <th className="hidden md:table-cell">
+                            <a href="#" onClick={() => onSortClick('duration')}>
+                              Duration
+                            </a>
+                          </th>
+                        )}
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {videoSources
+                        .sort((a, b) => compareFn(a, b))
+                        .map((videoSource) => {
+                          if (videoSource.alreadyMigrated) {
+                            return (
+                              <tr
+                                className="text-sm align-top font-semibold border-b border-slate-300 cursor-pointer last:border-0"
+                                key={`${videoSource.id}`}
+                                onClick={() => toggleSelection(videoSource.id)}
+                              >
+                                <td className="py-2.5 md:w-6/12">
+                                  <div className="flex flex-col md:flex-row gap-2">
+                                    <Thumbnail
+                                      className="h-[75px] w-[100px] object-contain bg-black"
+                                      width={100}
+                                      height={75}
+                                      src={videoSource.thumbnail}
+                                      alt={videoSource.name}
+                                    />
+
+                                    {videoSource.name}
+                                    {videoSource.size && (
+                                      <span className="block md:hidden">
+                                        {formatSize(videoSource.size)}
+                                      </span>
+                                    )}
+                                    {hasDurations && (
+                                      <span className="block md:hidden">
+                                        {videoSource.duration &&
+                                          formatDuration(videoSource.duration)}
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+
+                                {videoSource.size && (
+                                  <td className="py-2.5 hidden md:table-cell">
+                                    {formatSize(videoSource.size)}
+                                  </td>
+                                )}
+                                {hasDurations && (
+                                  <td className="py-2.5 hidden md:table-cell">
+                                    {videoSource.duration &&
+                                      formatDuration(videoSource.duration)}
+                                  </td>
+                                )}
+                              </tr>
+                            );
+                          }
+                        })}
+                    </tbody>
+                  </table>
+                </>
+              ) : null}
+
+              {/* New videos to import */}
+              <h1 className="font-semibold border-b border-slate-200 pb-2 mb-2">{`New videos to import (${
+                videoSources.filter((v) => !v.alreadyMigrated).length
+              })`}</h1>
+              <table className="w-full">
+                <thead className="border-b">
+                  <tr className="text-sm font-semibold pb-2">
+                    <th colSpan={2}>
+                      <div className="flex gap-2 items-center">
                         <input
-                          type="checkbox"
                           className="h-4 w-4 cursor-pointer"
-                          checked={selectedIds.indexOf(videoSource.id) !== -1}
-                          onChange={(a) => toggleSelection(videoSource.id)}
+                          type="checkbox"
+                          checked={
+                            !(
+                              videoSources
+                                .filter((v) => !v.alreadyMigrated)
+                                .filter((v) => selectedIds.indexOf(v.id) === -1)
+                                .length > 0
+                            )
+                          }
+                          onChange={() => multiSelectionToggle()}
                         />
-                      </td>
-                      <td className="py-2.5 md:w-6/12">
-                        <div className="flex flex-col md:flex-row gap-2">
-                          {!videoSource.alreadyMigrated && <Thumbnail
-                            className="h-[75px] w-[100px] object-contain bg-black"
-                            width={100}
-                            height={75}
-                            src={videoSource.thumbnail}
-                            alt={videoSource.name}
-                          />}
+                        <a
+                          href="#"
+                          className="hidden md:block"
+                          onClick={() => onSortClick('name')}
+                        >
+                          Video
+                        </a>
+                        <a
+                          href="#"
+                          className="block md:hidden"
+                          onClick={() => onSortClick('name')}
+                        >
+                          Select all
+                        </a>
+                      </div>
+                    </th>
+                    {hasSizes && (
+                      <th className="hidden md:block">
+                        <a href="#" onClick={() => onSortClick('size')}>
+                          Size
+                        </a>
+                      </th>
+                    )}
+                    {hasDurations && (
+                      <th className="hidden md:table-cell">
+                        <a href="#" onClick={() => onSortClick('duration')}>
+                          Duration
+                        </a>
+                      </th>
+                    )}
+                  </tr>
+                </thead>
 
-                          {videoSource.name}
-                          {videoSource.size && (
-                            <span className="block md:hidden">
-                              {formatSize(videoSource.size)}
-                            </span>
-                          )}
-                          {hasDurations && (
-                            <span className="block md:hidden">
-                              {videoSource.duration &&
-                                formatDuration(videoSource.duration)}
-                            </span>
-                          )}
-                        </div>
-                      </td>
+                <tbody>
+                  {videoSources
+                    .sort((a, b) => compareFn(a, b))
+                    .filter((v) => !v.alreadyMigrated)
+                    .map((videoSource, i) => (
+                      <tr
+                        className="text-sm align-top font-semibold border-b border-slate-300 cursor-pointer last:border-0"
+                        key={`${videoSource.id}`}
+                        onClick={() => toggleSelection(videoSource.id)}
+                      >
+                        <td className="w-6 pt-2.5">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 cursor-pointer"
+                            checked={selectedIds.indexOf(videoSource.id) !== -1}
+                            onChange={(a) => toggleSelection(videoSource.id)}
+                          />
+                        </td>
+                        <td className="py-2.5 md:w-6/12">
+                          <div className="flex flex-col md:flex-row gap-2">
+                            {!videoSource.alreadyMigrated && (
+                              <Thumbnail
+                                className="h-[75px] w-[100px] object-contain bg-black"
+                                width={100}
+                                height={75}
+                                src={videoSource.thumbnail}
+                                alt={videoSource.name}
+                              />
+                            )}
 
-                      {videoSource.size && (
-                        <td className="py-2.5 hidden md:table-cell">
-                          {formatSize(videoSource.size)}
+                            {videoSource.name}
+                            {videoSource.size && (
+                              <span className="block md:hidden">
+                                {formatSize(videoSource.size)}
+                              </span>
+                            )}
+                            {hasDurations && (
+                              <span className="block md:hidden">
+                                {videoSource.duration &&
+                                  formatDuration(videoSource.duration)}
+                              </span>
+                            )}
+                          </div>
                         </td>
-                      )}
-                      {hasDurations && (
-                        <td className="py-2.5 hidden md:table-cell">
-                          {videoSource.duration &&
-                            formatDuration(videoSource.duration)}
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+
+                        {videoSource.size && (
+                          <td className="py-2.5 hidden md:table-cell">
+                            {formatSize(videoSource.size)}
+                          </td>
+                        )}
+                        {hasDurations && (
+                          <td className="py-2.5 hidden md:table-cell">
+                            {videoSource.duration &&
+                              formatDuration(videoSource.duration)}
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </>
           )}
           <button
             className="text-sm mt-4 font-semibold"
