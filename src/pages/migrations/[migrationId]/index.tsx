@@ -36,7 +36,7 @@ const MigrationView: NextPage = () => {
                 id: router.query.migrationId as string,
                 videos: res.videos,
                 providerName: video.metadata
-                  ?.find((a) => a.key === 'x-apivideo-migration-provider')
+                  ?.find((a) => a.key === 'x-apivideo-import-provider')
                   ?.value?.toUpperCase() as ProviderName,
               };
               setSelectedMigration(videoMigration);

@@ -98,9 +98,8 @@ const VideoImportTable: React.FC<VideoImportTableProps> = (props) => {
           </div>
           {video.status?.ingest?.status ? (
             <div
-              className={`${
-                statusColors[`${video.status.ingest.status}`]
-              } font-jetbrains font-medium p-1 rounded-md text-xs w-fit`}
+              className={`${statusColors[`${video.status.ingest.status}`]
+                } font-jetbrains font-medium p-1 rounded-md text-xs w-fit`}
             >
               {formatIngestStatus(video.status.ingest.status)}
             </div>
@@ -122,9 +121,8 @@ const VideoImportTable: React.FC<VideoImportTableProps> = (props) => {
                 <div className="flex gap-2">
                   {hlsQualities.map((q, i) => (
                     <span
-                      className={`${
-                        statusColors[`${q.status}`]
-                      } font-medium p-1 rounded-md text-xs`}
+                      className={`${statusColors[`${q.status}`]
+                        } font-medium p-1 rounded-md text-xs`}
                       key={`hls-${i}`}
                     >
                       {q.quality}
@@ -140,9 +138,8 @@ const VideoImportTable: React.FC<VideoImportTableProps> = (props) => {
                 <div className="flex gap-2">
                   {mp4Qualities.map((q, i) => (
                     <span
-                      className={`${
-                        statusColors[`${q.status}`]
-                      } font-medium p-1 rounded-md text-xs`}
+                      className={`${statusColors[`${q.status}`]
+                        } font-medium p-1 rounded-md text-xs`}
                       key={`mp4-${i}`}
                     >
                       {q.quality}
@@ -173,7 +170,7 @@ const VideoImportTable: React.FC<VideoImportTableProps> = (props) => {
   const getFileSize = (video: VideoWithStatus) => {
     const sizeMetadata =
       video?.metadata &&
-      video.metadata.find((mt) => mt.key === 'x-apivideo-migration-video-size');
+      video.metadata.find((mt) => mt.key === 'x-apivideo-import-video-size');
     return sizeMetadata && formatSize(Number(sizeMetadata?.value));
   };
 

@@ -36,11 +36,11 @@ class ApiVideoService {
             title: options.title,
             source: options.source,
             metadata: [
-                { key: "x-apivideo-is-migration", value: "1" },
-                { key: "x-apivideo-migration-provider", value: options.providerName as string },
-                { key: "x-apivideo-migration-id", value: options.migrationId },
-                { key: "x-apivideo-migration-video-id", value: options.videoSourceId },
-                { key: "x-apivideo-migration-video-size", value: `${options.videoSourceSize}` },
+                { key: "x-apivideo-is-import", value: "1" },
+                { key: "x-apivideo-import-provider", value: options.providerName as string },
+                { key: "x-apivideo-import-id", value: options.migrationId },
+                { key: "x-apivideo-import-video-id", value: options.videoSourceId },
+                { key: "x-apivideo-import-video-size", value: `${options.videoSourceSize}` },
             ]
         });
     }
@@ -66,9 +66,9 @@ class ApiVideoService {
     public async getMigrations(provider?: ProviderName): Promise<Video[]> {
         let allVideos: Video[] = [];
 
-        const metadata: { [key: string]: string; } = provider 
-            ? { "x-apivideo-migration-provider": provider as string } 
-            : { "x-apivideo-is-migration": "1" };
+        const metadata: { [key: string]: string; } = provider
+            ? { "x-apivideo-import-provider": provider as string }
+            : { "x-apivideo-is-import": "1" };
 
         for (let currentPage = 1; ; currentPage++) {
             const res = await this.client.videos.list({ metadata, currentPage });
@@ -85,7 +85,7 @@ class ApiVideoService {
         let allVideos: Video[] = [];
 
         for (let currentPage = 1; ; currentPage++) {
-            const res = await this.client.videos.list({ metadata: { "x-apivideo-migration-id": migrationId }, currentPage });
+            const res = await this.client.videos.list({ metadata: { "x-apivideo-import-id": migrationId }, currentPage });
             allVideos = [...allVideos, ...res.data];
             if (currentPage >= (res?.pagination?.pagesTotal || 0)) {
                 break;

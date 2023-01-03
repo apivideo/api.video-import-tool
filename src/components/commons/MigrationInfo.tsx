@@ -20,10 +20,10 @@ const MigrationInfo: React.FC<MigrationInfoProps> = (props) => {
       if (m.key) metadata[m.key] = m.value || '';
     });
     return {
-      [metadata['x-apivideo-migration-provider'] + '_id']:
-        metadata['x-apivideo-migration-video-id'],
+      [metadata['x-apivideo-import-provider'] + '_id']:
+        metadata['x-apivideo-import-video-id'],
       apivideo_id: video.videoId,
-      size: metadata['x-apivideo-migration-video-size'],
+      size: metadata['x-apivideo-import-video-size'],
       name: video.title,
       apivideo_url: video.assets?.player,
     };
@@ -37,9 +37,9 @@ const MigrationInfo: React.FC<MigrationInfoProps> = (props) => {
     element.setAttribute(
       'href',
       `data:${mimeType};charset=utf-8,` +
-        encodeURIComponent(
-          stringify(videos.map((v) => generateExportVideoItem(v)))
-        )
+      encodeURIComponent(
+        stringify(videos.map((v) => generateExportVideoItem(v)))
+      )
     );
     element.setAttribute('download', `api-video-migration-report.${format}`);
 
@@ -77,9 +77,8 @@ const MigrationInfo: React.FC<MigrationInfoProps> = (props) => {
             return (
               <tr
                 key={migration.id}
-                className={`border-b border-slate-300 flex flex-col lg:table-row text-sm align-top font-normal ${
-                  props.allowLink && 'cursor-pointer'
-                }`}
+                className={`border-b border-slate-300 flex flex-col lg:table-row text-sm align-top font-normal ${props.allowLink && 'cursor-pointer'
+                  }`}
                 onClick={() => handleRowClick(migration.id)}
               >
                 <td className="py-4 flex gap-2">

@@ -76,10 +76,10 @@ const VideoSourceSelector: React.FC = () => {
         current: Video
       ) => {
         const providerId = current.metadata?.find(
-          (m) => m.key === 'x-apivideo-migration-video-id'
+          (m) => m.key === 'x-apivideo-import-video-id'
         ) as any;
         const providerSize = current.metadata?.find(
-          (m) => m.key === 'x-apivideo-migration-video-size'
+          (m) => m.key === 'x-apivideo-import-video-size'
         ) as any;
         if (providerId) {
           if (!acc[providerId['value'] as string]) {
@@ -317,7 +317,7 @@ const VideoSourceSelector: React.FC = () => {
           <br />
           {`Make
           sure there is at least one video in your ${Providers[providerName]?.displayName} account.`}
-          {Providers[providerName]?.providerErrorMessage ?? null }
+          {Providers[providerName]?.providerErrorMessage ?? null}
           {` Alternatively,`}{' '}
           <a
             href={`/${providerName.toString().toLocaleLowerCase()}`}
@@ -370,7 +370,7 @@ const VideoSourceSelector: React.FC = () => {
                     <h1 className="font-semibold flex align-middle gap-2">
                       {isCollapsed ? <ChevronDown /> : <ChevronUp />}
                       {`Already imported videos (${videoSources.filter((video) => video.alreadyMigrated)
-                          .length
+                        .length
                         })`}
                     </h1>
                     <Link

@@ -37,7 +37,7 @@ const MigrationsHome: NextPage = () => {
             const migratedVideosByMigration: { [id: string]: Video[] } = {};
             res.videos.forEach((v) => {
               const id =
-                v?.metadata?.find((v) => v.key === 'x-apivideo-migration-id')
+                v?.metadata?.find((v) => v.key === 'x-apivideo-import-id')
                   ?.value || 'unknown';
               if (!migratedVideosByMigration[id]) {
                 migratedVideosByMigration[id] = [];
@@ -57,7 +57,7 @@ const MigrationsHome: NextPage = () => {
                   providerName: migratedVideosByMigration[
                     migrationId
                   ][0].metadata
-                    ?.find((a) => a.key === 'x-apivideo-migration-provider')
+                    ?.find((a) => a.key === 'x-apivideo-import-provider')
                     ?.value?.toUpperCase() as ProviderName,
                 };
               }
@@ -98,11 +98,10 @@ const MigrationsHome: NextPage = () => {
               Enter your api.video API key
             </label>
             <input
-              className={`h-10 ${
-                apiVideoErrorMessage
+              className={`h-10 ${apiVideoErrorMessage
                   ? 'outline outline-red-500 outline-2'
                   : 'outline outline-slate-300 rounded-lg shadow outline-1'
-              }`}
+                }`}
               id="apiVideoApiKey"
               type={'password'}
               value={apiVideoApiKey}
@@ -120,9 +119,8 @@ const MigrationsHome: NextPage = () => {
             )}
           </div>
           <button
-            className={`mt-4 ${
-              !apiVideoApiKey ? 'bg-slate-300' : 'bg-black'
-            } text-sm font-semibold w-full`}
+            className={`mt-4 ${!apiVideoApiKey ? 'bg-slate-300' : 'bg-black'
+              } text-sm font-semibold w-full`}
             disabled={!apiVideoApiKey}
             onClick={() => getMigratedVideos(apiVideoApiKey!)}
           >
