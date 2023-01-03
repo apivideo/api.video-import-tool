@@ -317,6 +317,7 @@ const VideoSourceSelector: React.FC = () => {
           <br />
           {`Make
           sure there is at least one video in your ${Providers[providerName]?.displayName} account.`}
+          {Providers[providerName]?.providerErrorMessage ?? null }
           {` Alternatively,`}{' '}
           <a
             href={`/${providerName.toString().toLocaleLowerCase()}`}
@@ -368,10 +369,9 @@ const VideoSourceSelector: React.FC = () => {
                   >
                     <h1 className="font-semibold flex align-middle gap-2">
                       {isCollapsed ? <ChevronDown /> : <ChevronUp />}
-                      {`Already imported videos (${
-                        videoSources.filter((video) => video.alreadyMigrated)
+                      {`Already imported videos (${videoSources.filter((video) => video.alreadyMigrated)
                           .length
-                      })`}
+                        })`}
                     </h1>
                     <Link
                       href={'/migrations'}
@@ -382,9 +382,8 @@ const VideoSourceSelector: React.FC = () => {
                     </Link>
                   </div>
                   <table
-                    className={`w-full mb-8 ${
-                      isCollapsed ? 'collapse' : 'visible'
-                    }`}
+                    className={`w-full mb-8 ${isCollapsed ? 'collapse' : 'visible'
+                      }`}
                   >
                     <thead className="border-b">
                       <tr className="text-sm font-semibold pb-2">
@@ -463,10 +462,9 @@ const VideoSourceSelector: React.FC = () => {
               ) : null}
 
               {/* New videos to import */}
-              <h1 className="font-semibold border-b border-slate-200 pb-2 mb-2">{`New videos to import (${
-                videoSources.filter((v) => !v.alreadyMigrated).length
-              })`}</h1>
-              <table className="w-full">
+              <h1 className="font-semibold border-b border-slate-200 pb-2 mb-2">{`New videos to import (${videoSources.filter((v) => !v.alreadyMigrated).length
+                })`}</h1>
+              {videoSources.filter((v) => !v.alreadyMigrated).length ? <table className="w-full">
                 <thead className="border-b">
                   <tr className="text-sm font-semibold pb-2">
                     <th colSpan={2}>
@@ -576,7 +574,7 @@ const VideoSourceSelector: React.FC = () => {
                       </tr>
                     ))}
                 </tbody>
-              </table>
+              </table> : null}
             </>
           )}
           <button

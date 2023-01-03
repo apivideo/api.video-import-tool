@@ -35,6 +35,7 @@ export type MigrationProvider = {
     ): AbstractProviderService;
   };
   hasFeature: (feature: OptionalFeatureFlag) => boolean;
+  providerErrorMessage?: string | React.ReactNode;
 };
 
 export const Providers: { [name: string]: MigrationProvider } = {
@@ -60,6 +61,20 @@ export const Providers: { [name: string]: MigrationProvider } = {
       [OptionalFeatureFlag.ProviderCredentialsBackendValidation].indexOf(
         feature
       ) !== -1,
+    providerErrorMessage: (
+      <p>
+        Make sure you have correctly set the scopes of your{' '}
+        <a
+          className="text-blue-500 underline"
+          href="https://import.api.video/doc/generate-a-vimeo-access-token"
+          target="_blank"
+          rel="noreferrer"
+        >
+          access token
+        </a>
+        .
+      </p>
+    ),
   },
   DROPBOX: {
     displayName: 'Dropbox',
