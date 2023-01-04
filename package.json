@@ -1,16 +1,16 @@
 {
-  "name": "api.video-migration-tool",
+  "name": "api.video-import-tool",
   "version": "0.1.0",
-  "description": "api.video migration tool",
+  "description": "api.video import tool",
   "repository": {
     "type": "git",
-    "url": "git@github.com:apivideo/api.video-migration-tool.git"
+    "url": "git@github.com:apivideo/api.video-import-tool.git"
   },
   "author": "api.video <ecosystem@api.video> (https://api.video/)",
   "license": "MIT",
   "keywords": [
     "video",
-    "migration",
+    "import",
     "apivideo"
   ],
   "engines": {

@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle } from 'react-feather';
 import {
-  MigrationProvider,
+  ImportProvider,
   OptionalFeatureFlag,
   Providers,
 } from '../providers';
@@ -11,7 +11,7 @@ import {
   callVerifyApiVideoApiKeyApi,
 } from '../service/ClientApiHelpers';
 import AuthDisclaimer from './commons/AuthDisclaimer';
-import MigrationCard from './commons/MigrationCard';
+import ImportCard from './commons/ImportCard';
 import { useGlobalContext } from './context/Global';
 
 const Authenticate: React.FC = () => {
@@ -89,7 +89,7 @@ const Authenticate: React.FC = () => {
     }
   };
 
-  const provider: MigrationProvider | undefined = providerName
+  const provider: ImportProvider | undefined = providerName
     ? Providers[providerName]
     : undefined;
 
@@ -114,11 +114,11 @@ const Authenticate: React.FC = () => {
           `/${providerName?.toString().toLocaleLowerCase()}/video-selection`
         );
       }
-    } 
+    }
   };
 
   return (
-    <MigrationCard activeStep={2} paddingTop>
+    <ImportCard activeStep={2} paddingTop>
       <div className="flex flex-col md:flex-row text-sm gap-2 md:gap-10">
         <div className="flex flex-col md:w-2/4 gap-4">
           <h1 className="text-left font-semibold">Authentication</h1>
@@ -177,12 +177,12 @@ const Authenticate: React.FC = () => {
       <div className="w-full bg-yellow-50 flex gap-10 text-xs p-4 rounded mt-8 text-blue-900">
         <AlertTriangle color={'#F59E0B'} size={12} strokeWidth={'.2rem'} />
         <ul>
-          <li className="list-disc">If you are migrating to a sandbox project, your videos will be watermarked and deleted after 24 hours.</li>
-          <li className="list-disc">If you are migrating to a production project, your videos will count towards your encoding and hosting usage quota.</li>
+          <li className="list-disc">If you are importing to a sandbox project, your videos will be watermarked and deleted after 24 hours.</li>
+          <li className="list-disc">If you are importing to a production project, your videos will count towards your encoding and hosting usage quota.</li>
           <li>Depending on your plan, this might incur additional usage charges.</li>
         </ul>
       </div>
-    </MigrationCard>
+    </ImportCard>
   );
 };
 

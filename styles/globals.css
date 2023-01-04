@@ -133,26 +133,3 @@ span.icon.loading::after {
 .stepper .separator.done {
   border: 1px solid rgb(250, 91, 48);
 }
-
-.help-page h1,
-.help-page h2 {
-  color: white;
-}
-
-.help-page p,
-.help-page li {
-  font-size: 1.1em;
-  line-height: 1.4em;
-}
-
-.help-page img {
-  border-radius: 5px;
-}
-
-.migrationsList li {
-  line-height: 1.6em;
-}
-
-.migrationsList a {
-  color: white;
-}

@@ -1,61 +1,61 @@
 import Video from '@api.video/nodejs-client/lib/model/Video';
 import type { NextPage } from 'next';
 import { useEffect, useState } from 'react';
-import { callGetMigrationsApi } from '../../service/ClientApiHelpers';
-import MigrationInfo from '../../components/commons/MigrationInfo';
+import { callGetImportsApi } from '../../service/ClientApiHelpers';
+import ImportInfo from '../../components/commons/ImportInfo';
 import { ProviderName } from '../../providers';
-import MigrationCard from '../../components/commons/MigrationCard';
-import { Migration } from '../../types/common';
+import ImportCard from '../../components/commons/ImportCard';
+import { Import } from '../../types/common';
 
-const MigrationsHome: NextPage = () => {
+const ImportsHome: NextPage = () => {
   const [apiVideoApiKey, setApiVideoApiKey] = useState<string>();
   const [apiVideoErrorMessage, setApiVideoErrorMessage] = useState<string>('');
   const [noResults, setNoResults] = useState<string>('');
-  const [migrations, setMigrations] = useState<Migration[]>();
+  const [imports, setImports] = useState<Import[]>();
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const apiKey = sessionStorage.getItem('apiVideoApiKey');
     if (apiKey) {
       setApiVideoApiKey(apiVideoApiKey);
-      getMigratedVideos(apiKey);
+      getImportedVideos(apiKey);
     } else {
       setLoading(false);
     }
   }, []);
 
-  const getMigratedVideos = (apiKey: string) => {
+  const getImportedVideos = (apiKey: string) => {
     setLoading(true);
-    setMigrations([]);
+    setImports([]);
     apiKey &&
-      callGetMigrationsApi({ apiKey })
+      callGetImportsApi({ apiKey })
         .then((res) => {
           if (!res?.videos?.length) {
             setLoading(false);
-            setNoResults('No migrations were found for this API key.');
+            setNoResults('No imports were found for this API key.');
           } else {
-            const migratedVideosByMigration: { [id: string]: Video[] } = {};
+            const importedVideosByImport: { [id: string]: Video[] } = {};
             res.videos.forEach((v) => {
               const id =
                 v?.metadata?.find((v) => v.key === 'x-apivideo-import-id')
                   ?.value || 'unknown';
-              if (!migratedVideosByMigration[id]) {
-                migratedVideosByMigration[id] = [];
+              if (!importedVideosByImport[id]) {
+                importedVideosByImport[id] = [];
               }
-              migratedVideosByMigration[id].push(v);
+              importedVideosByImport[id].push(v);
             });
 
-            const finalMigrations = Object.keys(migratedVideosByMigration).map(
-              (migrationId): Migration => {
+            const finalImports = Object.keys(importedVideosByImport).map(
+              (importId): Import => {
                 return {
                   date: new Date(
-                    migratedVideosByMigration[migrationId][0]
+                    importedVideosByImport[importId][0]
                       .createdAt! as unknown as string
                   ),
-                  id: migrationId,
-                  videos: migratedVideosByMigration[migrationId],
-                  providerName: migratedVideosByMigration[
-                    migrationId
+                  id: importId,
+                  videos: importedVideosByImport[importId],
+                  providerName: importedVideosByImport[
+                    importId
                   ][0].metadata
                     ?.find((a) => a.key === 'x-apivideo-import-provider')
                     ?.value?.toUpperCase() as ProviderName,
@@ -63,8 +63,8 @@ const MigrationsHome: NextPage = () => {
               }
             );
             setLoading(false);
-            setMigrations(
-              finalMigrations.sort(
+            setImports(
+              finalImports.sort(
                 (a, b) =>
                   new Date(b.date).getTime() - new Date(a.date).getTime()
               )
@@ -77,19 +77,19 @@ const MigrationsHome: NextPage = () => {
   };
 
   return (
-    <MigrationCard hideDescription>
-      <h1 className="text-left font-semibold pb-4">My migrations</h1>
+    <ImportCard hideDescription>
+      <h1 className="text-left font-semibold pb-4">My imports</h1>
       <div className="h-px w-full bg-slate-300"></div>
       <div className="flex flex-col lg:flex-row lg:items-start pt-8 gap-4">
         <div className="flex flex-col gap-2.5 lg:w-3/6">
           <h1 className="text-left font-semibold">
-            Access previous migrations
+            Access previous imports
           </h1>
           <p className="text-sm">
-            If you have used this tool to migrate videos to your api.video
-            project, you can retrieve previous migration reports thanks to
+            If you have used this tool to import videos to your api.video
+            project, you can retrieve previous import reports thanks to
             metadata in your video library. Enter an API key to see previous
-            migrations.
+            imports.
           </p>
         </div>
         <div className="flex flex-col lg:w-3/6">
@@ -99,8 +99,8 @@ const MigrationsHome: NextPage = () => {
             </label>
             <input
               className={`h-10 ${apiVideoErrorMessage
-                  ? 'outline outline-red-500 outline-2'
-                  : 'outline outline-slate-300 rounded-lg shadow outline-1'
+                ? 'outline outline-red-500 outline-2'
+                : 'outline outline-slate-300 rounded-lg shadow outline-1'
                 }`}
               id="apiVideoApiKey"
               type={'password'}
@@ -122,19 +122,19 @@ const MigrationsHome: NextPage = () => {
             className={`mt-4 ${!apiVideoApiKey ? 'bg-slate-300' : 'bg-black'
               } text-sm font-semibold w-full`}
             disabled={!apiVideoApiKey}
-            onClick={() => getMigratedVideos(apiVideoApiKey!)}
+            onClick={() => getImportedVideos(apiVideoApiKey!)}
           >
-            See previous migrations
+            See previous imports
           </button>
         </div>
       </div>
-      {!loading && migrations?.length ? (
+      {!loading && imports?.length ? (
         <div>
           {' '}
           <p className="text-sm pt-6">
-            Your API key returned the following migrations.
+            Your API key returned the following imports.
           </p>
-          <MigrationInfo migrations={migrations} allowLink showDate />
+          <ImportInfo imports={imports} allowLink showDate />
         </div>
       ) : null}
       {loading && (
@@ -145,8 +145,8 @@ const MigrationsHome: NextPage = () => {
       {!loading && noResults ? (
         <p className="text-sm pt-6">{noResults}</p>
       ) : null}
-    </MigrationCard>
+    </ImportCard>
   );
 };
 
-export default MigrationsHome;
+export default ImportsHome;

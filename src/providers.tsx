@@ -22,7 +22,7 @@ export enum OptionalFeatureFlag {
   WaitForPublicMp4Availibility,
 }
 
-export type MigrationProvider = {
+export type ImportProvider = {
   displayName: string;
   description?: string;
   title: JSX.Element;
@@ -38,7 +38,7 @@ export type MigrationProvider = {
   providerErrorMessage?: string | React.ReactNode;
 };
 
-export const Providers: { [name: string]: MigrationProvider } = {
+export const Providers: { [name: string]: ImportProvider } = {
   VIMEO: {
     displayName: 'Vimeo',
     description: '⚠️ Pro Vimeo plan required',
@@ -51,7 +51,7 @@ export const Providers: { [name: string]: MigrationProvider } = {
     title: (
       <>
         Welcome to the <span style={{ color: 'rgb(0, 173, 239)' }}>Vimeo</span>{' '}
-        to <span className="orange">api.video</span> migration tool
+        to <span className="orange">api.video</span> import tool
       </>
     ),
     imgSrc: '/vimeo.svg',
@@ -82,7 +82,7 @@ export const Providers: { [name: string]: MigrationProvider } = {
     title: (
       <>
         Welcome to the <span style={{ color: '#0061fe' }}>Dropbox</span> to{' '}
-        <span className="orange">api.video</span> migration tool
+        <span className="orange">api.video</span> import tool
       </>
     ),
     imgSrc: '/dropbox.svg',

@@ -1,72 +1,72 @@
 import Video from '@api.video/nodejs-client/lib/model/Video';
 import type { NextPage } from 'next';
 import { useEffect, useState } from 'react';
-import { callGetMigrationApi } from '../../../service/ClientApiHelpers';
+import { callGetImportApi } from '../../../service/ClientApiHelpers';
 import { ArrowLeft } from 'react-feather';
-import MigrationInfo from '../../../components/commons/MigrationInfo';
+import ImportInfo from '../../../components/commons/ImportInfo';
 import { ProviderName } from '../../../providers';
 import { useRouter } from 'next/router';
-import MigrationCard from '../../../components/commons/MigrationCard';
+import ImportCard from '../../../components/commons/ImportCard';
 import Link from 'next/link';
 import VideoImportTable from '../../../components/commons/VideoImportTable';
-import { Migration } from '../../../types/common';
+import { Import } from '../../../types/common';
 
-const MigrationView: NextPage = () => {
+const ImportView: NextPage = () => {
   const [apiVideoApiKey, setApiVideoApiKey] = useState<string>();
-  const [migrationsError, setMigrationsError] = useState<string>('');
+  const [importsError, setImportsError] = useState<string>('');
   const [videos, setVideos] = useState<Video[]>([]);
-  const [selectedMigration, setSelectedMigration] = useState<Migration>();
+  const [selectedImport, setSelectedImport] = useState<Import>();
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
   useEffect(() => {
     const apiKey = sessionStorage.getItem('apiVideoApiKey') || '';
     setApiVideoApiKey(apiKey);
-    if (router?.query?.migrationId) {
-      const getMigratedVideos = async (apiKey: string) => {
-        const migrationId = router.query.migrationId as string;
-        if (migrationId) {
+    if (router?.query?.importId) {
+      const getImportedVideos = async (apiKey: string) => {
+        const importId = router.query.importId as string;
+        if (importId) {
           try {
             setLoading(true);
-            await callGetMigrationApi({ apiKey, migrationId }).then((res) => {
+            await callGetImportApi({ apiKey, importId }).then((res) => {
               setVideos(res.videos);
               const video: Video = res.videos[0];
-              const videoMigration: Migration = {
+              const videoImport: Import = {
                 date: new Date(video.createdAt! as unknown as string),
-                id: router.query.migrationId as string,
+                id: router.query.importId as string,
                 videos: res.videos,
                 providerName: video.metadata
                   ?.find((a) => a.key === 'x-apivideo-import-provider')
                   ?.value?.toUpperCase() as ProviderName,
               };
-              setSelectedMigration(videoMigration);
+              setSelectedImport(videoImport);
             });
             setLoading(false);
           } catch (err) {
-            setMigrationsError(
-              'Could not find migrations for the requested Migration-id.'
+            setImportsError(
+              'Could not find imports for the requested Import-id.'
             );
             console.error(err);
           }
         }
       };
-      getMigratedVideos(apiKey);
+      getImportedVideos(apiKey);
     }
   }, [router]);
 
   return (
-    <MigrationCard hideDescription>
-      <h1 className="text-left font-semibold pb-4">My migrations</h1>
+    <ImportCard hideDescription>
+      <h1 className="text-left font-semibold pb-4">My imports</h1>
       <div className="h-px w-full bg-slate-300"></div>
       <Link
         className="flex gap-2 items-center text-sm pt-6"
-        href={'/migrations'}
+        href={'/imports'}
       >
         <ArrowLeft size={16} strokeWidth={'.2rem'} />
-        Back to my migrations
+        Back to my imports
       </Link>
-      {selectedMigration && (
-        <MigrationInfo migrations={[selectedMigration]} showDate />
+      {selectedImport && (
+        <ImportInfo imports={[selectedImport]} showDate />
       )}
       {!loading && videos?.length ? (
         <VideoImportTable
@@ -79,9 +79,9 @@ const MigrationView: NextPage = () => {
           <span className="icon loading"></span>
         </div>
       )}
-      {migrationsError && <p className="text-sm pt-8">{migrationsError}</p>}
-    </MigrationCard>
+      {importsError && <p className="text-sm pt-8">{importsError}</p>}
+    </ImportCard>
   );
 };
 
-export default MigrationView;
+export default ImportView;

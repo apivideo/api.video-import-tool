@@ -1,6 +1,6 @@
 import { CreateApiVideoVideoRequestBody, CreateApiVideoVideoRequestResponse } from "../pages/api/apivideo/create-video";
-import { GetMigrationRequestBody, GetMigrationRequestResponse } from "../pages/api/apivideo/get-migration";
-import { GetMigrationsRequestBody, GetMigrationsRequestResponse } from "../pages/api/apivideo/get-migrations";
+import { GetImportRequestBody, GetImportRequestResponse } from "../pages/api/apivideo/get-import";
+import { GetImportsRequestBody, GetImportsRequestResponse } from "../pages/api/apivideo/get-imports";
 import { GetVideosStatusRequestBody, GetVideosStatusRequestResponse } from "../pages/api/apivideo/get-videos-status";
 import { VerifyApiKeyRequestBody, VerifyApiKeyRequestResponse } from "../pages/api/apivideo/verify-api-key";
 import { GeneratePublicMp4RequestBody, GeneratePublicMp4RequestResponse } from "../pages/api/providers/generate-public-mp4";
@@ -26,11 +26,11 @@ export const callGetOAuthAccessTokenApi = async (body: GetOauthAccessTokenReques
 export const callGetImportableVideosApi = async (body: GetImportableVideosRequestBody) =>
     callApi<GetImportableVideosRequestResponse, GetImportableVideosRequestBody>("/api/providers/get-importable-videos", "POST", body);
 
-export const callGetMigrationsApi = async (body: GetMigrationsRequestBody) =>
-    callApi<GetMigrationsRequestResponse, GetMigrationsRequestBody>("/api/apivideo/get-migrations", "POST", body);
+export const callGetImportsApi = async (body: GetImportsRequestBody) =>
+    callApi<GetImportsRequestResponse, GetImportsRequestBody>("/api/apivideo/get-imports", "POST", body);
 
-export const callGetMigrationApi = async (body: GetMigrationRequestBody) =>
-    callApi<GetMigrationRequestResponse, GetMigrationRequestBody>("/api/apivideo/get-migration", "POST", body);
+export const callGetImportApi = async (body: GetImportRequestBody) =>
+    callApi<GetImportRequestResponse, GetImportRequestBody>("/api/apivideo/get-import", "POST", body);
 
 export const callGetVideosStatusApi = async (body: GetVideosStatusRequestBody) =>
     callApi<GetVideosStatusRequestResponse, GetVideosStatusRequestBody>("/api/apivideo/get-videos-status", "POST", body);

@@ -1,6 +1,6 @@
-[![badge](https://img.shields.io/twitter/follow/api_video?style=social)](https://twitter.com/intent/follow?screen_name=api_video) &nbsp; [![badge](https://img.shields.io/github/stars/apivideo/api.video-migration-tool?style=social)](https://github.com/apivideo/api.video-migration-tool) &nbsp; [![badge](https://img.shields.io/discourse/topics?server=https%3A%2F%2Fcommunity.api.video)](https://community.api.video)
+[![badge](https://img.shields.io/twitter/follow/api_video?style=social)](https://twitter.com/intent/follow?screen_name=api_video) &nbsp; [![badge](https://img.shields.io/github/stars/apivideo/api.video-import-tool?style=social)](https://github.com/apivideo/api.video-import-tool) &nbsp; [![badge](https://img.shields.io/discourse/topics?server=https%3A%2F%2Fcommunity.api.video)](https://community.api.video)
 ![](https://github.com/apivideo/.github/blob/main/assets/apivideo_banner.png)
-<h1 align="center">api.video migration tool</h1>
+<h1 align="center">api.video import tool</h1>
 
 
 [api.video](https://api.video) is the video infrastructure for product builders. Lightning fast video APIs for integrating, scaling, and managing on-demand & low latency live streaming features in your app.
@@ -17,15 +17,15 @@
 
 # Project description
 
-The api.video migration tool is a Next.js application that allows you to easily import your videos hosted at different hosting provider to api.video. 
+The api.video import tool is a Next.js application that allows you to easily import your videos hosted at different hosting provider to api.video. 
 
-The tool provides a simple and straightforward interface for completing the migration process, which involves a few steps: 
-- First, select the platform from which you want to migrate videos.
+The tool provides a simple and straightforward interface for completing the import process, which involves a few steps: 
+- First, select the platform from which you want to import videos.
 - Next, enter your credentials for that platform. 
 - Then, select the specific videos you want to import. 
 - Finally, run the import and follow its progress.
   
-In addition to this core feature, the migration tool also allows users to view a list of all previous migrations and see the status of each one. This can be useful for keeping track of the progress of ongoing migrations or for checking on the status of migrations that have already been completed.
+In addition to this core feature, the import tool also allows users to view a list of all previous imports and see the status of each one. This can be useful for keeping track of the progress of ongoing imports or for checking on the status of imports that have already been completed.
 
 # Supported providers
 
@@ -39,11 +39,11 @@ Other providers will be added in the future. If you want to add a new provider, 
 
 ## Using the deployed version
 
-If you simply want to migrate videos without the headache, you can use the deployed version of the tool at [https://import.api.video](https://import.api.video).
+If you simply want to import videos without the headache, you can use the deployed version of the tool at [https://import.api.video](https://import.api.video).
 
 ## Running the tool locally
 
-To run the migration tool locally, you will need to first clone the project from GitHub. 
+To run the import tool locally, you will need to first clone the project from GitHub. 
 
 Once you have the project files on your local machine, you will need to install the npm dependencies by running the `npm install` command in the terminal. 
 

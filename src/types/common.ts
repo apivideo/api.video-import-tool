@@ -31,7 +31,7 @@ export type ApiResponse<T> = {
     error?: string;
 }
 
-export type Migration = {
+export type Import = {
     id: string;
     date: Date;
     videos: Video[];

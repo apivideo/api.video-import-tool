@@ -76,7 +76,7 @@ class VimeoProviderService implements AbstractProviderService {
         try {
             return await this.callApi("https://api.vimeo.com/me").then(res => {
                 if (res.account === "basic" || res.account === "plus" || res.account === "free") {
-                    return `${uppercaseFirstLetter(res.account)} Vimeo account is not compatible with the migration tool`;
+                    return `${uppercaseFirstLetter(res.account)} Vimeo account is not compatible with the import tool`;
                 }
                 return null;
             });

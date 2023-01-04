@@ -6,7 +6,7 @@ import VideoSource, { ApiResponse, ErrorResponse, MethodNotAllowedResponse, Succ
 
 export type CreateApiVideoVideoRequestBody = {
     apiKey: string;
-    migrationId: string;
+    importId: string;
     providerName: ProviderName;
     videoSource: VideoSource;
 }
@@ -28,7 +28,7 @@ export default async function handler(
             const video = await apiVideoService.createVideo({
                 title: body.videoSource.name,
                 source: body.videoSource.url!,
-                migrationId: body.migrationId,
+                importId: body.importId,
                 providerName: body.providerName,
                 videoSourceId: body.videoSource.id,
                 videoSourceSize: body.videoSource.size,

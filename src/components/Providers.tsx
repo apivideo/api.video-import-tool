@@ -1,12 +1,12 @@
 import Link from 'next/link';
 import { ProviderName, Providers } from '../providers';
 import Image from 'next/image';
-import MigrationCard from './commons/MigrationCard';
-interface MigrationToolProps {
+import ImportCard from './commons/ImportCard';
+interface ImportToolProps {
   providerName?: ProviderName;
 }
 
-const ProvidersPage: React.FC<MigrationToolProps> = (props) => {
+const ProvidersPage: React.FC<ImportToolProps> = (props) => {
   const providers = Object.keys(Providers).map((provider: ProviderName) => ({
     link: `/${(provider as string).toLowerCase()}`,
     displayName: Providers[provider].displayName,
@@ -16,7 +16,7 @@ const ProvidersPage: React.FC<MigrationToolProps> = (props) => {
   }));
 
   return (
-    <MigrationCard activeStep={1} paddingTop>
+    <ImportCard activeStep={1} paddingTop>
       <div className="flex flex-col justify-between">
         <div className="flex flex-row gap-4 pb-8 flex-wrap lg:flex-nowrap w-full">
           {providers.map(({ displayName, link, name, imgSrc, description }) => (
@@ -35,7 +35,7 @@ const ProvidersPage: React.FC<MigrationToolProps> = (props) => {
           We will be adding support for other platforms in the future. If you
           would like to contribute, feel free to open a pull request on{' '}
           <a
-            href="https://github.com/apivideo/api.video-migration-tool"
+            href="https://github.com/apivideo/api.video-import-tool"
             target="_blank"
             rel="noreferrer"
             className="text-blue-500 underline"
@@ -45,7 +45,7 @@ const ProvidersPage: React.FC<MigrationToolProps> = (props) => {
           .{' '}
         </p>
       </div>
-    </MigrationCard>
+    </ImportCard>
   );
 };
 

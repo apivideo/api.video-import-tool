@@ -3,29 +3,29 @@ import React, { useContext, useState } from 'react';
 import { ProviderName } from '../../../providers';
 
 interface IGlobalContextProps {
-    migrationId: string;
+    importId: string;
     providerName: ProviderName;
     providerAccessToken: string;
     videos: Video[];
     setProviderAccessToken: (accessToken: string) => void
-    setMigrationId: (migrationId: string) => void;
+    setImportId: (importId: string) => void;
     setProviderName: (providerName: ProviderName) => void;
     setVideos: (videos: Video[]) => void
 }
 
 export const GlobalContext = React.createContext<IGlobalContextProps>({
-    migrationId: '',
+    importId: '',
     providerName: '',
     providerAccessToken: '',
     videos: [],
     setProviderAccessToken: () => { },
-    setMigrationId: () => { },
+    setImportId: () => { },
     setProviderName: () => { },
     setVideos: () => { },
 });
 
 export const GlobalContextProvider = (props: { children: React.ReactNode }) => {
-    const [migrationId, setMigrationId] = useState<string>('');
+    const [importId, setImportId] = useState<string>('');
     const [providerName, setProviderName] = useState<ProviderName>('');
     const [videos, setVideos] = useState<Video[]>([]);
     const [providerAccessToken, setProviderAccessToken] = useState<string>('')
@@ -33,12 +33,12 @@ export const GlobalContextProvider = (props: { children: React.ReactNode }) => {
     return (
         <GlobalContext.Provider
             value={{
-                migrationId,
+                importId,
                 providerName,
                 providerAccessToken,
                 videos,
                 setProviderAccessToken,
-                setMigrationId,
+                setImportId,
                 setProviderName,
                 setVideos
             }}

@@ -8,7 +8,7 @@ export type VideoCreationOptions = {
     title: string;
     source: string;
     providerName: ProviderName;
-    migrationId: string;
+    importId: string;
     videoSourceId: string;
     videoSourceSize?: number;
 }
@@ -26,7 +26,7 @@ class ApiVideoService {
         this.apiKey = apiKey;
         this.client = new ApiVideoClient({
             apiKey,
-            applicationName: "apivideo-migration-tool",
+            applicationName: "apivideo-import-tool",
             applicationVersion: packageJson.version,
         });
     }
@@ -38,7 +38,7 @@ class ApiVideoService {
             metadata: [
                 { key: "x-apivideo-is-import", value: "1" },
                 { key: "x-apivideo-import-provider", value: options.providerName as string },
-                { key: "x-apivideo-import-id", value: options.migrationId },
+                { key: "x-apivideo-import-id", value: options.importId },
                 { key: "x-apivideo-import-video-id", value: options.videoSourceId },
                 { key: "x-apivideo-import-video-size", value: `${options.videoSourceSize}` },
             ]
@@ -63,7 +63,7 @@ class ApiVideoService {
         }
     }
 
-    public async getMigrations(provider?: ProviderName): Promise<Video[]> {
+    public async getImports(provider?: ProviderName): Promise<Video[]> {
         let allVideos: Video[] = [];
 
         const metadata: { [key: string]: string; } = provider
@@ -81,11 +81,11 @@ class ApiVideoService {
         return allVideos;
     }
 
-    public async getMigrationById(migrationId: string): Promise<Video[]> {
+    public async getImportById(importId: string): Promise<Video[]> {
         let allVideos: Video[] = [];
 
         for (let currentPage = 1; ; currentPage++) {
-            const res = await this.client.videos.list({ metadata: { "x-apivideo-import-id": migrationId }, currentPage });
+            const res = await this.client.videos.list({ metadata: { "x-apivideo-import-id": importId }, currentPage });
             allVideos = [...allVideos, ...res.data];
             if (currentPage >= (res?.pagination?.pagesTotal || 0)) {
                 break;

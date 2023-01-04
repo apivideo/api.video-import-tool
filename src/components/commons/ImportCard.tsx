@@ -4,21 +4,21 @@ import Link from 'next/link';
 import Stepper from '../stepper/Stepper';
 import { useGlobalContext } from '../context/Global';
 
-interface MigrationCardProps {
+interface ImportCardProps {
   children: React.ReactNode;
   activeStep?: number;
   hideDescription?: boolean;
   paddingTop?: boolean;
 }
 
-const MigrationCard: React.FC<MigrationCardProps> = ({
+const ImportCard: React.FC<ImportCardProps> = ({
   children,
   activeStep,
   hideDescription,
   paddingTop,
 }) => {
 
-  const { providerName, migrationId } = useGlobalContext()
+  const { providerName, importId } = useGlobalContext()
   return (
     <div className="mb-8 md:mb-auto mt-24 md:mt-40">
       <div className="border border-slate-200 rounded-lg w-full md:w-3/4 p-8 shadow max-w-5xl mx-auto relative">
@@ -34,10 +34,10 @@ const MigrationCard: React.FC<MigrationCardProps> = ({
         <div>
           <div className="flex flex-col gap-2 md:flex-row justify-between pb-4">
             <h1 className="text-left text-2xl font-semibold">
-              Video migration tool
+              Video import tool
             </h1>
             <a
-              href="https://github.com/apivideo/api.video-migration-tool"
+              href="https://github.com/apivideo/api.video-import-tool"
               target="_blank"
               rel="noreferrer"
             >
@@ -64,7 +64,7 @@ const MigrationCard: React.FC<MigrationCardProps> = ({
                   1: { link: '/providers' },
                   2: { link: providerName ? `/${providerName?.toString().toLocaleLowerCase()}` : '' },
                   3: { link: providerName ? `/${providerName?.toString().toLocaleLowerCase()}/video-selection` : '' },
-                  4: {link: providerName && migrationId ? `/${providerName?.toString().toLocaleLowerCase()}/${migrationId}` : ''}
+                  4: {link: providerName && importId ? `/${providerName?.toString().toLocaleLowerCase()}/${importId}` : ''}
                 }}
                 steps={[
                   'Select source',
@@ -84,4 +84,4 @@ const MigrationCard: React.FC<MigrationCardProps> = ({
   );
 };
 
-export default MigrationCard;
+export default ImportCard;

@@ -8,7 +8,7 @@ import {
   callCreateApiVideoVideoApi,
   callGeneratePublicMp4Api,
   callGetImportableVideosApi,
-  callGetMigrationsApi,
+  callGetImportsApi,
   callGetPublicMp4UrlApi,
 } from '../service/ClientApiHelpers';
 import VideoSource, {
@@ -16,7 +16,7 @@ import VideoSource, {
   ProviderAuthenticationContext,
 } from '../types/common';
 import { buildId, formatSize } from '../utils/functions';
-import MigrationCard from './commons/MigrationCard';
+import ImportCard from './commons/ImportCard';
 import { useGlobalContext } from './context/Global';
 import Link from 'next/link';
 import { ChevronDown, ChevronUp } from 'react-feather';
@@ -24,7 +24,7 @@ import { ChevronDown, ChevronUp } from 'react-feather';
 type ColumnName = 'name' | 'size' | 'duration';
 
 interface VideoSourceExtended extends VideoSource {
-  alreadyMigrated: boolean;
+  alreadyImported: boolean;
 }
 
 const VideoSourceSelector: React.FC = () => {
@@ -37,9 +37,9 @@ const VideoSourceSelector: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<1 | -1>(1);
   const [createdCount, setCreatedCount] = useState<number>(0);
   const [fetchingVideos, setFetchingVideos] = useState<boolean>(true);
-  const [migrationId, _] = useState<string>(buildId(9));
+  const [importId, _] = useState<string>(buildId(9));
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-  const { providerName, providerAccessToken, setVideos, setMigrationId } =
+  const { providerName, providerAccessToken, setVideos, setImportId } =
     useGlobalContext();
   const router = useRouter();
 
@@ -56,21 +56,21 @@ const VideoSourceSelector: React.FC = () => {
       setAuthenticationContext(authenticationContext);
 
       (async () => {
-        const alreadyMigrated = await fetchAlreadyMigratedVideos(
+        const alreadyImported = await fetchAlreadyImportedVideos(
           apiVideoApiKey
         );
-        fetchVideos(authenticationContext, alreadyMigrated);
+        fetchVideos(authenticationContext, alreadyImported);
       })();
     }
   }, [router, providerName]);
 
-  const fetchAlreadyMigratedVideos = async (apiVideoApiKey: string) => {
-    const previousMigrations = await callGetMigrationsApi({
+  const fetchAlreadyImportedVideos = async (apiVideoApiKey: string) => {
+    const previousImports = await callGetImportsApi({
       apiKey: apiVideoApiKey,
       provider: providerName,
     });
 
-    return previousMigrations.videos.reduce(
+    return previousImports.videos.reduce(
       (
         acc: { [key: string]: { videoId: string; size: number } },
         current: Video
@@ -100,7 +100,7 @@ const VideoSourceSelector: React.FC = () => {
 
   const fetchVideos = async (
     authenticationContext: AuthenticationContext,
-    alreadyMigrated: { [key: string]: { videoId: string; size: number } },
+    alreadyImported: { [key: string]: { videoId: string; size: number } },
     videos: VideoSourceExtended[] = [],
     nextPageFetchDetails?: any
   ) => {
@@ -113,18 +113,18 @@ const VideoSourceSelector: React.FC = () => {
       videos = videos.concat(
         res.data.map((video) => ({
           ...video,
-          alreadyMigrated: alreadyMigrated[video.id]?.size == video.size,
+          alreadyImported: alreadyImported[video.id]?.size == video.size,
         }))
       );
       setVideoSources(videos);
       setSelectedIds(
-        videos.filter((v) => !v.alreadyMigrated).map((video) => video.id)
+        videos.filter((v) => !v.alreadyImported).map((video) => video.id)
       );
 
       if (res.hasMore) {
         fetchVideos(
           authenticationContext,
-          alreadyMigrated,
+          alreadyImported,
           videos,
           res.nextPageFetchDetails
         );
@@ -150,7 +150,7 @@ const VideoSourceSelector: React.FC = () => {
     } else {
       let arrSelected: string[] = [];
       videoSources
-        .filter((v) => !v.alreadyMigrated)
+        .filter((v) => !v.alreadyImported)
         .map(({ id }) => {
           arrSelected.push(id);
         });
@@ -224,7 +224,7 @@ const VideoSourceSelector: React.FC = () => {
       const res = (
         await callCreateApiVideoVideoApi({
           apiKey: authenticationContext?.apiVideoApiKey as string,
-          migrationId,
+          importId,
           providerName,
           videoSource: video,
         })
@@ -297,8 +297,8 @@ const VideoSourceSelector: React.FC = () => {
     a: VideoSourceExtended,
     b: VideoSourceExtended
   ): number => {
-    if (a.alreadyMigrated && !b.alreadyMigrated) return 1;
-    if (!a.alreadyMigrated && b.alreadyMigrated) return -1;
+    if (a.alreadyImported && !b.alreadyImported) return 1;
+    if (!a.alreadyImported && b.alreadyImported) return -1;
     switch (sortBy) {
       case 'name':
         return sortOrder * a.name.localeCompare(b.name);
@@ -311,7 +311,7 @@ const VideoSourceSelector: React.FC = () => {
 
   if (!fetchingVideos && (!videoSources || videoSources.length === 0)) {
     return (
-      <MigrationCard activeStep={3} paddingTop>
+      <ImportCard activeStep={3} paddingTop>
         <p>
           {`No videos could be found in the ${Providers[providerName]?.displayName} account you authenticated.`}
           <br />
@@ -328,7 +328,7 @@ const VideoSourceSelector: React.FC = () => {
           {`and authenticate a different ${Providers[providerName]?.displayName}
           account.`}
         </p>
-      </MigrationCard>
+      </ImportCard>
     );
   }
 
@@ -336,7 +336,7 @@ const VideoSourceSelector: React.FC = () => {
   const hasSizes = !!videoSources.find((v) => !!v.size);
 
   return (
-    <MigrationCard activeStep={3} paddingTop>
+    <ImportCard activeStep={3} paddingTop>
       {fetchingVideos ? (
         <p className="text-sm">
           {`Retrieving videos from ${Providers[providerName]?.displayName}
@@ -346,7 +346,7 @@ const VideoSourceSelector: React.FC = () => {
         <>
           <div className="pb-8">
             <h1 className="text-left font-semibold">
-              Select videos to migrate
+              Select videos to import
             </h1>
             <p className="text-sm">
               Please select the videos you would like to import. Once you have
@@ -358,7 +358,7 @@ const VideoSourceSelector: React.FC = () => {
           {!createdCount && (
             <>
               {/* Already imported videos */}
-              {videoSources.filter((video) => video.alreadyMigrated).length ? (
+              {videoSources.filter((video) => video.alreadyImported).length ? (
                 <>
                   {' '}
                   <div
@@ -369,16 +369,16 @@ const VideoSourceSelector: React.FC = () => {
                   >
                     <h1 className="font-semibold flex align-middle gap-2">
                       {isCollapsed ? <ChevronDown /> : <ChevronUp />}
-                      {`Already imported videos (${videoSources.filter((video) => video.alreadyMigrated)
+                      {`Already imported videos (${videoSources.filter((video) => video.alreadyImported)
                         .length
                         })`}
                     </h1>
                     <Link
-                      href={'/migrations'}
+                      href={'/imports'}
                       target="_blank"
                       className="rounded border border-slate-200 text-gray-500 font-semibold px-2"
                     >
-                      View previous migrations
+                      View previous imports
                     </Link>
                   </div>
                   <table
@@ -409,7 +409,7 @@ const VideoSourceSelector: React.FC = () => {
                       {videoSources
                         .sort((a, b) => compareFn(a, b))
                         .map((videoSource) => {
-                          if (videoSource.alreadyMigrated) {
+                          if (videoSource.alreadyImported) {
                             return (
                               <tr
                                 className="text-sm align-top font-semibold border-b border-slate-300 cursor-pointer last:border-0"
@@ -462,9 +462,9 @@ const VideoSourceSelector: React.FC = () => {
               ) : null}
 
               {/* New videos to import */}
-              <h1 className="font-semibold border-b border-slate-200 pb-2 mb-2">{`New videos to import (${videoSources.filter((v) => !v.alreadyMigrated).length
+              <h1 className="font-semibold border-b border-slate-200 pb-2 mb-2">{`New videos to import (${videoSources.filter((v) => !v.alreadyImported).length
                 })`}</h1>
-              {videoSources.filter((v) => !v.alreadyMigrated).length ? <table className="w-full">
+              {videoSources.filter((v) => !v.alreadyImported).length ? <table className="w-full">
                 <thead className="border-b">
                   <tr className="text-sm font-semibold pb-2">
                     <th colSpan={2}>
@@ -475,7 +475,7 @@ const VideoSourceSelector: React.FC = () => {
                           checked={
                             !(
                               videoSources
-                                .filter((v) => !v.alreadyMigrated)
+                                .filter((v) => !v.alreadyImported)
                                 .filter((v) => selectedIds.indexOf(v.id) === -1)
                                 .length > 0
                             )
@@ -518,7 +518,7 @@ const VideoSourceSelector: React.FC = () => {
                 <tbody>
                   {videoSources
                     .sort((a, b) => compareFn(a, b))
-                    .filter((v) => !v.alreadyMigrated)
+                    .filter((v) => !v.alreadyImported)
                     .map((videoSource, i) => (
                       <tr
                         className="text-sm align-top font-semibold border-b border-slate-300 cursor-pointer last:border-0"
@@ -535,7 +535,7 @@ const VideoSourceSelector: React.FC = () => {
                         </td>
                         <td className="py-2.5 md:w-6/12">
                           <div className="flex flex-col md:flex-row gap-2">
-                            {!videoSource.alreadyMigrated && (
+                            {!videoSource.alreadyImported && (
                               <Thumbnail
                                 className="h-[75px] w-[100px] object-contain bg-black"
                                 width={100}
@@ -585,9 +585,9 @@ const VideoSourceSelector: React.FC = () => {
               createApiVideoVideos()
                 .then((result) => {
                   setVideos(result.successes);
-                  setMigrationId(migrationId);
+                  setImportId(importId);
                   router.push(
-                    `/${providerName.toString().toLowerCase()}/${migrationId}`
+                    `/${providerName.toString().toLowerCase()}/${importId}`
                   );
                   // TODO manage video creation fails in result.failed
                 })
@@ -601,7 +601,7 @@ const VideoSourceSelector: React.FC = () => {
           </button>
         </>
       )}
-    </MigrationCard>
+    </ImportCard>
   );
 };
 

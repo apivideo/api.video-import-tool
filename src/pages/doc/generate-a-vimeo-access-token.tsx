@@ -18,7 +18,7 @@ const VimeoAccessToken: NextPage = () => {
 
         <div className="text-sm">
           <p>
-            To work, the Vimeo migration tool needs you to provide it with a
+            To work, the Vimeo import tool needs you to provide it with a
             Vimeo access token. This access token is used to retrieve the list
             of your videos, and to access the video source files.
           </p>
@@ -70,7 +70,7 @@ const VimeoAccessToken: NextPage = () => {
           <p>
             Just bellow, a new item will appear with the Token value
             (8011xxxx...xxx in the screenshoot above), this is the one
-            you&apos;ll have to copy/paste in the migration tool.
+            you&apos;ll have to copy/paste in the import tool.
           </p>
 
           <Image

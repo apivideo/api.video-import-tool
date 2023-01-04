@@ -58,7 +58,7 @@ const DropboxLogin = (props: ProviderLoginProps) => {
           'Please wait...'
         ) : (
           <div className="flex justify-center items-center gap-2">
-            Proceed to migration <ArrowRight size={14} strokeWidth={'.2rem'} />
+            Proceed to import <ArrowRight size={14} strokeWidth={'.2rem'} />
           </div>
         )}
       </button>}

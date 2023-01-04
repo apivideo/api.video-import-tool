@@ -4,15 +4,15 @@ import { VideoWithStatus } from '../../service/ApiVideoService';
 import { unparse } from 'papaparse';
 import { useRouter } from 'next/router';
 import { formatDate } from '../../utils/functions';
-import { Migration } from '../../types/common';
+import { Import } from '../../types/common';
 
-interface MigrationInfoProps {
-  migrations: Migration[];
+interface ImportInfoProps {
+  imports: Import[];
   allowLink?: boolean;
   showDate?: boolean;
 }
 
-const MigrationInfo: React.FC<MigrationInfoProps> = (props) => {
+const ImportInfo: React.FC<ImportInfoProps> = (props) => {
   const router = useRouter();
   const generateExportVideoItem = (video: VideoWithStatus) => {
     const metadata: { [key: string]: string } = {};
@@ -41,7 +41,7 @@ const MigrationInfo: React.FC<MigrationInfoProps> = (props) => {
         stringify(videos.map((v) => generateExportVideoItem(v)))
       )
     );
-    element.setAttribute('download', `api-video-migration-report.${format}`);
+    element.setAttribute('download', `api-video-import-report.${format}`);
 
     element.style.display = 'none';
     document.body.appendChild(element);
@@ -51,18 +51,18 @@ const MigrationInfo: React.FC<MigrationInfoProps> = (props) => {
     document.body.removeChild(element);
   };
 
-  const handleRowClick = (migrationId: string) => {
+  const handleRowClick = (importId: string) => {
     if (props.allowLink) {
-      router.push(`migrations/${migrationId}`);
+      router.push(`imports/${importId}`);
     }
   };
   return (
     <table className="w-full mt-6">
       <thead className="border-b border-slate-300">
         <tr className="text-sm pb-2 font-semibold">
-          <th className="lg:hidden font-semibold">Migrations</th>
+          <th className="lg:hidden font-semibold">Imports</th>
           <th className="hidden lg:table-cell font-semibold">Provider</th>
-          <th className="hidden lg:table-cell font-semibold">Migration-id</th>
+          <th className="hidden lg:table-cell font-semibold">Import-id</th>
           {props.showDate && (
             <th className="hidden lg:table-cell font-semibold">Date</th>
           )}
@@ -72,34 +72,34 @@ const MigrationInfo: React.FC<MigrationInfoProps> = (props) => {
       </thead>
 
       <tbody>
-        {props?.migrations?.length &&
-          props.migrations.map((migration: Migration) => {
+        {props?.imports?.length &&
+          props.imports.map((sImport: Import) => {
             return (
               <tr
-                key={migration.id}
+                key={sImport.id}
                 className={`border-b border-slate-300 flex flex-col lg:table-row text-sm align-top font-normal ${props.allowLink && 'cursor-pointer'
                   }`}
-                onClick={() => handleRowClick(migration.id)}
+                onClick={() => handleRowClick(sImport.id)}
               >
                 <td className="py-4 flex gap-2">
                   <img
-                    src={Providers[migration.providerName].imgSrc}
+                    src={Providers[sImport.providerName].imgSrc}
                     height={'16px'}
                     width={'16px'}
                   />
-                  {migration.providerName}
+                  {sImport.providerName}
                 </td>
-                <td className="py-4">{migration.id}</td>
+                <td className="py-4">{sImport.id}</td>
                 {props.showDate && (
-                  <td className="py-4">{formatDate(migration.date)}</td>
+                  <td className="py-4">{formatDate(sImport.date)}</td>
                 )}
-                <td className="py-4">{migration.videos.length}</td>
+                <td className="py-4">{sImport.videos.length}</td>
                 <td className="py-4">
                   {' '}
                   <a
                     href="#"
                     className="text-blue-500 underline"
-                    onClick={() => download('csv', migration.videos)}
+                    onClick={() => download('csv', sImport.videos)}
                   >
                     csv
                   </a>
@@ -107,7 +107,7 @@ const MigrationInfo: React.FC<MigrationInfoProps> = (props) => {
                   <a
                     href="#"
                     className="text-blue-500 underline"
-                    onClick={() => download('json', migration.videos)}
+                    onClick={() => download('json', sImport.videos)}
                   >
                     json
                   </a>
@@ -120,4 +120,4 @@ const MigrationInfo: React.FC<MigrationInfoProps> = (props) => {
   );
 };
 
-export default MigrationInfo;
+export default ImportInfo;
