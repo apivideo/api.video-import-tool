@@ -43,7 +43,7 @@ const VimeoAccessToken: NextPage = () => {
             </a>
             , and click on Create an app
           </p>
-          <Image src="/vimeo-1.svg" width={1030} height={140} alt="vimeo-1" />
+          <Image src="/vimeo-1.svg" width={1030} height={140} alt="vimeo-1" priority />
 
           <h2 className="text-base font-semibold mb-4 mt-4">
             Step 2/2 - Generate access token
