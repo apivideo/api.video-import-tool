@@ -118,7 +118,7 @@ const VideoImportTable: React.FC<VideoImportTableProps> = (props) => {
             {hlsQualities?.length ? (
               <div className="flex gap-2">
                 <div className="text-sky-900">HLS:</div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   {hlsQualities.map((q, i) => (
                     <span
                       className={`${statusColors[`${q.status}`]
