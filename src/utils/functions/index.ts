@@ -6,6 +6,19 @@ export const formatDate = (date: Date) => {
   return `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
 };
 
+export const formatDuration = (durationSec: number) => {
+  const seconds = Math.round((durationSec % 60) * 100) / 100;
+  const minutes = Math.floor(durationSec / 60) % 60;
+  const hours = Math.floor(durationSec / 3600) % 3600;
+
+  const twoDigits = (t: number) => (t < 10 ? '0' + t : t);
+
+  if (hours > 0)
+    return `${hours}h ${twoDigits(minutes)}m ${twoDigits(seconds)}s`;
+  if (minutes > 0) return `${minutes}m ${twoDigits(seconds)}s`;
+  return `${twoDigits(seconds)}s`;
+};
+
 export const buildId = (length: number) => {
   let result = '';
   let characters =

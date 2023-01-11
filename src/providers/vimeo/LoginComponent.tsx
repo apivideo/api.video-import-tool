@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProviderLoginProps } from '..';
+import { ProviderLoginProps } from '../types';
 
 const VimeoLogin = (props: ProviderLoginProps) => {
   const [vimeoAccessToken, setVimeoAccessToken] = React.useState<string>('');
