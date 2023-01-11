@@ -1,8 +1,12 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-import Image from 'next/image';
+import Providers from '../providers';
+import { joinStrings } from '../utils/functions';
 
 const HomePage: React.FC = () => {
+
+
   return (
     <div className="flex items-center flex-col max-w-xs sm:max-w-2xl pt-36 self-center mb-auto">
       <Image
@@ -16,7 +20,7 @@ const HomePage: React.FC = () => {
         Video import tool
       </h1>
       <p className="text-gray-500 font-semibold py-2 text-center">
-        Import your videos from vimeo or dropbox directly to api.video
+        Import your videos from {joinStrings(Object.values(Providers).map((a) => a.displayName), "or")} directly to api.video
       </p>
       <p className="text-sm text-center">
         We built this tool to help you quickly import your already hosted videos

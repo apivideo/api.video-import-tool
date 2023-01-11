@@ -1,14 +1,13 @@
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle } from 'react-feather';
-import {
-  ImportProvider,
-  OptionalFeatureFlag,
-  Providers,
+import Providers, {
+  ProviderName
 } from '../providers';
+import { ImportProvider, OptionalFeatureFlag } from '../providers/types';
 import {
   callValidateProviderCredentialsApi,
-  callVerifyApiVideoApiKeyApi,
+  callVerifyApiVideoApiKeyApi
 } from '../service/ClientApiHelpers';
 import AuthDisclaimer from './commons/AuthDisclaimer';
 import ImportCard from './commons/ImportCard';
@@ -38,7 +37,7 @@ const Authenticate: React.FC = () => {
 
   useEffect(() => {
     if (router?.query?.provider)
-      setProviderName(router.query.provider.toString().toUpperCase());
+      setProviderName(router.query.provider.toString().toUpperCase() as ProviderName);
   }, [router, setProviderName]);
 
   const validateApiVideoAuthentication = async (): Promise<string | null> => {
@@ -89,7 +88,7 @@ const Authenticate: React.FC = () => {
     }
   };
 
-  const provider: ImportProvider | undefined = providerName
+  const provider: ImportProvider | undefined = providerName && Providers
     ? Providers[providerName]
     : undefined;
 
@@ -124,7 +123,7 @@ const Authenticate: React.FC = () => {
           <h1 className="text-left font-semibold">Authentication</h1>
           <div className="hidden md:block">
             {' '}
-            <AuthDisclaimer providerName={providerName as string} />
+            <AuthDisclaimer providerName={providerName} authenticationScopes={provider?.authenticationScopes} />
           </div>
         </div>
         <div className="flex flex-col md:w-2/4">
@@ -170,7 +169,7 @@ const Authenticate: React.FC = () => {
           )}
           <div className="block pt-4 md:hidden">
             {' '}
-            <AuthDisclaimer providerName={providerName as string} />
+            <AuthDisclaimer providerName={providerName} authenticationScopes={provider?.authenticationScopes} />
           </div>
         </div>
       </div>

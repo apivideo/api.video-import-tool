@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ProviderName, Providers } from '../../../providers';
+import Providers, { ProviderName } from '../../../providers';
 import { OauthAccessToken } from '../../../service/OAuthHelpers';
 import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 

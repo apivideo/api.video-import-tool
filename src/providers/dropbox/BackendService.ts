@@ -1,7 +1,7 @@
 import { DROPBOX_CLIENT_ID, DROPBOX_CLIENT_SECRET, DROPBOX_REDIRECT_URL } from "../../env";
+import { getOauthAccessTokenCall, OauthAccessToken } from "../../service/OAuthHelpers";
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
-import { getOauthAccessTokenCall, OauthAccessToken } from "../OAuthHelpers";
-import AbstractProviderService from "./AbstractProviderService";
+import AbstractProviderService from "../AbstractProviderService";
 
 type DropboxSearchApiResponse = {
     has_more: boolean;

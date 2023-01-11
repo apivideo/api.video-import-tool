@@ -15,7 +15,7 @@ interface IGlobalContextProps {
 
 export const GlobalContext = React.createContext<IGlobalContextProps>({
     importId: '',
-    providerName: '',
+    providerName: '' as ProviderName,
     providerAccessToken: '',
     videos: [],
     setProviderAccessToken: () => { },
@@ -26,7 +26,7 @@ export const GlobalContext = React.createContext<IGlobalContextProps>({
 
 export const GlobalContextProvider = (props: { children: React.ReactNode }) => {
     const [importId, setImportId] = useState<string>('');
-    const [providerName, setProviderName] = useState<ProviderName>('');
+    const [providerName, setProviderName] = useState<ProviderName>('' as ProviderName);
     const [videos, setVideos] = useState<Video[]>([]);
     const [providerAccessToken, setProviderAccessToken] = useState<string>('')
 

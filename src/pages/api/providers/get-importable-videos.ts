@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ProviderName, Providers } from '../../../providers';
+import Providers, { ProviderName } from '../../../providers';
 import VideoSource, { ApiResponse, AuthenticationContext, ErrorResponse, MethodNotAllowedResponse, Page, SuccessResponse } from '../../../types/common';
 
 

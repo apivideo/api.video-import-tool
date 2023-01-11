@@ -1,7 +1,7 @@
+import { OauthAccessToken } from "../../service/OAuthHelpers";
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
 import { uppercaseFirstLetter } from "../../utils/functions";
-import { OauthAccessToken } from "../OAuthHelpers";
-import AbstractProviderService from "./AbstractProviderService";
+import AbstractProviderService from "../AbstractProviderService";
 
 
 type VimeoVideo = {

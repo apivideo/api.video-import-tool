@@ -1,9 +1,9 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { ArrowRight, Check } from 'react-feather';
+import { ProviderLoginProps } from '..';
 import { DROPBOX_CLIENT_ID, DROPBOX_REDIRECT_URL } from '../../env';
 import { GetOauthAccessTokenRequestResponse } from '../../pages/api/providers/get-oauth-access-token';
-import { ProviderLoginProps } from '../../providers';
 import { callGetOAuthAccessTokenApi } from '../../service/ClientApiHelpers';
 
 const DropboxLogin = (props: ProviderLoginProps) => {

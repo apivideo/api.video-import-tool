@@ -21,3 +21,16 @@ export const buildId = (length: number) => {
 export const uppercaseFirstLetter = (word: string) => {
   return word.charAt(0).toUpperCase() + word.slice(1);
 };
+
+export const arrayContains = <T,> (features: T[], feature: T) => features.indexOf(feature) !== -1;
+
+
+export const joinStrings = (list: string[], lastSeparator: string) => {
+  if (list.length === 1) {
+    return list[0];
+  }
+  if (list.length === 2) {
+    return list.join(` ${lastSeparator} `);
+  }
+  return list.slice(0, -1).join(', ') + ` ${lastSeparator} ` + list.slice(-1);
+};
