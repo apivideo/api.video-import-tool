@@ -26,6 +26,7 @@ export default async function handler(
             const video = await providerService.generatePublicMp4(body.video);
             res.status(201).send(SuccessResponse({ video }));
         } catch (e: any) {
+            console.error(e);
             res.status(500).send(ErrorResponse(e.message));
         }
     } else {

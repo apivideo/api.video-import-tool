@@ -27,6 +27,7 @@ export default async function handler(
 
             res.status(200).json(SuccessResponse({ videos: videosWithStatuses }));
         } catch (e: any) {
+            console.error(e);
             res.status(500).send(ErrorResponse(e.message));
         }
     } else {

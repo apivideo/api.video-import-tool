@@ -25,6 +25,7 @@ export default async function handler(
             const token = await providerService.getOauthAccessToken(body.code)
             res.status(201).send(SuccessResponse(token));
         } catch (e: any) {
+            console.error(e);
             res.status(500).send(ErrorResponse(e.message));
         }
     } else {
