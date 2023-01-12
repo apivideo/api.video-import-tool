@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ProviderName, Providers } from '../../../providers';
+import Providers, { ProviderName } from '../../../providers';
 import { OauthAccessToken } from '../../../service/OAuthHelpers';
 import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
@@ -25,6 +25,7 @@ export default async function handler(
             const token = await providerService.getOauthAccessToken(body.code)
             res.status(201).send(SuccessResponse(token));
         } catch (e: any) {
+            console.error(e);
             res.status(500).send(ErrorResponse(e.message));
         }
     } else {

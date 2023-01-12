@@ -1,5 +1,5 @@
-import VideoSource, { Page } from "../../types/common";
-import { OauthAccessToken } from "../OAuthHelpers";
+import { OauthAccessToken } from "../service/OAuthHelpers";
+import VideoSource, { Page } from "../types/common";
 
 abstract class AbstractProviderService {
     abstract getImportableVideos(nextPageFetchDetails?: any): Promise<Page<VideoSource>>;

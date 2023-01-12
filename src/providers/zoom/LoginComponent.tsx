@@ -1,23 +1,23 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { ArrowRight, Check } from 'react-feather';
-import { DROPBOX_CLIENT_ID, DROPBOX_REDIRECT_URL } from '../../env';
+import { ZOOM_CLIENT_ID, ZOOM_REDIRECT_URL } from '../../env';
 import { GetOauthAccessTokenRequestResponse } from '../../pages/api/providers/get-oauth-access-token';
-import { ProviderLoginProps } from '../../providers';
 import { callGetOAuthAccessTokenApi } from '../../service/ClientApiHelpers';
+import { ProviderLoginProps } from '../types';
 
-const DropboxLogin = (props: ProviderLoginProps) => {
-  const [dropboxAccessToken, setDropboxAccessToken] = useState<string>('');
+const ZoomLogin = (props: ProviderLoginProps) => {
+  const [zoomAccessToken, setZoomAccessToken] = useState<string>('');
   const router = useRouter();
 
   useEffect(() => {
     if (router.query.code) {
       callGetOAuthAccessTokenApi({
-        provider: 'DROPBOX',
+        provider: 'ZOOM',
         code: router.query.code as string,
       }).then((res: GetOauthAccessTokenRequestResponse) => {
         if (res.access_token) {
-          setDropboxAccessToken(res.access_token);
+          setZoomAccessToken(res.access_token);
           props.onAccessTokenChanged(res.access_token);
         }
       });
@@ -27,28 +27,28 @@ const DropboxLogin = (props: ProviderLoginProps) => {
   return (
     <div className="flex flex-col mb-3.5">
       <div className="flex flex-col gap-4">
-        <label>Authorize access to Dropbox</label>
+        <label>Authorize access to Zoom</label>
         <button
           onClick={() =>
             router.push(
-              `https://www.dropbox.com/oauth2/authorize?client_id=${DROPBOX_CLIENT_ID}&response_type=code&redirect_uri=${DROPBOX_REDIRECT_URL}`
+              `https://zoom.us/oauth/authorize?response_type=code&client_id=${ZOOM_CLIENT_ID}&redirect_uri=${ZOOM_REDIRECT_URL}`
             )
           }
           className="bg-dropbox text-sm font-semibold w-full"
         >
-          {dropboxAccessToken ? (
+          {zoomAccessToken ? (
             <div className="flex justify-center items-center gap-2">
               <Check size={20} strokeWidth={'.2rem'} />
-              Successfully signed into Dropbox
+              Successfully signed into Zoom
             </div>
           ) : (
-            'Sign in to Dropbox'
+            'Sign in to Zoom'
           )}
         </button>
       </div>
 
       <p className="text-sm text-red-600">{props.errorMessage}</p>
-      {dropboxAccessToken && <button
+      {zoomAccessToken && <button
         className={`text-sm font-semibold w-full mt-3 ${props.buttonDisabled ? 'bg-slate-300' : 'bg-black'
       }`}
         disabled={props.buttonDisabled}
@@ -67,4 +67,4 @@ const DropboxLogin = (props: ProviderLoginProps) => {
   );
 };
 
-export default DropboxLogin;
+export default ZoomLogin;

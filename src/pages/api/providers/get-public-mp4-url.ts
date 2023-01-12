@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ProviderName, Providers } from '../../../providers';
+import Providers, { ProviderName } from '../../../providers';
 import VideoSource, { ApiResponse, ErrorResponse, MethodNotAllowedResponse, ProviderAuthenticationContext, SuccessResponse } from '../../../types/common';
 
 
@@ -26,6 +26,7 @@ export default async function handler(
             const video = await providerService.getPublicMp4Url(body.video);
             res.status(201).send(SuccessResponse({ video }));
         } catch (e: any) {
+            console.error(e);
             res.status(500).send(ErrorResponse(e.message));
         }
     } else {

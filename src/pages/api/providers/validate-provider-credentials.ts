@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ProviderName, Providers } from '../../../providers';
+import Providers, { ProviderName } from '../../../providers';
 import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, ProviderAuthenticationContext, SuccessResponse } from '../../../types/common';
 
 
@@ -25,6 +25,7 @@ export default async function handler(
             const errorMessage = await providerService.validateCredentials();
             res.status(201).send(SuccessResponse({ error: errorMessage }));
         } catch (e: any) {
+            console.error(e);
             res.status(500).send(ErrorResponse(e.message));
         }
     } else {

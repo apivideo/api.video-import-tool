@@ -1,27 +1,24 @@
 import Video from '@api.video/nodejs-client/lib/model/Video';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import Thumbnail from './commons/Thumbnail';
 
-import { OptionalFeatureFlag, Providers } from '../providers';
+import Link from 'next/link';
+import { ChevronDown, ChevronUp } from 'react-feather';
+import Providers from '../providers';
+import { OptionalFeatureFlag, VideoSourceTableColumn } from '../providers/types';
 import {
   callCreateApiVideoVideoApi,
-  callGeneratePublicMp4Api,
-  callGetImportableVideosApi,
-  callGetImportsApi,
-  callGetPublicMp4UrlApi,
+  callGeneratePublicMp4Api, callGetImportableVideosApi, callGetImportsApi,
+  callGetPublicMp4UrlApi
 } from '../service/ClientApiHelpers';
 import VideoSource, {
   AuthenticationContext,
-  ProviderAuthenticationContext,
+  ProviderAuthenticationContext
 } from '../types/common';
 import { buildId, formatSize } from '../utils/functions';
 import ImportCard from './commons/ImportCard';
 import { useGlobalContext } from './context/Global';
-import Link from 'next/link';
-import { ChevronDown, ChevronUp } from 'react-feather';
-
-type ColumnName = 'name' | 'size' | 'duration';
+import VideoSourceTable from './VideoSourceTable';
 
 interface VideoSourceExtended extends VideoSource {
   alreadyImported: boolean;
@@ -33,7 +30,7 @@ const VideoSourceSelector: React.FC = () => {
   const [videoSources, setVideoSources] = useState<VideoSourceExtended[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [sortBy, setSortBy] = useState<ColumnName>('name');
+  const [sortBy, setSortBy] = useState<VideoSourceTableColumn | null>();
   const [sortOrder, setSortOrder] = useState<1 | -1>(1);
   const [createdCount, setCreatedCount] = useState<number>(0);
   const [fetchingVideos, setFetchingVideos] = useState<boolean>(true);
@@ -42,6 +39,8 @@ const VideoSourceSelector: React.FC = () => {
   const { providerName, providerAccessToken, setVideos, setImportId } =
     useGlobalContext();
   const router = useRouter();
+
+  const provider = Providers[providerName as keyof typeof Providers];
 
   useEffect(() => {
     if (!providerName || !providerAccessToken) {
@@ -116,7 +115,7 @@ const VideoSourceSelector: React.FC = () => {
           alreadyImported: alreadyImported[video.id]?.size == video.size,
         }))
       );
-      setVideoSources(videos);
+      setVideoSources(sortVideos(videos, 1, null));
       setSelectedIds(
         videos.filter((v) => !v.alreadyImported).map((video) => video.id)
       );
@@ -158,18 +157,7 @@ const VideoSourceSelector: React.FC = () => {
     }
   };
 
-  const formatDuration = (durationSec: number) => {
-    const seconds = Math.round((durationSec % 60) * 100) / 100;
-    const minutes = Math.floor(durationSec / 60) % 60;
-    const hours = Math.floor(durationSec / 3600) % 3600;
 
-    const twoDigits = (t: number) => (t < 10 ? '0' + t : t);
-
-    if (hours > 0)
-      return `${hours}h ${twoDigits(minutes)}m ${twoDigits(seconds)}s`;
-    if (minutes > 0) return `${minutes}m ${twoDigits(seconds)}s`;
-    return `${twoDigits(seconds)}s`;
-  };
 
   const getSelectedVideos = (): VideoSourceExtended[] => {
     return videoSources.filter((a) => selectedIds.indexOf(a.id) > -1);
@@ -285,29 +273,29 @@ const VideoSourceSelector: React.FC = () => {
     );
   };
 
-  const onSortClick = (column: ColumnName) => {
-    if (sortBy === column) {
-      setSortOrder(-sortOrder as 1 | -1);
+  const onSortClick = (column?: VideoSourceTableColumn) => {
+    let newSortOrder = sortOrder;
+    let newSortBy = sortBy;
+    if ((!column && !sortBy) || sortBy?.attributeName === column?.attributeName) {
+      newSortOrder = -sortOrder as 1 | -1;
     } else {
-      setSortBy(column);
+      newSortBy = column || null;
     }
+
+    setVideoSources(sortVideos(videoSources, newSortOrder, newSortBy || null));
+    
+    setSortOrder(newSortOrder);
+    setSortBy(newSortBy);
   };
 
-  const compareFn = (
-    a: VideoSourceExtended,
-    b: VideoSourceExtended
-  ): number => {
-    if (a.alreadyImported && !b.alreadyImported) return 1;
-    if (!a.alreadyImported && b.alreadyImported) return -1;
-    switch (sortBy) {
-      case 'name':
-        return sortOrder * a.name.localeCompare(b.name);
-      case 'duration':
-        return sortOrder * ((a.duration || 0) - (b.duration || 0));
-      case 'size':
-        return sortOrder * ((a.size || 0) - (b.size || 0));
-    }
-  };
+  const sortVideos = (videos: VideoSourceExtended[], order: number, column: VideoSourceTableColumn | null): VideoSourceExtended[] => {
+    return [...videos].sort((a, b) => {
+      if (column) {
+        return column.sortFunction(a, b, order);
+      }
+      return order * a.name.localeCompare(b.name)
+    });
+  }
 
   if (!fetchingVideos && (!videoSources || videoSources.length === 0)) {
     return (
@@ -332,9 +320,6 @@ const VideoSourceSelector: React.FC = () => {
     );
   }
 
-  const hasDurations = !!videoSources.find((v) => !!v.duration);
-  const hasSizes = !!videoSources.find((v) => !!v.size);
-
   return (
     <ImportCard activeStep={3} paddingTop>
       {fetchingVideos ? (
@@ -354,11 +339,11 @@ const VideoSourceSelector: React.FC = () => {
               process.
             </p>
           </div>
-
+          
           {!createdCount && (
             <>
-              {/* Already imported videos */}
-              {videoSources.filter((video) => video.alreadyImported).length ? (
+              {videoSources
+                .filter((video) => video.alreadyImported).length > 0 &&
                 <>
                   {' '}
                   <div
@@ -381,200 +366,27 @@ const VideoSourceSelector: React.FC = () => {
                       View previous imports
                     </Link>
                   </div>
-                  <table
-                    className={`w-full mb-8 ${isCollapsed ? 'collapse' : 'visible'
-                      }`}
-                  >
-                    <thead className="border-b">
-                      <tr className="text-sm font-semibold pb-2">
-                        <th>Video</th>
-                        {hasSizes && (
-                          <th className="hidden md:block">
-                            <a href="#" onClick={() => onSortClick('size')}>
-                              Size
-                            </a>
-                          </th>
-                        )}
-                        {hasDurations && (
-                          <th className="hidden md:table-cell">
-                            <a href="#" onClick={() => onSortClick('duration')}>
-                              Duration
-                            </a>
-                          </th>
-                        )}
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {videoSources
-                        .sort((a, b) => compareFn(a, b))
-                        .map((videoSource) => {
-                          if (videoSource.alreadyImported) {
-                            return (
-                              <tr
-                                className="text-sm align-top font-semibold border-b border-slate-300 cursor-pointer last:border-0"
-                                key={`${videoSource.id}`}
-                                onClick={() => toggleSelection(videoSource.id)}
-                              >
-                                <td className="py-2.5 md:w-6/12">
-                                  <div className="flex flex-col md:flex-row gap-2">
-                                    <Thumbnail
-                                      className="h-[75px] w-[100px] object-contain bg-black"
-                                      width={100}
-                                      height={75}
-                                      src={videoSource.thumbnail}
-                                      alt={videoSource.name}
-                                    />
-
-                                    {videoSource.name}
-                                    {videoSource.size && (
-                                      <span className="block md:hidden">
-                                        {formatSize(videoSource.size)}
-                                      </span>
-                                    )}
-                                    {hasDurations && (
-                                      <span className="block md:hidden">
-                                        {videoSource.duration &&
-                                          formatDuration(videoSource.duration)}
-                                      </span>
-                                    )}
-                                  </div>
-                                </td>
-
-                                {videoSource.size && (
-                                  <td className="py-2.5 hidden md:table-cell">
-                                    {formatSize(videoSource.size)}
-                                  </td>
-                                )}
-                                {hasDurations && (
-                                  <td className="py-2.5 hidden md:table-cell">
-                                    {videoSource.duration &&
-                                      formatDuration(videoSource.duration)}
-                                  </td>
-                                )}
-                              </tr>
-                            );
-                          }
-                        })}
-                    </tbody>
-                  </table>
+                  <VideoSourceTable
+                    isCollapsed={isCollapsed}
+                    onSortClick={onSortClick}
+                    videoSourceTableSettings={provider.videoTableSettings}
+                    videoSources={videoSources.filter((video) => video.alreadyImported)}
+                  ></VideoSourceTable>
                 </>
-              ) : null}
-
-              {/* New videos to import */}
-              <h1 className="font-semibold border-b border-slate-200 pb-2 mb-2">{`New videos to import (${videoSources.filter((v) => !v.alreadyImported).length
-                })`}</h1>
-              {videoSources.filter((v) => !v.alreadyImported).length ? <table className="w-full">
-                <thead className="border-b">
-                  <tr className="text-sm font-semibold pb-2">
-                    <th colSpan={2}>
-                      <div className="flex gap-2 items-center">
-                        <input
-                          className="h-4 w-4 cursor-pointer"
-                          type="checkbox"
-                          checked={
-                            !(
-                              videoSources
-                                .filter((v) => !v.alreadyImported)
-                                .filter((v) => selectedIds.indexOf(v.id) === -1)
-                                .length > 0
-                            )
-                          }
-                          onChange={() => multiSelectionToggle()}
-                        />
-                        <a
-                          href="#"
-                          className="hidden md:block"
-                          onClick={() => onSortClick('name')}
-                        >
-                          Video
-                        </a>
-                        <a
-                          href="#"
-                          className="block md:hidden"
-                          onClick={() => onSortClick('name')}
-                        >
-                          Select all
-                        </a>
-                      </div>
-                    </th>
-                    {hasSizes && (
-                      <th className="hidden md:block">
-                        <a href="#" onClick={() => onSortClick('size')}>
-                          Size
-                        </a>
-                      </th>
-                    )}
-                    {hasDurations && (
-                      <th className="hidden md:table-cell">
-                        <a href="#" onClick={() => onSortClick('duration')}>
-                          Duration
-                        </a>
-                      </th>
-                    )}
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {videoSources
-                    .sort((a, b) => compareFn(a, b))
-                    .filter((v) => !v.alreadyImported)
-                    .map((videoSource, i) => (
-                      <tr
-                        className="text-sm align-top font-semibold border-b border-slate-300 cursor-pointer last:border-0"
-                        key={`${videoSource.id}`}
-                        onClick={() => toggleSelection(videoSource.id)}
-                      >
-                        <td className="w-6 pt-2.5">
-                          <input
-                            type="checkbox"
-                            className="h-4 w-4 cursor-pointer"
-                            checked={selectedIds.indexOf(videoSource.id) !== -1}
-                            onChange={(a) => toggleSelection(videoSource.id)}
-                          />
-                        </td>
-                        <td className="py-2.5 md:w-6/12">
-                          <div className="flex flex-col md:flex-row gap-2">
-                            {!videoSource.alreadyImported && (
-                              <Thumbnail
-                                className="h-[75px] w-[100px] object-contain bg-black"
-                                width={100}
-                                height={75}
-                                src={videoSource.thumbnail}
-                                alt={videoSource.name}
-                              />
-                            )}
-
-                            {videoSource.name}
-                            {videoSource.size && (
-                              <span className="block md:hidden">
-                                {formatSize(videoSource.size)}
-                              </span>
-                            )}
-                            {hasDurations && (
-                              <span className="block md:hidden">
-                                {videoSource.duration &&
-                                  formatDuration(videoSource.duration)}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {videoSource.size && (
-                          <td className="py-2.5 hidden md:table-cell">
-                            {formatSize(videoSource.size)}
-                          </td>
-                        )}
-                        {hasDurations && (
-                          <td className="py-2.5 hidden md:table-cell">
-                            {videoSource.duration &&
-                              formatDuration(videoSource.duration)}
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                </tbody>
-              </table> : null}
+              }
+              
+              <h1 className="font-semibold border-b border-slate-200 pb-2 mb-2">{`New videos to import (${videoSources.filter((v) => !v.alreadyImported).length})`}</h1>
+              <VideoSourceTable
+                isCollapsed={false}
+                onSortClick={onSortClick}
+                videoSourceTableSettings={provider.videoTableSettings}
+                videoSources={videoSources.filter((video) => !video.alreadyImported)}
+                selection={{
+                  toggleSelection,
+                  selectedIds,
+                  multiSelectionToggle
+                }}
+              ></VideoSourceTable>
             </>
           )}
           <button
