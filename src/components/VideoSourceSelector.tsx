@@ -115,7 +115,7 @@ const VideoSourceSelector: React.FC = () => {
           alreadyImported: alreadyImported[video.id]?.size == video.size,
         }))
       );
-      setVideoSources(videos);
+      setVideoSources(sortVideos(videos, 1, null));
       setSelectedIds(
         videos.filter((v) => !v.alreadyImported).map((video) => video.id)
       );
@@ -282,17 +282,20 @@ const VideoSourceSelector: React.FC = () => {
       newSortBy = column || null;
     }
 
-    setVideoSources([...videoSources].sort((a, b) => {
-      if (newSortBy) {
-        return newSortBy.sortFunction(a, b, newSortOrder);
-      }
-      return sortOrder * a.name.localeCompare(b.name)
-    }));
-
+    setVideoSources(sortVideos(videoSources, newSortOrder, newSortBy || null));
+    
     setSortOrder(newSortOrder);
     setSortBy(newSortBy);
   };
 
+  const sortVideos = (videos: VideoSourceExtended[], order: number, column: VideoSourceTableColumn | null): VideoSourceExtended[] => {
+    return [...videos].sort((a, b) => {
+      if (column) {
+        return column.sortFunction(a, b, order);
+      }
+      return order * a.name.localeCompare(b.name)
+    });
+  }
 
   if (!fetchingVideos && (!videoSources || videoSources.length === 0)) {
     return (
