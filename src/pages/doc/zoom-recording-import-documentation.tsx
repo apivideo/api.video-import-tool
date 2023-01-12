@@ -26,7 +26,7 @@ const VimeoAccessToken: NextPage = () => {
             </p>
             <ul className="list-disc ml-5">
             <li>by installing the app from the Zoom market place: <a href="https://zoom.us/oauth/authorize?response_type=code&client_id=NWItzjLDRHOZErQncaO1fA&redirect_uri=https://import.api.video/zoom" target="_blank" rel="noopener noreferrer"><img src="https://marketplacecontent.zoom.us/zoom_marketplace/img/add_to_zoom.png" style={{height: "32px", display: "inline"}} height="32" alt="Add to ZOOM" /></a></li>
-            <li>by going on <a href="https://import.api.video/zoom">https://import.api.video/zoom</a> and clicking on "Sign in to Zoom"</li>            
+            <li>by going on <a href="https://import.api.video/zoom">https://import.api.video/zoom</a> and clicking on &quot;Sign in to Zoom&quot;</li>            
             </ul>
           
         </div>
@@ -35,7 +35,7 @@ const VimeoAccessToken: NextPage = () => {
             Using the application
           </h2>
           <p>Once the application is installer, you will be able to select the recording you would like to import to api.video</p>
-          <p>Once you have selected the recording, after clicking on "Import", you will be redirected import progress page</p>
+          <p>Once you have selected the recording, after clicking on &quot;Import&quot;, you will be redirected import progress page</p>
           <p>Your recording will be quickly imported and you will be able to access it from the <a href="https://dashboard.api.video">api.video dashboard</a></p>
       </div>
     </div>
