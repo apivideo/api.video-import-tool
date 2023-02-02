@@ -44,7 +44,8 @@ const VimeoProvider: ImportProvider = {
         sortFunction: (a: any, b: any, order: number) => order * (a.size - b.size),
         formatter: (v) => formatDuration(v),
       }]
-    }
+    },
+    apiVideoAuthenticationMode: 'auth0'
   };
 
   export default VimeoProvider;

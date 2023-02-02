@@ -1,27 +1,22 @@
 import Video from '@api.video/nodejs-client/lib/model/Video';
 import type { NextPage } from 'next';
 import { useEffect, useState } from 'react';
-import { callGetImportsApi } from '../../service/ClientApiHelpers';
+import ApiKeySelector from '../../components/commons/ApiKeySelector';
+import ImportCard from '../../components/commons/ImportCard';
 import ImportInfo from '../../components/commons/ImportInfo';
 import { ProviderName } from '../../providers';
-import ImportCard from '../../components/commons/ImportCard';
+import { callGetImportsApi } from '../../service/ClientApiHelpers';
 import { Import } from '../../types/common';
 
 const ImportsHome: NextPage = () => {
-  const [apiVideoApiKey, setApiVideoApiKey] = useState<string>();
-  const [apiVideoErrorMessage, setApiVideoErrorMessage] = useState<string>('');
+  const [apiVideoApiKey, setApiVideoApiKey] = useState<string | null>(null);
+  const [apiVideoErrorMessage, setApiVideoErrorMessage] = useState<string | null>(null);
   const [noResults, setNoResults] = useState<string>('');
   const [imports, setImports] = useState<Import[]>();
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const apiKey = sessionStorage.getItem('apiVideoApiKey');
-    if (apiKey) {
-      setApiVideoApiKey(apiVideoApiKey);
-      getImportedVideos(apiKey);
-    } else {
-      setLoading(false);
-    }
+    
   }, []);
 
   const getImportedVideos = (apiKey: string) => {
@@ -73,6 +68,7 @@ const ImportsHome: NextPage = () => {
         })
         .catch((err) => {
           setApiVideoErrorMessage(err.message);
+          setLoading(false);
         });
   };
 
@@ -92,31 +88,17 @@ const ImportsHome: NextPage = () => {
             imports.
           </p>
         </div>
-        <div className="flex flex-col lg:w-3/6">
-          <div className="flex flex-col">
-            <label htmlFor="apiVideoApiKey" className="pb-4">
-              Enter your api.video API key
-            </label>
-            <input
-              className={`h-10 ${apiVideoErrorMessage
-                ? 'outline outline-red-500 outline-2'
-                : 'outline outline-slate-300 rounded-lg shadow outline-1'
-                }`}
-              id="apiVideoApiKey"
-              type={'password'}
-              value={apiVideoApiKey}
-              onChange={(v) => {
-                setNoResults('');
-                setApiVideoErrorMessage('');
-                sessionStorage.setItem('apiVideoApiKey', v.target.value);
-                setApiVideoApiKey(v.target.value);
+        <div className="flex flex-col md:w-2/4">
+          <div className="flex flex-col gap-4">
+            <ApiKeySelector
+              mode={'auth0'}
+              onApiKeyChange={(apiKey) => {
+                setApiVideoApiKey(apiKey);
+                setApiVideoErrorMessage(null);
               }}
-            ></input>
-            {apiVideoErrorMessage && (
-              <p className="text-sm text-red-600 pt-2">
-                {apiVideoErrorMessage}
-              </p>
-            )}
+              errorMessage={apiVideoErrorMessage}
+              apiKey={apiVideoApiKey}
+            />
           </div>
           <button
             className={`mt-4 ${!apiVideoApiKey ? 'bg-slate-300' : 'bg-black'

@@ -2,6 +2,7 @@ import { CreateApiVideoVideoRequestBody, CreateApiVideoVideoRequestResponse } fr
 import { GetImportRequestBody, GetImportRequestResponse } from "../pages/api/apivideo/get-import";
 import { GetImportsRequestBody, GetImportsRequestResponse } from "../pages/api/apivideo/get-imports";
 import { GetVideosStatusRequestBody, GetVideosStatusRequestResponse } from "../pages/api/apivideo/get-videos-status";
+import { GetApiVideoApiKeysResponse } from "../pages/api/apivideo/keys";
 import { VerifyApiKeyRequestBody, VerifyApiKeyRequestResponse } from "../pages/api/apivideo/verify-api-key";
 import { GeneratePublicMp4RequestBody, GeneratePublicMp4RequestResponse } from "../pages/api/providers/generate-public-mp4";
 import { GetImportableVideosRequestBody, GetImportableVideosRequestResponse } from "../pages/api/providers/get-importable-videos";
@@ -38,13 +39,17 @@ export const callGetVideosStatusApi = async (body: GetVideosStatusRequestBody) =
 export const callVerifyApiVideoApiKeyApi = async (body: VerifyApiKeyRequestBody) =>
     callApi<VerifyApiKeyRequestResponse, VerifyApiKeyRequestBody>("/api/apivideo/verify-api-key", "POST", body);
 
+export const callGetApiVideoApiKeysApi = async (accessToken: string) =>
+    callApi<GetApiVideoApiKeysResponse, void>("/api/apivideo/keys", "GET", undefined, {authorization: `Bearer ${accessToken}`});
+
 export const callValidateProviderCredentialsApi = async (body: ValidateProviderCredentialsRequestBody) =>
     callApi<ValidateProviderCredentialsRequestResponse, ValidateProviderCredentialsRequestBody>("/api/providers/validate-provider-credentials", "POST", body);
 
-const callApi = async <U, T>(url: string, method: "POST" | "GET" = "POST", body?: T): Promise<U> => {
+const callApi = async <U, T>(url: string, method: "POST" | "GET", body: T, headers?: HeadersInit): Promise<U> => {
     const res: ApiResponse<U> = await fetch(url, {
         method: method,
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        headers
     }).then(a => a.json());
 
     if (res.error) {

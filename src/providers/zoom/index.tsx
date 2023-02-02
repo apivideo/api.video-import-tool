@@ -36,7 +36,8 @@ const ZoomProvider: ImportProvider = {
       sortFunction: (a: any, b: any, order: number) => order * (a.duration - b.duration),
       formatter: (v) => formatDuration(v),
     }]
-  }
+  },
+  apiVideoAuthenticationMode: "auth0"
 };
 
 export default ZoomProvider; 
