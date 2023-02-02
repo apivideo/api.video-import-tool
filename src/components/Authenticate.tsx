@@ -9,52 +9,31 @@ import {
   callValidateProviderCredentialsApi,
   callVerifyApiVideoApiKeyApi
 } from '../service/ClientApiHelpers';
+import ApiKeySelector from './commons/ApiKeySelector';
 import AuthDisclaimer from './commons/AuthDisclaimer';
 import ImportCard from './commons/ImportCard';
 import { useGlobalContext } from './context/Global';
 
 const Authenticate: React.FC = () => {
-  const [apiVideoApiKey, setApiVideoApiKey] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [apiVideoErrorMessage, setApiVideoErrorMessage] = useState<
-    string | null
-  >(null);
-  const [providerAccessToken, setProviderAccessToken] = useState<string | null>(
-    null
-  );
-  const [providerErrorMessage, setProviderErrorMessage] = useState<
-    string | null
-  >();
+
+  const [providerAccessToken, setProviderAccessToken] = useState<string | null>(null);
+  const [providerErrorMessage, setProviderErrorMessage] = useState<string | null>();
+
+  const [apiVideoApiKey, setApiVideoApiKey] = useState<string | null>(null);
+  const [apiVideoErrorMessage, setApiVideoErrorMessage] = useState<string | null>(null);
 
   const { providerName, setProviderName, setProviderAccessToken: globalSetProviderAccessToken } = useGlobalContext();
 
   const router = useRouter();
 
-  useEffect(() => {
-    const apiKey = sessionStorage.getItem('apiVideoApiKey') || ''
-    if (apiKey) setApiVideoApiKey(apiKey)
-  }, [])
 
   useEffect(() => {
     if (router?.query?.provider)
       setProviderName(router.query.provider.toString().toUpperCase() as ProviderName);
   }, [router, setProviderName]);
 
-  const validateApiVideoAuthentication = async (): Promise<string | null> => {
-    let errorMessage = null;
-    if (apiVideoApiKey.trim() === '') {
-      errorMessage = 'Please enter your api.video API key';
-    }
-    const res = await callVerifyApiVideoApiKeyApi({ apiKey: apiVideoApiKey });
 
-    if (!res.ok) {
-      errorMessage = 'Please verify your api key';
-    }
-
-    setApiVideoErrorMessage(errorMessage);
-
-    return errorMessage;
-  };
 
   const validateProviderAuthentication = async (): Promise<string | null> => {
     if (!providerName) {
@@ -92,6 +71,24 @@ const Authenticate: React.FC = () => {
     ? Providers[providerName]
     : undefined;
 
+
+  const validateApiVideoAuthentication = async (): Promise<string | null> => {
+    let error = null;
+    if (!apiVideoApiKey || apiVideoApiKey.trim() === '') {
+      error = 'Please enter your api.video API key';
+    } else {
+      const res = await callVerifyApiVideoApiKeyApi({ apiKey: apiVideoApiKey });
+
+      if (!res.ok) {
+        error = 'Please verify your api key';
+      }
+    }
+
+    setApiVideoErrorMessage(error);
+
+    return error;
+  };
+
   const handleAuthClick = async () => {
     setLoading(true);
 
@@ -128,28 +125,16 @@ const Authenticate: React.FC = () => {
         </div>
         <div className="flex flex-col md:w-2/4">
           <div className="flex flex-col gap-4">
-            <label htmlFor="apiVideoApiKey">Enter your api.video API key</label>
-            <div className={'mb-4'}>
-              <input
-                className={`h-10 ${apiVideoErrorMessage
-                  ? 'outline outline-red-500 outline-2'
-                  : 'outline outline-slate-300 rounded-lg shadow outline-1'
-                  }`}
-                id="apiVideoApiKey"
-                type={'password'}
-                value={apiVideoApiKey}
-                onChange={(v) => {
-                  setApiVideoErrorMessage('');
-                  sessionStorage.setItem('apiVideoApiKey', v.target.value);
-                  setApiVideoApiKey(v.target.value);
-                }}
-              ></input>
-              {apiVideoErrorMessage && (
-                <p className="text-sm text-red-600 pt-2">
-                  {apiVideoErrorMessage}&nbsp;
-                </p>
-              )}
-            </div>
+            <ApiKeySelector
+              mode={provider?.apiVideoAuthenticationMode || 'apiKey'}
+              onApiKeyChange={(apiKey) => {
+                setApiVideoApiKey(apiKey);
+                setApiVideoErrorMessage(null);
+              }}
+              errorMessage={apiVideoErrorMessage}
+              apiKey={apiVideoApiKey}
+            />
+
           </div>
 
           {provider && (

@@ -85,7 +85,6 @@ class ZoomProviderService implements AbstractProviderService {
         }
 
         const queryParams = params.map(([key, value]) => `${key}=${value}`).join("&");
-        console.log(queryParams);
 
         const zoomRes: ZoomRecordingsApiResponse = await this.callApi(`https://api.zoom.us/v2/accounts/me/recordings?${queryParams}`, "GET")
 

@@ -5,3 +5,8 @@ export const DROPBOX_CLIENT_SECRET = process.env.DROPBOX_CLIENT_SECRET!;
 export const ZOOM_CLIENT_ID = process.env.NEXT_PUBLIC_ZOOM_CLIENT_ID!; 
 export const ZOOM_REDIRECT_URL = process.env.NEXT_PUBLIC_ZOOM_REDIRECT_URL!;
 export const ZOOM_CLIENT_SECRET = process.env.ZOOM_CLIENT_SECRET!; 
+
+export const DASHBOARD_DOMAIN = process.env.DASHBOARD_DOMAIN!;
+
+export const AUTH0_CLIENT_ID = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID!;
+export const AUTH0_DOMAIN = process.env.NEXT_PUBLIC_AUTH0_DOMAIN!;

@@ -1,3 +1,4 @@
+import { ApiKeySelectorMode } from '../components/commons/ApiKeySelector';
 import { ProviderAuthenticationContext } from '../types/common';
 import AbstractProviderService from './AbstractProviderService';
 
@@ -48,5 +49,6 @@ export interface ProviderLoginProps {
     providerErrorMessage?: string | React.ReactNode;
     authenticationScopes?: AuthenticationScope[];
     videoTableSettings: VideoSourceTableSettings;
+    apiVideoAuthenticationMode: ApiKeySelectorMode;
   };
   
