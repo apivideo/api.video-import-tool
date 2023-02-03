@@ -13,10 +13,7 @@ const ZoomProvider: ImportProvider = {
   hasFeature: (feature: OptionalFeatureFlag) => false,
   authenticationScopes: [{
     name: 'account:read:admin',
-    description: 'If you\'re an admin of a Zoom account, meeting or webinar recordings of the account.',
-  }, {
-    name: 'recording:read:admin',
-    description: 'All the meeting or webinar recordings of your own Zooom user',
+    description: 'In order to retrieve all the recordings of your Master Account.',
   }],
   videoTableSettings: {
     showThumnail: false,
