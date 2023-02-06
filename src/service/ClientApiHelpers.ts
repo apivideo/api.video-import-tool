@@ -8,8 +8,10 @@ import { GeneratePublicMp4RequestBody, GeneratePublicMp4RequestResponse } from "
 import { GetImportableVideosRequestBody, GetImportableVideosRequestResponse } from "../pages/api/providers/get-importable-videos";
 import { GetOauthAccessTokenRequestBody, GetOauthAccessTokenRequestResponse } from "../pages/api/providers/get-oauth-access-token";
 import { GetPublicMp4UrlRequestBody, GetPublicMp4UrlRequestResponse } from "../pages/api/providers/get-public-mp4-url";
+import { RevokeOauthAccessTokenRequestBody } from "../pages/api/providers/revoke-oauth-access-token";
 import { ValidateProviderCredentialsRequestBody, ValidateProviderCredentialsRequestResponse } from "../pages/api/providers/validate-provider-credentials";
 import { ApiResponse } from "../types/common";
+import { RevokeAccessTokenResponse } from "./OAuthHelpers";
 
 
 export const callGeneratePublicMp4Api = async (body: GeneratePublicMp4RequestBody) =>
@@ -23,6 +25,9 @@ export const callCreateApiVideoVideoApi = async (body: CreateApiVideoVideoReques
 
 export const callGetOAuthAccessTokenApi = async (body: GetOauthAccessTokenRequestBody) =>
     callApi<GetOauthAccessTokenRequestResponse, GetOauthAccessTokenRequestBody>("/api/providers/get-oauth-access-token", "POST", body);
+
+export const callRevokeAccessTokenApi = async (body: RevokeOauthAccessTokenRequestBody) =>
+    callApi<RevokeAccessTokenResponse, RevokeOauthAccessTokenRequestBody>("/api/providers/revoke-oauth-access-token", "POST", body);
 
 export const callGetImportableVideosApi = async (body: GetImportableVideosRequestBody) =>
     callApi<GetImportableVideosRequestResponse, GetImportableVideosRequestBody>("/api/providers/get-importable-videos", "POST", body);

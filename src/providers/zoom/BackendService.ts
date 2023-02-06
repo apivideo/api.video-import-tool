@@ -1,5 +1,5 @@
 import { ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_REDIRECT_URL } from "../../env";
-import { getOauthAccessTokenCall, OauthAccessToken } from "../../service/OAuthHelpers";
+import { getOauthAccessTokenCall, OauthAccessToken, RevokeAccessTokenResponse, revokeOauthAccessTokenCall } from "../../service/OAuthHelpers";
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
 import AbstractProviderService from "../AbstractProviderService";
 
@@ -47,6 +47,10 @@ class ZoomProviderService implements AbstractProviderService {
 
     constructor(authenticationContext?: ProviderAuthenticationContext) {
         this.authenticationContext = authenticationContext;
+    }
+
+    public async revokeOauthAccessToken(): Promise<RevokeAccessTokenResponse> {
+        return await revokeOauthAccessTokenCall("https://zoom.us/oauth/revoke", ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, this.authenticationContext?.providerAccessToken!);;
     }
 
     public getPublicMp4Url(videoSource: VideoSource): Promise<VideoSource> {

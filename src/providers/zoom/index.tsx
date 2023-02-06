@@ -14,6 +14,9 @@ const ZoomProvider: ImportProvider = {
   authenticationScopes: [{
     name: 'account:read:admin',
     description: 'In order to retrieve all the recordings of your Master Account.',
+  }, {
+    name: 'recording:read:admin',
+    description: 'In order to be able to download the recordings video files.',
   }],
   videoTableSettings: {
     showThumnail: false,

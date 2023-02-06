@@ -3,12 +3,25 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, Check } from 'react-feather';
 import { ZOOM_CLIENT_ID, ZOOM_REDIRECT_URL } from '../../env';
 import { GetOauthAccessTokenRequestResponse } from '../../pages/api/providers/get-oauth-access-token';
-import { callGetOAuthAccessTokenApi } from '../../service/ClientApiHelpers';
+import { callGetOAuthAccessTokenApi, callRevokeAccessTokenApi } from '../../service/ClientApiHelpers';
 import { ProviderLoginProps } from '../types';
 
 const ZoomLogin = (props: ProviderLoginProps) => {
   const [zoomAccessToken, setZoomAccessToken] = useState<string>('');
   const router = useRouter();
+
+  useEffect(() => {
+    if(localStorage.getItem('zoomAccessToken')) {
+      const accessToken = JSON.parse(localStorage.getItem('zoomAccessToken') || "{}");
+      const expireInSecs = (accessToken.expiration - new Date().getTime()) / 1000;
+      if(!accessToken.expiration || expireInSecs < 60 * 10) {
+        localStorage.removeItem('zoomAccessToken');
+        return;
+      }
+      setZoomAccessToken(accessToken.access_token);
+      props.onAccessTokenChanged(accessToken.access_token);
+    }
+  }, []);
 
   useEffect(() => {
     if (router.query.code) {
@@ -17,12 +30,31 @@ const ZoomLogin = (props: ProviderLoginProps) => {
         code: router.query.code as string,
       }).then((res: GetOauthAccessTokenRequestResponse) => {
         if (res.access_token) {
+          localStorage.setItem('zoomAccessToken', JSON.stringify({
+            expiration: new Date().getTime() + (res.expires_in * 1000),
+            ...res
+          }));
           setZoomAccessToken(res.access_token);
           props.onAccessTokenChanged(res.access_token);
         }
       });
     }
   }, [router.query.code]);
+
+  
+  const revokeAccessToken = async () => {
+    
+    await callRevokeAccessTokenApi({
+      provider: 'ZOOM',
+      authenticationContext: {
+        providerAccessToken: localStorage.getItem('zoomAccessToken') ? JSON.parse(localStorage.getItem('zoomAccessToken') || "{}").access_token || '' : '',
+      }
+    });
+    props.onAccessTokenChanged('');
+    localStorage.removeItem('zoomAccessToken');
+    setZoomAccessToken('');
+
+  };
 
   return (
     <div className="flex flex-col mb-3.5">
@@ -34,6 +66,7 @@ const ZoomLogin = (props: ProviderLoginProps) => {
               `https://zoom.us/oauth/authorize?response_type=code&client_id=${ZOOM_CLIENT_ID}&redirect_uri=${ZOOM_REDIRECT_URL}`
             )
           }
+          disabled={!!zoomAccessToken}
           className="bg-dropbox text-sm font-semibold w-full"
         >
           {zoomAccessToken ? (
@@ -46,6 +79,7 @@ const ZoomLogin = (props: ProviderLoginProps) => {
           )}
         </button>
       </div>
+      <p style={{...(!zoomAccessToken ? {display: "none"} : {})}} className="text-right"><a onClick={() => revokeAccessToken()} className="text-dropbox underline" href="#">Revoke Zoom access</a></p>
 
       <p className="text-sm text-red-600">{props.errorMessage}</p>
       {zoomAccessToken && <button

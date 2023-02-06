@@ -1,4 +1,4 @@
-import { OauthAccessToken } from "../../service/OAuthHelpers";
+import { OauthAccessToken, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
 import { uppercaseFirstLetter } from "../../utils/functions";
 import AbstractProviderService from "../AbstractProviderService";
@@ -43,6 +43,10 @@ class VimeoProviderService implements AbstractProviderService {
 
     constructor(authenticationContext?: ProviderAuthenticationContext) {
         this.authenticationContext = authenticationContext;
+    }
+    
+    public revokeOauthAccessToken(): Promise<RevokeAccessTokenResponse> {
+        throw new Error("Method not implemented.");
     }
 
     public getPublicMp4Url(videoSource: VideoSource): Promise<VideoSource> {

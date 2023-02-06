@@ -1,5 +1,5 @@
 import { DROPBOX_CLIENT_ID, DROPBOX_CLIENT_SECRET, DROPBOX_REDIRECT_URL } from "../../env";
-import { getOauthAccessTokenCall, OauthAccessToken } from "../../service/OAuthHelpers";
+import { getOauthAccessTokenCall, OauthAccessToken, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
 import AbstractProviderService from "../AbstractProviderService";
 
@@ -30,6 +30,10 @@ class DropboxProviderService implements AbstractProviderService {
 
     constructor(authenticationContext?: ProviderAuthenticationContext) {
         this.authenticationContext = authenticationContext;
+    }
+    
+    public revokeOauthAccessToken(): Promise<RevokeAccessTokenResponse> {
+        throw new Error("Method not implemented.");
     }
 
     public getPublicMp4Url(videoSource: VideoSource): Promise<VideoSource> {
