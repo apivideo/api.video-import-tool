@@ -59,7 +59,6 @@ class GcsProviderService implements AbstractProviderService {
 
     public async getOauthAccessToken(code: string): Promise<OauthAccessToken> {
         const res = await getOauthAccessTokenCall("https://oauth2.googleapis.com/token", GCS_CLIENT_ID, GCS_CLIENT_SECRET, GCS_REDIRECT_URL, code);;
-        console.log(res);
         return res;
     }
 
@@ -72,12 +71,11 @@ class GcsProviderService implements AbstractProviderService {
     }
 
     public async getImportableVideos(nextPageFetchDetails?: any): Promise<Page<VideoSource>> {
-        const bucket = this.authenticationContext?.additionnalData?.bucket;
+        const bucket = this.authenticationContext?.additionnalData?.bucket.split(":")[1];
 
         const res = await this.callApi(`https://storage.googleapis.com/storage/v1/b/${bucket}/o/` + (nextPageFetchDetails ? `?pageToken=${nextPageFetchDetails}` : ""), "GET");
-
         return {
-            data: res.items
+            data: (res.items || [])
                 .filter((item: any) => item.contentType.indexOf("video") === 0)
                 .map((item: any) => ({
                     id: item.name,
