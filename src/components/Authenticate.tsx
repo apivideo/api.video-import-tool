@@ -1,10 +1,10 @@
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle } from 'react-feather';
+import { AlertTriangle, ArrowRight } from 'react-feather';
 import Providers, {
   ProviderName
 } from '../providers';
-import { ImportProvider, OptionalFeatureFlag } from '../providers/types';
+import { ImportProvider, OptionalFeatureFlag, ProviderAuthenticationData } from '../providers/types';
 import {
   callValidateProviderCredentialsApi,
   callVerifyApiVideoApiKeyApi
@@ -17,13 +17,13 @@ import { useGlobalContext } from './context/Global';
 const Authenticate: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [providerAccessToken, setProviderAccessToken] = useState<string | null>(null);
+  const [providerAuthenticationData, setProviderAuthenticationData] = useState<ProviderAuthenticationData | null>(null);
   const [providerErrorMessage, setProviderErrorMessage] = useState<string | null>();
 
   const [apiVideoApiKey, setApiVideoApiKey] = useState<string | null>(null);
   const [apiVideoErrorMessage, setApiVideoErrorMessage] = useState<string | null>(null);
 
-  const { providerName, setProviderName, setProviderAccessToken: globalSetProviderAccessToken } = useGlobalContext();
+  const { providerName, setProviderName, setProviderAuthenticationData: globalSetProviderAuthenticationData } = useGlobalContext();
 
   const router = useRouter();
 
@@ -42,7 +42,7 @@ const Authenticate: React.FC = () => {
 
     const provider = Providers[providerName];
 
-    if (!providerAccessToken) {
+    if (!providerAuthenticationData) {
       return `Missing ${provider.displayName} authentication`;
     }
 
@@ -57,7 +57,7 @@ const Authenticate: React.FC = () => {
     try {
       const res = await callValidateProviderCredentialsApi({
         authenticationContext: {
-          providerAccessToken,
+          ...providerAuthenticationData,
         },
         provider: providerName,
       });
@@ -113,6 +113,9 @@ const Authenticate: React.FC = () => {
     }
   };
 
+
+  const buttonDisabled = loading || !providerAuthenticationData?.filled || !apiVideoApiKey;
+
   return (
     <ImportCard activeStep={2} paddingTop>
       <div className="flex flex-col md:flex-row text-sm gap-2 md:gap-10">
@@ -134,24 +137,36 @@ const Authenticate: React.FC = () => {
               errorMessage={apiVideoErrorMessage}
               apiKey={apiVideoApiKey}
             />
-
           </div>
 
           {provider && (
             <provider.loginComponent
-              onAccessTokenChanged={(providerAccessToken) => {
+              onAuthenticationDataChanged={(providerAuthenticationData) => {
                 setLoading(false);
                 setProviderErrorMessage('');
-                setProviderAccessToken(providerAccessToken);
-                globalSetProviderAccessToken(providerAccessToken as string)
+                setProviderAuthenticationData(providerAuthenticationData);
+                globalSetProviderAuthenticationData(providerAuthenticationData!);
               }}
-              providerAccessToken={providerAccessToken as string}
+              authenticationData={providerAuthenticationData}
               errorMessage={providerErrorMessage || undefined}
-              buttonDisabled={loading || !providerAccessToken || !apiVideoApiKey}
-              onClick={handleAuthClick}
-              loading={loading}
             />
           )}
+
+          <button
+            className={`text-sm font-semibold w-full mt-3 ${buttonDisabled ? 'bg-slate-300' : 'bg-black'
+              }`}
+            disabled={buttonDisabled}
+            onClick={handleAuthClick}
+          >
+            {loading ? (
+              'Please wait...'
+            ) : (
+              <div className="flex justify-center items-center gap-2">
+                Proceed to import <ArrowRight size={14} strokeWidth={'.2rem'} />
+              </div>
+            )}
+          </button>
+          
           <div className="block pt-4 md:hidden">
             {' '}
             <AuthDisclaimer providerName={providerName} authenticationScopes={provider?.authenticationScopes} />

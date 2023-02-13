@@ -13,13 +13,17 @@ type Key = {
     projectName: string;
 };
 
-export type GetApiVideoApiKeysResponse = {
+
+export type ProjectWithApiKeys = {
     name: string;
     keys: {
         production: Key[];
         sandbox: Key[];
     };
-}[];
+};
+
+
+export type GetApiVideoApiKeysResponse = ProjectWithApiKeys[];
 
 export default async function handler(
     req: NextApiRequest,

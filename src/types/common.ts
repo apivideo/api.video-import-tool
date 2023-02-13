@@ -21,8 +21,9 @@ export type ApiVideoAuthenticationContext = {
 };
 
 export type ProviderAuthenticationContext = {
-    providerAccessToken: string;
-};
+    accessToken: string;
+    additionnalData?: any;
+};  
 
 export type AuthenticationContext = ApiVideoAuthenticationContext & ProviderAuthenticationContext;
 

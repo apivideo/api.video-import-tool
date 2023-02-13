@@ -11,6 +11,7 @@ module.exports = {
       colors: {
         dropbox: '#0061FF',
         vimeo: '#32B8E8',
+        gcs: '#356DF7',
       },
       fontFamily: {
         jetbrains: ['JetBrains Mono', 'monospace'],

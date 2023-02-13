@@ -16,6 +16,7 @@ import VideoSource, {
   ProviderAuthenticationContext
 } from '../types/common';
 import { buildId, formatSize } from '../utils/functions';
+import { getItem } from '../utils/functions/localStorageHelper';
 import ImportCard from './commons/ImportCard';
 import { useGlobalContext } from './context/Global';
 import VideoSourceTable from './VideoSourceTable';
@@ -36,21 +37,22 @@ const VideoSourceSelector: React.FC = () => {
   const [fetchingVideos, setFetchingVideos] = useState<boolean>(true);
   const [importId, _] = useState<string>(buildId(9));
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-  const { providerName, providerAccessToken, setVideos, setImportId } =
+  const { providerName, providerAuthenticationData, setVideos, setImportId } =
     useGlobalContext();
   const router = useRouter();
 
   const provider = Providers[providerName as keyof typeof Providers];
 
   useEffect(() => {
-    if (!providerName || !providerAccessToken) {
+    if (!providerName || !providerAuthenticationData.accessToken) {
       const pName = router.query.provider;
       pName && router.push(`/${pName}`);
     } else {
-      const apiVideoApiKey = sessionStorage.getItem('apiVideoApiKey') || '';
+      const item = getItem('APIVIDEO');
+      const apiVideoApiKey = item?.apiKey || '';
       const authenticationContext: AuthenticationContext = {
         apiVideoApiKey,
-        providerAccessToken,
+        ...providerAuthenticationData,
       };
       setAuthenticationContext(authenticationContext);
 
