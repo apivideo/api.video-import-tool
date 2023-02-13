@@ -35,23 +35,30 @@ export const setItem = <T extends SessionStorageEntryNames>(
     ttl?: number
 ) => {
     const existingEntry = sessionStorage.getItem(getKey(name));
-    const expirity = !!existingEntry ? JSON.parse(existingEntry).expiry : ttl;
-    console.log({existingEntry, ttl, expirity});
+    
+    let expirity = undefined;
+
+    if(existingEntry) {
+        expirity = JSON.parse(existingEntry).expiry;
+    } else if(ttl) {
+        expirity = Date.now() + ttl;
+    }
+    
     const entry = {
         value: value,
-        expiry: expirity ? Date.now() + expirity : null,
+        expiry: expirity ? expirity : null,
     };
 
     sessionStorage.setItem(getKey(name), JSON.stringify(entry));
 }
 
-export const getItem = <T extends SessionStorageEntryNames>(name: T): SessionStorageEntries[T] | null => {
+export const getItem = <T extends SessionStorageEntryNames>(name: T, expirityMarginMinutes: number = 30): SessionStorageEntries[T] | null => {
     const entry = sessionStorage.getItem(getKey(name));
     if (!entry) {
         return null;
     }
     const parsedEntry = JSON.parse(entry);
-    if (parsedEntry.expiry && Date.now() > parsedEntry.expiry) {
+    if (parsedEntry.expiry && Date.now() > (parsedEntry.expiry - expirityMarginMinutes * 60 * 1000)) {
         sessionStorage.removeItem(getKey(name));
         return null;
     }
@@ -61,3 +68,4 @@ export const getItem = <T extends SessionStorageEntryNames>(name: T): SessionSto
 export const removeItem = (name: SessionStorageEntryNames) => {
     sessionStorage.removeItem(getKey(name));
 }
+ 

@@ -1,19 +1,8 @@
-import { NextApiResponse } from "next";
 import { GCS_CLIENT_ID, GCS_CLIENT_SECRET, GCS_REDIRECT_URL } from "../../env";
 import { getOauthAccessTokenCall, OauthAccessToken, RevokeAccessTokenResponse, revokeOauthAccessTokenCall } from "../../service/OAuthHelpers";
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
-import { decrypt, encrypt } from "../../utils/functions/crypto";
+import { getVideoSourceProxyUrl } from "../../utils/functions/crypto";
 import AbstractProviderService from "../AbstractProviderService";
-
-type GcsRecordingsApiResponse = {
-    next_page_token: string;
-}
-
-type VideoDownloadProxyData = {
-    bucket: string;
-    objectName: string;
-    accessToken: string;
-}
 
 
 export type ProjectBucket = {
@@ -60,33 +49,6 @@ class GcsProviderService implements AbstractProviderService {
         return buckets;
     }
 
-    public async videoDownloadProxy(encryptedData: string, res: NextApiResponse<any>): Promise<void> {
-        const data: VideoDownloadProxyData = JSON.parse(decrypt(encryptedData));
-        console.log(data);
-        const { bucket, objectName, accessToken } = data;
-
-        const mediaRes = await fetch(`https://storage.googleapis.com/storage/v1/b/${bucket}/o/${encodeURIComponent(objectName)}?alt=media`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        });
-
-        console.log(mediaRes.status);
-
-        if (mediaRes.status !== 200) {
-            res.status(500).send("Error");
-            return;
-        }
-
-        res.setHeader("Content-Type", "video/mp4");
-        res.setHeader("Content-Disposition", `attachment; filename=${objectName.replaceAll("/", "_")}`);
-        //@ts-ignore
-        mediaRes.body?.pipe(res);
-
-        console.log(mediaRes.status);
-    }
-
     public async revokeOauthAccessToken(): Promise<RevokeAccessTokenResponse> {
         return await revokeOauthAccessTokenCall("https://oauth2.googleapis.com/revoke", GCS_CLIENT_ID, GCS_CLIENT_SECRET, this.authenticationContext?.accessToken!);;
     }
@@ -96,7 +58,9 @@ class GcsProviderService implements AbstractProviderService {
     }
 
     public async getOauthAccessToken(code: string): Promise<OauthAccessToken> {
-        return await getOauthAccessTokenCall("https://oauth2.googleapis.com/token", GCS_CLIENT_ID, GCS_CLIENT_SECRET, GCS_REDIRECT_URL, code);;
+        const res = await getOauthAccessTokenCall("https://oauth2.googleapis.com/token", GCS_CLIENT_ID, GCS_CLIENT_SECRET, GCS_REDIRECT_URL, code);;
+        console.log(res);
+        return res;
     }
 
     public async generatePublicMp4(videoSource: VideoSource): Promise<VideoSource> {
@@ -109,29 +73,25 @@ class GcsProviderService implements AbstractProviderService {
 
     public async getImportableVideos(nextPageFetchDetails?: any): Promise<Page<VideoSource>> {
         const bucket = this.authenticationContext?.additionnalData?.bucket;
-        const res = await this.callApi(`https://storage.googleapis.com/storage/v1/b/${bucket}/o/`, "GET");
+
+        const res = await this.callApi(`https://storage.googleapis.com/storage/v1/b/${bucket}/o/` + (nextPageFetchDetails ? `?pageToken=${nextPageFetchDetails}` : ""), "GET");
 
         return {
             data: res.items
                 .filter((item: any) => item.contentType.indexOf("video") === 0)
-                .map((item: any) => {
-                    const data: VideoDownloadProxyData = {
-                        bucket,
-                        objectName: item.name,
-                        accessToken: this.authenticationContext?.accessToken!
-                    }
-                    const url = `https://import.api.video/api/download?provider=gcs&data=${encrypt(JSON.stringify(data))}`;
-                    console.log(url);
-                    return {
-                        id: item.name,
-                        name: item.name,
-                        size: item.size,
-                        date: new Date(item.timeCreated),
-                        url
-                    }
-                }),
-            nextPageFetchDetails: null,
-            hasMore: false
+                .map((item: any) => ({
+                    id: item.name,
+                    name: item.name,
+                    size: Math.round(item.size),
+                    date: new Date(item.timeCreated),
+                    url: getVideoSourceProxyUrl(
+                        `https://storage.googleapis.com/storage/v1/b/${bucket}/o/${encodeURIComponent(item.name)}?alt=media`,
+                        item.name,
+                        this.authenticationContext?.accessToken!
+                    )
+                })),
+            nextPageFetchDetails: res.nextPageToken,
+            hasMore: !!res.nextPageToken
         }
     };
 

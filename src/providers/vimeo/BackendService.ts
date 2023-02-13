@@ -1,4 +1,3 @@
-import { NextApiResponse } from "next";
 import { OauthAccessToken, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
 import { uppercaseFirstLetter } from "../../utils/functions";
@@ -44,10 +43,6 @@ class VimeoProviderService implements AbstractProviderService {
 
     constructor(authenticationContext?: ProviderAuthenticationContext) {
         this.authenticationContext = authenticationContext;
-    }
-    
-    public videoDownloadProxy(data: string, res: NextApiResponse<any>): Promise<void> {
-        throw new Error("Method not implemented.");
     }
     
     public fetchAdditionalUserDataAfterSignin(): Promise<any> {

@@ -1,4 +1,3 @@
-import { NextApiResponse } from "next";
 import { ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_REDIRECT_URL } from "../../env";
 import { getOauthAccessTokenCall, OauthAccessToken, RevokeAccessTokenResponse, revokeOauthAccessTokenCall } from "../../service/OAuthHelpers";
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
@@ -50,10 +49,6 @@ class ZoomProviderService implements AbstractProviderService {
         this.authenticationContext = authenticationContext;
     }
     
-    public videoDownloadProxy(data: string, res: NextApiResponse<any>): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-
     public fetchAdditionalUserDataAfterSignin(): Promise<any> {
         throw new Error("Method not implemented.");
     }

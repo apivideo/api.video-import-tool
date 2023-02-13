@@ -1,4 +1,3 @@
-import { NextApiResponse } from "next";
 import { DROPBOX_CLIENT_ID, DROPBOX_CLIENT_SECRET, DROPBOX_REDIRECT_URL } from "../../env";
 import { getOauthAccessTokenCall, OauthAccessToken, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
@@ -33,10 +32,6 @@ class DropboxProviderService implements AbstractProviderService {
         this.authenticationContext = authenticationContext;
     }
 
-    public videoDownloadProxy(data: string, res: NextApiResponse<any>): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    
     public fetchAdditionalUserDataAfterSignin(): Promise<any> {
         throw new Error("Method not implemented.");
     }
