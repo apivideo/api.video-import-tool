@@ -62,15 +62,17 @@ class GcsProviderService implements AbstractProviderService {
 
     public async videoDownloadProxy(encryptedData: string, res: NextApiResponse<any>): Promise<void> {
         const data: VideoDownloadProxyData = JSON.parse(decrypt(encryptedData));
-
+        console.log(data);
         const { bucket, objectName, accessToken } = data;
 
-        const mediaRes = await fetch(`https://storage.googleapis.com/storage/v1/b/${bucket}/o/${objectName}?alt=media`, {
+        const mediaRes = await fetch(`https://storage.googleapis.com/storage/v1/b/${bucket}/o/${encodeURIComponent(objectName)}?alt=media`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
         });
+
+        console.log(mediaRes.status);
 
         if (mediaRes.status !== 200) {
             res.status(500).send("Error");
@@ -78,7 +80,7 @@ class GcsProviderService implements AbstractProviderService {
         }
 
         res.setHeader("Content-Type", "video/mp4");
-        res.setHeader("Content-Disposition", `attachment; filename=${objectName}`);
+        res.setHeader("Content-Disposition", `attachment; filename=${objectName.replaceAll("/", "_")}`);
         //@ts-ignore
         mediaRes.body?.pipe(res);
 
