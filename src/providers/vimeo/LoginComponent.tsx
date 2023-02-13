@@ -32,21 +32,15 @@ const VimeoLogin = (props: ProviderLoginProps) => {
             value={vimeoAccessToken}
             onChange={(v) => {
               setVimeoAccessToken(v.target.value);
-              props.onAccessTokenChanged(v.target.value);
+              props.onAuthenticationDataChanged({
+                accessToken: v.target.value,
+                filled: !!v.target.value && v.target.value.length > 0,
+              });
             }}
           ></input>
           {props.errorMessage && <p className="text-sm text-red-600 pt-2">{props.errorMessage}&nbsp;</p>}
         </div>
       </div>
-
-      <button
-        className={`${props.buttonDisabled ? 'bg-slate-300' : 'bg-vimeo'
-          } text-sm font-semibold w-full`}
-        disabled={props.buttonDisabled}
-        onClick={props.onClick}
-      >
-        {props.loading ? 'Please wait...' : 'Authorize access to Vimeo account'}
-      </button>
     </div>
   );
 };

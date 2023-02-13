@@ -1,3 +1,4 @@
+import { NextApiResponse } from "next";
 import { ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_REDIRECT_URL } from "../../env";
 import { getOauthAccessTokenCall, OauthAccessToken, RevokeAccessTokenResponse, revokeOauthAccessTokenCall } from "../../service/OAuthHelpers";
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
@@ -48,9 +49,17 @@ class ZoomProviderService implements AbstractProviderService {
     constructor(authenticationContext?: ProviderAuthenticationContext) {
         this.authenticationContext = authenticationContext;
     }
+    
+    public videoDownloadProxy(data: string, res: NextApiResponse<any>): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+
+    public fetchAdditionalUserDataAfterSignin(): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
 
     public async revokeOauthAccessToken(): Promise<RevokeAccessTokenResponse> {
-        return await revokeOauthAccessTokenCall("https://zoom.us/oauth/revoke", ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, this.authenticationContext?.providerAccessToken!);;
+        return await revokeOauthAccessTokenCall("https://zoom.us/oauth/revoke", ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, this.authenticationContext?.additionnalData!);;
     }
 
     public getPublicMp4Url(videoSource: VideoSource): Promise<VideoSource> {
@@ -100,7 +109,7 @@ class ZoomProviderService implements AbstractProviderService {
                         id: meeting.uuid,
                         name: meeting.topic,
                         thumbnail: "/zoom.svg",
-                        url: `${recording.download_url}?access_token=${this.authenticationContext?.providerAccessToken}`,
+                        url: `${recording.download_url}?access_token=${this.authenticationContext?.accessToken}`,
                         duration: meeting.duration,
                         size: recording.file_size,
                         date: new Date(meeting.start_time),
@@ -120,7 +129,7 @@ class ZoomProviderService implements AbstractProviderService {
         }
 
         const headers = new Headers();
-        headers.append("Authorization", "Bearer " + this.authenticationContext.providerAccessToken)
+        headers.append("Authorization", "Bearer " + this.authenticationContext.accessToken)
         headers.append("Content-Type", "application/json");
 
         const res = await fetch(path, {

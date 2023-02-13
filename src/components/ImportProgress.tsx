@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
+import { getItem } from '../utils/functions/localStorageHelper';
+import ImportCard from './commons/ImportCard';
 import ImportInfo from './commons/ImportInfo';
 import VideoImportTable from './commons/VideoImportTable';
-import ImportCard from './commons/ImportCard';
 import { useGlobalContext } from './context/Global';
 
 const ImportProgress: React.FC = () => {
@@ -12,7 +13,8 @@ const ImportProgress: React.FC = () => {
   const { videos, importId, providerName } = useGlobalContext()
 
   useEffect(() => {
-    const apiKey = sessionStorage.getItem('apiVideoApiKey') || ''
+    const item = getItem('APIVIDEO');
+    const apiKey = item?.apiKey || ''
     setApiVideoApiKey(apiKey)
     if (!importId) {
       const impId = router.query.importId

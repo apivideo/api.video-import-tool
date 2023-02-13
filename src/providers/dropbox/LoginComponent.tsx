@@ -1,24 +1,43 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { ArrowRight, Check } from 'react-feather';
+import { Check } from 'react-feather';
 import { DROPBOX_CLIENT_ID, DROPBOX_REDIRECT_URL } from '../../env';
 import { GetOauthAccessTokenRequestResponse } from '../../pages/api/providers/get-oauth-access-token';
 import { callGetOAuthAccessTokenApi } from '../../service/ClientApiHelpers';
+import { getItem, setItem } from '../../utils/functions/localStorageHelper';
 import { ProviderLoginProps } from '../types';
 
 const DropboxLogin = (props: ProviderLoginProps) => {
-  const [dropboxAccessToken, setDropboxAccessToken] = useState<string>('');
+  const [accessToken, setAccessToken] = useState<string>('');
   const router = useRouter();
 
+
   useEffect(() => {
-    if (router.query.code) {
+    const item = getItem('DROPBOX')
+    if (item) {
+      const accessToken = item.accessToken;
+      setAccessToken(accessToken);
+      props.onAuthenticationDataChanged({
+        accessToken,
+        filled: !!accessToken,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (router.query.code && !accessToken) {
       callGetOAuthAccessTokenApi({
         provider: 'DROPBOX',
         code: router.query.code as string,
       }).then((res: GetOauthAccessTokenRequestResponse) => {
         if (res.access_token) {
-          setDropboxAccessToken(res.access_token);
-          props.onAccessTokenChanged(res.access_token);
+          setAccessToken(res.access_token);
+          setItem('DROPBOX', { accessToken: res.access_token }, res.expires_in * 1000);
+          
+          props.onAuthenticationDataChanged({
+            accessToken,
+            filled: !!accessToken,
+          });
         }
       });
     }
@@ -36,7 +55,7 @@ const DropboxLogin = (props: ProviderLoginProps) => {
           }
           className="bg-dropbox text-sm font-semibold w-full"
         >
-          {dropboxAccessToken ? (
+          {accessToken ? (
             <div className="flex justify-center items-center gap-2">
               <Check size={20} strokeWidth={'.2rem'} />
               Successfully signed into Dropbox
@@ -48,20 +67,6 @@ const DropboxLogin = (props: ProviderLoginProps) => {
       </div>
 
       <p className="text-sm text-red-600">{props.errorMessage}</p>
-      {dropboxAccessToken && <button
-        className={`text-sm font-semibold w-full mt-3 ${props.buttonDisabled ? 'bg-slate-300' : 'bg-black'
-      }`}
-        disabled={props.buttonDisabled}
-        onClick={props.onClick}
-      >
-        {props.loading ? (
-          'Please wait...'
-        ) : (
-          <div className="flex justify-center items-center gap-2">
-            Proceed to import <ArrowRight size={14} strokeWidth={'.2rem'} />
-          </div>
-        )}
-      </button>}
 
     </div>
   );

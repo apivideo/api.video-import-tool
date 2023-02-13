@@ -1,13 +1,14 @@
 import Video from '@api.video/nodejs-client/lib/model/Video';
 import React, { useContext, useState } from 'react';
 import { ProviderName } from '../../../providers';
+import { ProviderAuthenticationData } from '../../../providers/types';
 
 interface IGlobalContextProps {
     importId: string;
     providerName: ProviderName;
-    providerAccessToken: string;
+    providerAuthenticationData: ProviderAuthenticationData;
     videos: Video[];
-    setProviderAccessToken: (accessToken: string) => void
+    setProviderAuthenticationData: (authenticationData: ProviderAuthenticationData) => void
     setImportId: (importId: string) => void;
     setProviderName: (providerName: ProviderName) => void;
     setVideos: (videos: Video[]) => void
@@ -16,9 +17,9 @@ interface IGlobalContextProps {
 export const GlobalContext = React.createContext<IGlobalContextProps>({
     importId: '',
     providerName: '' as ProviderName,
-    providerAccessToken: '',
+    providerAuthenticationData: {} as ProviderAuthenticationData,
     videos: [],
-    setProviderAccessToken: () => { },
+    setProviderAuthenticationData: () => { },
     setImportId: () => { },
     setProviderName: () => { },
     setVideos: () => { },
@@ -28,16 +29,16 @@ export const GlobalContextProvider = (props: { children: React.ReactNode }) => {
     const [importId, setImportId] = useState<string>('');
     const [providerName, setProviderName] = useState<ProviderName>('' as ProviderName);
     const [videos, setVideos] = useState<Video[]>([]);
-    const [providerAccessToken, setProviderAccessToken] = useState<string>('')
+    const [providerAuthenticationData, setProviderAuthenticationData] = useState<ProviderAuthenticationData>({} as ProviderAuthenticationData);
 
     return (
         <GlobalContext.Provider
             value={{
                 importId,
                 providerName,
-                providerAccessToken,
+                providerAuthenticationData,
                 videos,
-                setProviderAccessToken,
+                setProviderAuthenticationData,
                 setImportId,
                 setProviderName,
                 setVideos

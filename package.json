@@ -25,6 +25,7 @@
   "dependencies": {
     "@api.video/nodejs-client": "^2.2.9",
     "@auth0/auth0-react": "^1.12.1",
+    "crypto": "^1.0.1",
     "next": "13.0.3",
     "papaparse": "^5.3.2",
     "react": "18.2.0",

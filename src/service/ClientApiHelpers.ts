@@ -4,6 +4,7 @@ import { GetImportsRequestBody, GetImportsRequestResponse } from "../pages/api/a
 import { GetVideosStatusRequestBody, GetVideosStatusRequestResponse } from "../pages/api/apivideo/get-videos-status";
 import { GetApiVideoApiKeysResponse } from "../pages/api/apivideo/keys";
 import { VerifyApiKeyRequestBody, VerifyApiKeyRequestResponse } from "../pages/api/apivideo/verify-api-key";
+import { FetchAdditionalUserDataAfterSigninRequestBody, FetchAdditionalUserDataAfterSigninRequestResponse } from "../pages/api/providers/fetch-additional-user-data-after-signin";
 import { GeneratePublicMp4RequestBody, GeneratePublicMp4RequestResponse } from "../pages/api/providers/generate-public-mp4";
 import { GetImportableVideosRequestBody, GetImportableVideosRequestResponse } from "../pages/api/providers/get-importable-videos";
 import { GetOauthAccessTokenRequestBody, GetOauthAccessTokenRequestResponse } from "../pages/api/providers/get-oauth-access-token";
@@ -45,10 +46,14 @@ export const callVerifyApiVideoApiKeyApi = async (body: VerifyApiKeyRequestBody)
     callApi<VerifyApiKeyRequestResponse, VerifyApiKeyRequestBody>("/api/apivideo/verify-api-key", "POST", body);
 
 export const callGetApiVideoApiKeysApi = async (accessToken: string) =>
-    callApi<GetApiVideoApiKeysResponse, void>("/api/apivideo/keys", "GET", undefined, {authorization: `Bearer ${accessToken}`});
+    callApi<GetApiVideoApiKeysResponse, void>("/api/apivideo/keys", "GET", undefined, { authorization: `Bearer ${accessToken}` });
 
 export const callValidateProviderCredentialsApi = async (body: ValidateProviderCredentialsRequestBody) =>
     callApi<ValidateProviderCredentialsRequestResponse, ValidateProviderCredentialsRequestBody>("/api/providers/validate-provider-credentials", "POST", body);
+
+
+export const callFetchAdditionalUserDataAfterSigninApi = async (body: FetchAdditionalUserDataAfterSigninRequestBody) =>
+    callApi<FetchAdditionalUserDataAfterSigninRequestResponse, FetchAdditionalUserDataAfterSigninRequestBody>("/api/providers/fetch-additional-user-data-after-signin", "POST", body);
 
 const callApi = async <U, T>(url: string, method: "POST" | "GET", body: T, headers?: HeadersInit): Promise<U> => {
     const res: ApiResponse<U> = await fetch(url, {

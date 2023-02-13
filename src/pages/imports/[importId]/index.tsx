@@ -1,15 +1,16 @@
 import Video from '@api.video/nodejs-client/lib/model/Video';
 import type { NextPage } from 'next';
-import { useEffect, useState } from 'react';
-import { callGetImportApi } from '../../../service/ClientApiHelpers';
-import { ArrowLeft } from 'react-feather';
-import ImportInfo from '../../../components/commons/ImportInfo';
-import { ProviderName } from '../../../providers';
-import { useRouter } from 'next/router';
-import ImportCard from '../../../components/commons/ImportCard';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { ArrowLeft } from 'react-feather';
+import ImportCard from '../../../components/commons/ImportCard';
+import ImportInfo from '../../../components/commons/ImportInfo';
 import VideoImportTable from '../../../components/commons/VideoImportTable';
+import { ProviderName } from '../../../providers';
+import { callGetImportApi } from '../../../service/ClientApiHelpers';
 import { Import } from '../../../types/common';
+import { getItem } from '../../../utils/functions/localStorageHelper';
 
 const ImportView: NextPage = () => {
   const [apiVideoApiKey, setApiVideoApiKey] = useState<string>();
@@ -20,7 +21,8 @@ const ImportView: NextPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const apiKey = sessionStorage.getItem('apiVideoApiKey') || '';
+    const item = getItem('APIVIDEO');
+    const apiKey = item?.apiKey || '';
     setApiVideoApiKey(apiKey);
     if (router?.query?.importId) {
       const getImportedVideos = async (apiKey: string) => {

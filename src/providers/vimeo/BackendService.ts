@@ -1,3 +1,4 @@
+import { NextApiResponse } from "next";
 import { OauthAccessToken, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
 import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
 import { uppercaseFirstLetter } from "../../utils/functions";
@@ -45,6 +46,14 @@ class VimeoProviderService implements AbstractProviderService {
         this.authenticationContext = authenticationContext;
     }
     
+    public videoDownloadProxy(data: string, res: NextApiResponse<any>): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    
+    public fetchAdditionalUserDataAfterSignin(): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
+    
     public revokeOauthAccessToken(): Promise<RevokeAccessTokenResponse> {
         throw new Error("Method not implemented.");
     }
@@ -74,7 +83,7 @@ class VimeoProviderService implements AbstractProviderService {
     };
 
     public async validateCredentials(): Promise<string | null> {
-        if (!this.authenticationContext?.providerAccessToken) {
+        if (!this.authenticationContext?.accessToken) {
             return "Vimeo access token is required";
         }
         try {
@@ -111,7 +120,7 @@ class VimeoProviderService implements AbstractProviderService {
             throw new Error("Authentication context is required");
         }
 
-        headers.append("Authorization", `bearer ${this.authenticationContext.providerAccessToken}`);
+        headers.append("Authorization", `bearer ${this.authenticationContext.accessToken}`);
         headers.append("Content-Type", "application/json");
         headers.append("Accept", "application/vnd.vimeo.*+json;version=3.4");
 
