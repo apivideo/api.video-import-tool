@@ -65,9 +65,7 @@ const GcsLogin = (props: ProviderLoginProps) => {
 
     setBuckets(buckets);
 
-    setItem('GCS', { accessToken, buckets });
-
-    onBucketSelected(buckets[0].buckets[0], buckets, accessToken)
+    onBucketSelected(buckets[0].projectId + ":" + buckets[0].buckets[0], buckets, accessToken)
   }
 
   const onBucketSelected = (bucket: string, buckets: ProjectBucket[], accessToken: string) => {
