@@ -12,8 +12,11 @@ const GcsProvider: ImportProvider = {
   backendService: GcsProviderService,
   hasFeature: (feature: OptionalFeatureFlag) => false,
   authenticationScopes: [{
-    name: 'TODO',
-    description: 'TODO',
+    name: 'cloudplatformprojects.readonly',
+    description: 'View the list of projects you have access to'
+  }, {
+    name: 'devstorage.read_only',
+    description: 'View your data in Google Cloud Storage'
   }],
   videoTableSettings: {
     showThumnail: false,

@@ -15,6 +15,9 @@ type SessionStorageEntries = {
     DROPBOX: {
         accessToken: string;
     };
+    VIMEO: {
+        accessToken: string;
+    };
     APIVIDEO: {
         apiKey?: string;
         apiKeys: ProjectWithApiKeys[];

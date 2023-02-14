@@ -1,8 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { getItem, setItem } from '../../utils/functions/localStorageHelper';
 import { ProviderLoginProps } from '../types';
 
 const VimeoLogin = (props: ProviderLoginProps) => {
   const [vimeoAccessToken, setVimeoAccessToken] = React.useState<string>('');
+
+
+  useEffect(() => {
+    const storageItem = getItem('VIMEO');
+    if (storageItem) {
+      setVimeoAccessToken(storageItem.accessToken);
+      
+      props.onAuthenticationDataChanged({
+        accessToken: storageItem.accessToken || '',
+        filled: !!storageItem.accessToken,
+      });
+    }
+  }, []);
 
   return (
     <div>
@@ -31,6 +45,7 @@ const VimeoLogin = (props: ProviderLoginProps) => {
             type={'password'}
             value={vimeoAccessToken}
             onChange={(v) => {
+              setItem('VIMEO', { accessToken: v.target.value });
               setVimeoAccessToken(v.target.value);
               props.onAuthenticationDataChanged({
                 accessToken: v.target.value,
