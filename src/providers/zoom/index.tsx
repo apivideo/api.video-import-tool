@@ -1,6 +1,5 @@
 import { formatDate, formatDuration, formatSize } from "../../utils/functions";
 import { ImportProvider, OptionalFeatureFlag } from "../types";
-import ZoomProviderService from "./BackendService";
 import ZoomLogin from "./LoginComponent";
 
 const ZoomProvider: ImportProvider = {
@@ -9,7 +8,6 @@ const ZoomProvider: ImportProvider = {
   imgSrc: '/zoom.svg',
   hidden: true,
   loginComponent: ZoomLogin,
-  backendService: ZoomProviderService,
   hasFeature: (feature: OptionalFeatureFlag) => false,
   authenticationScopes: [{
     name: 'account:read:admin',

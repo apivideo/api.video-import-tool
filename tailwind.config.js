@@ -12,6 +12,8 @@ module.exports = {
         dropbox: '#0061FF',
         vimeo: '#32B8E8',
         gcs: '#356DF7',
+        s3: '#ec7211',
+        s3hover: '#eb5f07'
       },
       fontFamily: {
         jetbrains: ['JetBrains Mono', 'monospace'],

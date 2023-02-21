@@ -5,7 +5,7 @@ export default interface VideoSource {
     id: string;
     name: string;
     url?: string;
-    thumbnail: string;
+    thumbnail?: string;
     duration?: number;
     size?: number;
 }
@@ -30,9 +30,15 @@ export type ProviderAuthenticationContext = {
 };  
 
 export type EncryptedProviderAuthenticationContext = {
-    encryptedAccessToken: string;
+    encryptedAccessToken?: string;
     additionnalData?: any;
 };  
+
+export type CredentialsValidationResult = {
+    error?: string;
+    encryptedAccessToken?: string;
+    additionnalData?: any;
+}
 
 export type AuthenticationContext = ApiVideoAuthenticationContext & ProviderAuthenticationContext;
 export type EncryptedAuthenticationContext = ApiVideoAuthenticationContext & EncryptedProviderAuthenticationContext;

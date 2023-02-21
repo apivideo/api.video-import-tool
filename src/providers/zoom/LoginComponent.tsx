@@ -27,7 +27,7 @@ const ZoomLogin = (props: ProviderLoginProps) => {
   useEffect(() => {
     if (router.query.code && !accessToken) {
       callGetOAuthAccessTokenApi({
-        provider: 'ZOOM',
+        providerName: 'ZOOM',
         code: router.query.code as string,
       }).then((res: GetOauthAccessTokenRequestResponse) => {
         if (res.encrypted_access_token) {
@@ -67,7 +67,7 @@ const ZoomLogin = (props: ProviderLoginProps) => {
   return (
     <div className="flex flex-col mb-3.5">
       <div className="flex flex-col gap-4">
-        <label>Authorize access to Zoom</label>
+        <label className="font-semibold">Authorize access to Zoom</label>
         <button
           onClick={() =>
             router.push(

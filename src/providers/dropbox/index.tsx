@@ -1,6 +1,5 @@
 import { arrayContains, formatSize } from "../../utils/functions";
 import { ImportProvider, OptionalFeatureFlag } from "../types";
-import DropboxProviderService from "./BackendService";
 import DropboxLogin from "./LoginComponent";
 
 const DropboxProvider: ImportProvider = {
@@ -8,7 +7,6 @@ const DropboxProvider: ImportProvider = {
   description: 'Import from Dropbox',
   imgSrc: '/dropbox.svg',
   loginComponent: DropboxLogin,
-  backendService: DropboxProviderService,
   hasFeature: (feature: OptionalFeatureFlag) => arrayContains([OptionalFeatureFlag.GeneratePublicMp4UrlBeforeVideoCreation], feature),
   authenticationScopes: [{
     name: 'files.content.read',

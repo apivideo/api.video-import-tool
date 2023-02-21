@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Providers, { ProviderName } from '../../../providers';
-import { ApiResponse, EncryptedProviderAuthenticationContext, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
+import { ProviderName } from '../../../providers';
+import { getProviderBackendService } from '../../../providers/BackendServiceFactory';
+import { ApiResponse, CredentialsValidationResult, EncryptedProviderAuthenticationContext, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
 
 export type ValidateProviderCredentialsRequestBody = {
@@ -8,9 +9,7 @@ export type ValidateProviderCredentialsRequestBody = {
     provider: ProviderName,
 }
 
-export type ValidateProviderCredentialsRequestResponse = {
-    error: string | null;
-};
+export type ValidateProviderCredentialsRequestResponse = CredentialsValidationResult;
 
 export default async function handler(
     req: NextApiRequest,
@@ -20,12 +19,11 @@ export default async function handler(
         try {
             const body = JSON.parse(req.body) as ValidateProviderCredentialsRequestBody;
 
-            const providerService = new Providers[body.provider].backendService(body.authenticationContext);
+            const providerService = new (getProviderBackendService(body.provider))(body.authenticationContext);
 
-            const errorMessage = await providerService.validateCredentials();
 
             res.setHeader('Cache-Control', 'no-store');
-            res.status(201).send(SuccessResponse({ error: errorMessage }));
+            res.status(201).send(SuccessResponse(await providerService.validateCredentials()));
         } catch (e: any) {
             console.error(e);
             res.status(500).send(ErrorResponse(e.message));

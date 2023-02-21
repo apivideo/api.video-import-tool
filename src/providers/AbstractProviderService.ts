@@ -1,10 +1,10 @@
 import { EncryptedOauthAccessToken, RevokeAccessTokenResponse } from "../service/OAuthHelpers";
-import VideoSource, { Page } from "../types/common";
+import VideoSource, { CredentialsValidationResult, Page } from "../types/common";
 
 
 abstract class AbstractProviderService {
     abstract getImportableVideos(nextPageFetchDetails?: any): Promise<Page<VideoSource>>;
-    abstract validateCredentials(): Promise<string | null>;
+    abstract validateCredentials(): Promise<CredentialsValidationResult>;
     abstract generatePublicMp4(videoSource: VideoSource): Promise<VideoSource>; 
     abstract getOauthAccessToken(code: string): Promise<EncryptedOauthAccessToken>;
     abstract revokeOauthAccessToken(): Promise<RevokeAccessTokenResponse>;

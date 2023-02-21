@@ -1,6 +1,6 @@
 import { DROPBOX_CLIENT_ID, DROPBOX_CLIENT_SECRET, DROPBOX_REDIRECT_URL } from "../../env";
 import { EncryptedOauthAccessToken, getOauthAccessTokenCall, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
-import VideoSource, { EncryptedProviderAuthenticationContext, Page, ProviderAuthenticationContext } from "../../types/common";
+import VideoSource, { CredentialsValidationResult, EncryptedProviderAuthenticationContext, Page } from "../../types/common";
 import { decryptProviderAuthenticationContext, encryptAccessToken } from "../../utils/functions/crypto";
 import AbstractProviderService from "../AbstractProviderService";
 
@@ -27,10 +27,12 @@ type DropboxSearchApiResponse = {
 
 
 class DropboxProviderService implements AbstractProviderService {
-    authenticationContext?: ProviderAuthenticationContext;
+    accessToken?: string;
 
     constructor(authenticationContext?: EncryptedProviderAuthenticationContext) {
-        this.authenticationContext = authenticationContext ? decryptProviderAuthenticationContext(authenticationContext) : undefined;
+        if(authenticationContext?.encryptedAccessToken) {
+            this.accessToken = decryptProviderAuthenticationContext(authenticationContext).accessToken;
+        } 
     }
 
     public fetchAdditionalUserDataAfterSignin(): Promise<any> {
@@ -60,7 +62,7 @@ class DropboxProviderService implements AbstractProviderService {
         }
     }
 
-    public async validateCredentials(): Promise<string | null> {
+    public async validateCredentials(): Promise<CredentialsValidationResult> {
         throw new Error("Method not implemented.");
     }
 
@@ -91,12 +93,12 @@ class DropboxProviderService implements AbstractProviderService {
     };
 
     private async callApi(path: string, method: string, body?: any): Promise<any> {
-        if (!this.authenticationContext) {
+        if (!this.accessToken) {
             throw new Error("No authentication context provided");
         }
 
         const headers = new Headers();
-        headers.append("Authorization", "Bearer " + this.authenticationContext.accessToken)
+        headers.append("Authorization", "Bearer " + this.accessToken)
         headers.append("Content-Type", "application/json");
 
         const res = await fetch(path, {

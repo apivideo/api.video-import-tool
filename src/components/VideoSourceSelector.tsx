@@ -27,7 +27,7 @@ interface VideoSourceExtended extends VideoSource {
 const VideoSourceSelector: React.FC = () => {
   const [providerAuthenticationContext, setProviderAuthenticationContext] =
     useState<EncryptedProviderAuthenticationContext>();
-    const [apiVideoAuthenticationContext, setApiVideoAuthenticationContext] =
+  const [apiVideoAuthenticationContext, setApiVideoAuthenticationContext] =
     useState<EcryptedApiVideoAuthenticationContext>();
   const [videoSources, setVideoSources] = useState<VideoSourceExtended[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -51,9 +51,9 @@ const VideoSourceSelector: React.FC = () => {
     } else {
       const item = getItem('APIVIDEO');
       const encryptedApiKey = item?.encryptedKey || '';
-      
+
       setProviderAuthenticationContext(providerAuthenticationData);
-      setApiVideoAuthenticationContext({encryptedApiKey});
+      setApiVideoAuthenticationContext({ encryptedApiKey });
 
       (async () => {
         const alreadyImported = await fetchAlreadyImportedVideos(encryptedApiKey);
@@ -70,7 +70,7 @@ const VideoSourceSelector: React.FC = () => {
 
     return previousImports.videos.reduce(
       (
-        acc: { [key: string]: { videoId: string; size: number } },
+        acc: { [key: string]: { videoId: string; size?: number } },
         current: Video
       ) => {
         const providerId = current.metadata?.find(
@@ -83,11 +83,13 @@ const VideoSourceSelector: React.FC = () => {
           if (!acc[providerId['value'] as string]) {
             acc[providerId['value'] as string] = {
               videoId: current.videoId,
-              size: providerSize['value'],
+              ...(providerSize ? { size: providerSize['value'] } : {}),
             };
           } else {
             acc[providerId['value'] as string].videoId = current.videoId;
-            acc[providerId['value'] as string].size = providerSize['value'];
+            if(providerSize) {
+              acc[providerId['value'] as string].size = providerSize['value'];
+            }
           }
         }
         return acc;
@@ -98,20 +100,20 @@ const VideoSourceSelector: React.FC = () => {
 
   const fetchVideos = async (
     providerAutenticationContext: EncryptedProviderAuthenticationContext,
-    alreadyImported: { [key: string]: { videoId: string; size: number } },
+    alreadyImported: { [key: string]: { videoId: string; size?: number } },
     videos: VideoSourceExtended[] = [],
     nextPageFetchDetails?: any
   ) => {
     try {
       const res = await callGetImportableVideosApi({
         authenticationContext: providerAutenticationContext,
-        provider: providerName,
+        providerName: providerName,
         nextPageFetchDetails,
       });
       videos = videos.concat(
         res.data.map((video) => ({
           ...video,
-          alreadyImported: alreadyImported[video.id]?.size == video.size,
+          alreadyImported: alreadyImported[video.id] && (!alreadyImported[video.id]?.size || alreadyImported[video.id]?.size == video.size),
         }))
       );
       setVideoSources(sortVideos(videos, 1, null));
@@ -282,7 +284,7 @@ const VideoSourceSelector: React.FC = () => {
     }
 
     setVideoSources(sortVideos(videoSources, newSortOrder, newSortBy || null));
-    
+
     setSortOrder(newSortOrder);
     setSortBy(newSortBy);
   };
@@ -338,7 +340,7 @@ const VideoSourceSelector: React.FC = () => {
               process.
             </p>
           </div>
-          
+
           {!createdCount && (
             <>
               {videoSources
@@ -373,7 +375,7 @@ const VideoSourceSelector: React.FC = () => {
                   ></VideoSourceTable>
                 </>
               }
-              
+
               <h1 className="font-semibold border-b border-slate-200 pb-2 mb-2">{`New videos to import (${videoSources.filter((v) => !v.alreadyImported).length})`}</h1>
               <VideoSourceTable
                 isCollapsed={false}

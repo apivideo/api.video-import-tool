@@ -22,6 +22,7 @@ const ProvidersPage: React.FC<ImportToolProps> = (props) => {
         <div className="flex flex-row gap-4 pb-8 flex-wrap lg:flex-wrap w-full">
           {providers
             .filter((p) => p.hidden !== true)
+            .sort((a, b) => a.displayName.localeCompare(b.displayName))
             .map(({ displayName, link, name, imgSrc, description }) => (
               <Link href={link} key={name} className="w-1/3 sm:w-72 block">
                 <div className="border border-slate-200 rounded-lg shadow flex gap-4 p-6">

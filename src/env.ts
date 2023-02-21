@@ -6,8 +6,7 @@ export const ZOOM_CLIENT_ID = process.env.NEXT_PUBLIC_ZOOM_CLIENT_ID!;
 export const ZOOM_REDIRECT_URL = process.env.NEXT_PUBLIC_ZOOM_REDIRECT_URL!;
 export const ZOOM_CLIENT_SECRET = process.env.ZOOM_CLIENT_SECRET!; 
 
-export const GCS_CLIENT_ID = process.env.NEXT_PUBLIC_GCS_CLIENT_ID!; 
-export const GCS_REDIRECT_URL = process.env.NEXT_PUBLIC_GCS_REDIRECT_URL!;
+export const GCS_CLIENT_EMAIL = process.env.GCS_CLIENT_EMAIL!; 
 export const GCS_CLIENT_SECRET = process.env.GCS_CLIENT_SECRET!; 
 
 export const DASHBOARD_DOMAIN = process.env.DASHBOARD_DOMAIN!;

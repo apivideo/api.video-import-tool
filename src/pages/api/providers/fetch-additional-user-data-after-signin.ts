@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Providers, { ProviderName } from '../../../providers';
+import { ProviderName } from '../../../providers';
+import { getProviderBackendService } from '../../../providers/BackendServiceFactory';
 import { ApiResponse, EncryptedProviderAuthenticationContext, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
 
@@ -18,7 +19,8 @@ export default async function handler(
         try {
             const body = JSON.parse(req.body) as FetchAdditionalUserDataAfterSigninRequestBody;
 
-            const providerService = new Providers[body.providerName].backendService(body.authenticationContext);
+            const providerService = new (getProviderBackendService(body.providerName))(body.authenticationContext)
+            //const providerService = new Providers[body.providerName].backendService(body.authenticationContext);
 
             const buckets = await providerService.fetchAdditionalUserDataAfterSignin();
             res.setHeader('Cache-Control', 'no-store');
