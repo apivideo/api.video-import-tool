@@ -13,7 +13,7 @@ import { Import } from '../../../types/common';
 import { getItem } from '../../../utils/functions/localStorageHelper';
 
 const ImportView: NextPage = () => {
-  const [apiVideoApiKey, setApiVideoApiKey] = useState<string>();
+  const [apiVideoEncryptedKey, setApiVideoEncryptedKey] = useState<string>();
   const [importsError, setImportsError] = useState<string>('');
   const [videos, setVideos] = useState<Video[]>([]);
   const [selectedImport, setSelectedImport] = useState<Import>();
@@ -22,15 +22,15 @@ const ImportView: NextPage = () => {
 
   useEffect(() => {
     const item = getItem('APIVIDEO');
-    const apiKey = item?.apiKey || '';
-    setApiVideoApiKey(apiKey);
+    const apiKey = item?.encryptedKey || '';
+    setApiVideoEncryptedKey(apiKey);
     if (router?.query?.importId) {
-      const getImportedVideos = async (apiKey: string) => {
+      const getImportedVideos = async (encryptedApiKey: string) => {
         const importId = router.query.importId as string;
         if (importId) {
           try {
             setLoading(true);
-            await callGetImportApi({ apiKey, importId }).then((res) => {
+            await callGetImportApi({ encryptedApiKey, importId }).then((res) => {
               setVideos(res.videos);
               const video: Video = res.videos[0];
               const videoImport: Import = {
@@ -73,7 +73,7 @@ const ImportView: NextPage = () => {
       {!loading && videos?.length ? (
         <VideoImportTable
           videos={videos}
-          apiVideoApiKey={apiVideoApiKey as string}
+          apiVideoEncryptedKey={apiVideoEncryptedKey as string}
         />
       ) : null}
       {loading && (

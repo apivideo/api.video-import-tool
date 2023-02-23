@@ -1,5 +1,5 @@
-import { OauthAccessToken, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
-import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
+import { EncryptedOauthAccessToken, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
+import VideoSource, { EncryptedProviderAuthenticationContext, Page, ProviderAuthenticationContext } from "../../types/common";
 import { uppercaseFirstLetter } from "../../utils/functions";
 import AbstractProviderService from "../AbstractProviderService";
 
@@ -41,8 +41,11 @@ type VimeoApiResult = {
 class VimeoProviderService implements AbstractProviderService {
     authenticationContext?: ProviderAuthenticationContext;
 
-    constructor(authenticationContext?: ProviderAuthenticationContext) {
-        this.authenticationContext = authenticationContext;
+    constructor(authenticationContext?: EncryptedProviderAuthenticationContext) {
+        this.authenticationContext = {
+            ...authenticationContext,
+            accessToken: authenticationContext?.encryptedAccessToken!
+        };
     }
     
     public fetchAdditionalUserDataAfterSignin(): Promise<any> {
@@ -57,7 +60,7 @@ class VimeoProviderService implements AbstractProviderService {
         throw new Error("Method not implemented.");
     }
 
-    public getOauthAccessToken(code: string): Promise<OauthAccessToken> {
+    public getOauthAccessToken(code: string): Promise<EncryptedOauthAccessToken> {
         throw new Error("Method not implemented.");
     }
 

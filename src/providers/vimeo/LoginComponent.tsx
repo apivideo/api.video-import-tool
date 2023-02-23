@@ -12,7 +12,7 @@ const VimeoLogin = (props: ProviderLoginProps) => {
       setVimeoAccessToken(storageItem.accessToken);
       
       props.onAuthenticationDataChanged({
-        accessToken: storageItem.accessToken || '',
+        encryptedAccessToken: storageItem.accessToken || '',
         filled: !!storageItem.accessToken,
       });
     }
@@ -48,7 +48,7 @@ const VimeoLogin = (props: ProviderLoginProps) => {
               setItem('VIMEO', { accessToken: v.target.value });
               setVimeoAccessToken(v.target.value);
               props.onAuthenticationDataChanged({
-                accessToken: v.target.value,
+                encryptedAccessToken: v.target.value,
                 filled: !!v.target.value && v.target.value.length > 0,
               });
             }}

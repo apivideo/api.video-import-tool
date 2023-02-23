@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { DASHBOARD_DOMAIN } from '../../../env';
 import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
+import { encryptProjectWithApiKeys } from '../../../utils/functions/crypto';
 
 export type VerifyApiKeyRequestBody = {
     apiKey: string;
@@ -13,17 +14,27 @@ type Key = {
     projectName: string;
 };
 
-
-export type ProjectWithApiKeys = {
+type EncryptedKey = {
     name: string;
-    keys: {
-        production: Key[];
-        sandbox: Key[];
-    };
+    encryptedKey: string;
+    projectId: string;
+    projectName: string;
 };
 
 
-export type GetApiVideoApiKeysResponse = ProjectWithApiKeys[];
+type AbstractProjectWithApiKeys<T> = {
+    name: string;
+    keys: {
+        production: T[];
+        sandbox: T[];
+    };
+};
+
+export type ProjectWithApiKeys = AbstractProjectWithApiKeys<Key>;
+export type ProjectWithEncryptedApiKeys = AbstractProjectWithApiKeys<EncryptedKey>;
+
+
+export type GetApiVideoApiKeysResponse = ProjectWithEncryptedApiKeys[];
 
 export default async function handler(
     req: NextApiRequest,
@@ -41,9 +52,10 @@ export default async function handler(
                 }
             });
             
-            const json = await res1.json();
-
-            res.status(200).json(SuccessResponse(json));
+            const json: ProjectWithApiKeys[] = await res1.json();
+            
+            res.setHeader('Cache-Control', 'no-store');
+            res.status(200).json(SuccessResponse(json.map(a => encryptProjectWithApiKeys(a))));
         } catch (e: any) {
             console.error(e);
             res.status(500).send(ErrorResponse(e.message));

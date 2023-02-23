@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Providers, { ProviderName } from '../../../providers';
-import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, ProviderAuthenticationContext, SuccessResponse } from '../../../types/common';
+import { ApiResponse, EncryptedProviderAuthenticationContext, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
 
 export type ValidateProviderCredentialsRequestBody = {
-    authenticationContext: ProviderAuthenticationContext,
+    authenticationContext: EncryptedProviderAuthenticationContext,
     provider: ProviderName,
 }
 
@@ -23,6 +23,8 @@ export default async function handler(
             const providerService = new Providers[body.provider].backendService(body.authenticationContext);
 
             const errorMessage = await providerService.validateCredentials();
+
+            res.setHeader('Cache-Control', 'no-store');
             res.status(201).send(SuccessResponse({ error: errorMessage }));
         } catch (e: any) {
             console.error(e);

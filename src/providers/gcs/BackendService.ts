@@ -1,7 +1,7 @@
 import { GCS_CLIENT_ID, GCS_CLIENT_SECRET, GCS_REDIRECT_URL } from "../../env";
-import { getOauthAccessTokenCall, OauthAccessToken, RevokeAccessTokenResponse, revokeOauthAccessTokenCall } from "../../service/OAuthHelpers";
-import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
-import { getVideoSourceProxyUrl } from "../../utils/functions/crypto";
+import { EncryptedOauthAccessToken, getOauthAccessTokenCall, RevokeAccessTokenResponse, revokeOauthAccessTokenCall } from "../../service/OAuthHelpers";
+import VideoSource, { EncryptedProviderAuthenticationContext, Page, ProviderAuthenticationContext } from "../../types/common";
+import { decryptProviderAuthenticationContext, encryptAccessToken, getVideoSourceProxyUrl } from "../../utils/functions/crypto";
 import AbstractProviderService from "../AbstractProviderService";
 
 
@@ -14,8 +14,8 @@ export type ProjectBucket = {
 class GcsProviderService implements AbstractProviderService {
     authenticationContext?: ProviderAuthenticationContext;
 
-    constructor(authenticationContext?: ProviderAuthenticationContext) {
-        this.authenticationContext = authenticationContext;
+    constructor(authenticationContext?: EncryptedProviderAuthenticationContext) {
+        this.authenticationContext = authenticationContext ? decryptProviderAuthenticationContext(authenticationContext) : undefined;
     }
 
     public async fetchAdditionalUserDataAfterSignin(): Promise<any> {
@@ -57,8 +57,8 @@ class GcsProviderService implements AbstractProviderService {
         throw new Error("Method not implemented.");
     }
 
-    public async getOauthAccessToken(code: string): Promise<OauthAccessToken> {
-        const res = await getOauthAccessTokenCall("https://oauth2.googleapis.com/token", GCS_CLIENT_ID, GCS_CLIENT_SECRET, GCS_REDIRECT_URL, code);;
+    public async getOauthAccessToken(code: string): Promise<EncryptedOauthAccessToken> {
+        const res = encryptAccessToken(await getOauthAccessTokenCall("https://oauth2.googleapis.com/token", GCS_CLIENT_ID, GCS_CLIENT_SECRET, GCS_REDIRECT_URL, code));
         return res;
     }
 

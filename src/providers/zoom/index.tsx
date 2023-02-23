@@ -37,7 +37,6 @@ const ZoomProvider: ImportProvider = {
       formatter: (v) => formatDuration(v),
     }]
   },
-  apiVideoAuthenticationMode: "auth0"
 };
 
 export default ZoomProvider; 

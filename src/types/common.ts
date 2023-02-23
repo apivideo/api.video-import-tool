@@ -20,12 +20,22 @@ export type ApiVideoAuthenticationContext = {
     apiVideoApiKey: string;
 };
 
+export type EcryptedApiVideoAuthenticationContext = {
+    encryptedApiKey: string;
+};
+
 export type ProviderAuthenticationContext = {
     accessToken: string;
     additionnalData?: any;
 };  
 
+export type EncryptedProviderAuthenticationContext = {
+    encryptedAccessToken: string;
+    additionnalData?: any;
+};  
+
 export type AuthenticationContext = ApiVideoAuthenticationContext & ProviderAuthenticationContext;
+export type EncryptedAuthenticationContext = ApiVideoAuthenticationContext & EncryptedProviderAuthenticationContext;
 
 export type ApiResponse<T> = {
     data?: T;
@@ -46,5 +56,7 @@ export const SuccessResponse = <T>(data: T) => ({
 export const ErrorResponse = (error: string) => ({
     error
 });
+
+
 
 export const MethodNotAllowedResponse = ErrorResponse("Method not allowed");

@@ -3,6 +3,7 @@ import Video from "@api.video/nodejs-client/lib/model/Video";
 import VideoStatus from "@api.video/nodejs-client/lib/model/VideoStatus";
 import packageJson from '../../package.json';
 import { ProviderName } from "../providers";
+import { decrypt } from "../utils/functions/crypto";
 
 export type VideoCreationOptions = {
     title: string;
@@ -22,10 +23,10 @@ class ApiVideoService {
     apiKey: string;
     client: ApiVideoClient;
 
-    constructor(apiKey: string) {
-        this.apiKey = apiKey;
+    constructor(encryptedApiKey: string) {
+        this.apiKey = decrypt(encryptedApiKey);
         this.client = new ApiVideoClient({
-            apiKey,
+            apiKey: this.apiKey,
             applicationName: "apivideo-import-tool",
             applicationVersion: packageJson.version,
         });

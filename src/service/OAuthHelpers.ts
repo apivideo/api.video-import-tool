@@ -4,6 +4,12 @@ export type OauthAccessToken = {
     token_type: string;
 }
 
+export type EncryptedOauthAccessToken = {
+    encrypted_access_token: string;
+    expires_in: number;
+    token_type: string;
+}
+
 export type RevokeAccessTokenResponse = {
     success: boolean;
 }

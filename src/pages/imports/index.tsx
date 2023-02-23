@@ -9,7 +9,7 @@ import { callGetImportsApi } from '../../service/ClientApiHelpers';
 import { Import } from '../../types/common';
 
 const ImportsHome: NextPage = () => {
-  const [apiVideoApiKey, setApiVideoApiKey] = useState<string | null>(null);
+  const [apiVideoEncryptedKey, setApiVideoEncryptedKey] = useState<string>();
   const [apiVideoErrorMessage, setApiVideoErrorMessage] = useState<string | null>(null);
   const [noResults, setNoResults] = useState<string>('');
   const [imports, setImports] = useState<Import[]>();
@@ -19,11 +19,11 @@ const ImportsHome: NextPage = () => {
     
   }, []);
 
-  const getImportedVideos = (apiKey: string) => {
+  const getImportedVideos = (encryptedApiKey: string) => {
     setLoading(true);
     setImports([]);
-    apiKey &&
-      callGetImportsApi({ apiKey })
+    encryptedApiKey &&
+      callGetImportsApi({ encryptedApiKey })
         .then((res) => {
           if (!res?.videos?.length) {
             setLoading(false);
@@ -91,20 +91,19 @@ const ImportsHome: NextPage = () => {
         <div className="flex flex-col md:w-2/4">
           <div className="flex flex-col gap-4">
             <ApiKeySelector
-              mode={'auth0'}
-              onApiKeyChange={(apiKey) => {
-                setApiVideoApiKey(apiKey);
+              onApiKeyChange={(encryptedKey) => {
+                setApiVideoEncryptedKey(encryptedKey);
                 setApiVideoErrorMessage(null);
               }}
               errorMessage={apiVideoErrorMessage}
-              apiKey={apiVideoApiKey}
+              encryptedKey={apiVideoEncryptedKey}
             />
           </div>
           <button
-            className={`mt-4 ${!apiVideoApiKey ? 'bg-slate-300' : 'bg-black'
+            className={`mt-4 ${!apiVideoEncryptedKey ? 'bg-slate-300' : 'bg-black'
               } text-sm font-semibold w-full`}
-            disabled={!apiVideoApiKey}
-            onClick={() => getImportedVideos(apiVideoApiKey!)}
+            disabled={!apiVideoEncryptedKey}
+            onClick={() => getImportedVideos(apiVideoEncryptedKey!)}
           >
             See previous imports
           </button>

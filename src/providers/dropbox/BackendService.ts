@@ -1,6 +1,7 @@
 import { DROPBOX_CLIENT_ID, DROPBOX_CLIENT_SECRET, DROPBOX_REDIRECT_URL } from "../../env";
-import { getOauthAccessTokenCall, OauthAccessToken, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
-import VideoSource, { Page, ProviderAuthenticationContext } from "../../types/common";
+import { EncryptedOauthAccessToken, getOauthAccessTokenCall, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
+import VideoSource, { EncryptedProviderAuthenticationContext, Page, ProviderAuthenticationContext } from "../../types/common";
+import { decryptProviderAuthenticationContext, encryptAccessToken } from "../../utils/functions/crypto";
 import AbstractProviderService from "../AbstractProviderService";
 
 type DropboxSearchApiResponse = {
@@ -28,8 +29,8 @@ type DropboxSearchApiResponse = {
 class DropboxProviderService implements AbstractProviderService {
     authenticationContext?: ProviderAuthenticationContext;
 
-    constructor(authenticationContext?: ProviderAuthenticationContext) {
-        this.authenticationContext = authenticationContext;
+    constructor(authenticationContext?: EncryptedProviderAuthenticationContext) {
+        this.authenticationContext = authenticationContext ? decryptProviderAuthenticationContext(authenticationContext) : undefined;
     }
 
     public fetchAdditionalUserDataAfterSignin(): Promise<any> {
@@ -44,8 +45,8 @@ class DropboxProviderService implements AbstractProviderService {
         throw new Error("Method not implemented.");
     }
 
-    public async getOauthAccessToken(code: string): Promise<OauthAccessToken> {
-        return await getOauthAccessTokenCall("https://api.dropbox.com/oauth2/token", DROPBOX_CLIENT_ID, DROPBOX_CLIENT_SECRET, DROPBOX_REDIRECT_URL, code);
+    public async getOauthAccessToken(code: string): Promise<EncryptedOauthAccessToken> {
+        return encryptAccessToken(await getOauthAccessTokenCall("https://api.dropbox.com/oauth2/token", DROPBOX_CLIENT_ID, DROPBOX_CLIENT_SECRET, DROPBOX_REDIRECT_URL, code));
     }
 
     public async generatePublicMp4(videoSource: VideoSource): Promise<VideoSource> {

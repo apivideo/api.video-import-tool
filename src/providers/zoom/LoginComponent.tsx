@@ -14,12 +14,12 @@ const ZoomLogin = (props: ProviderLoginProps) => {
   useEffect(() => {
     const item = getItem('ZOOM')
     if (item) {
-      onNewAccessToken(item.accessToken);
-      const accessToken = item.accessToken;
-      setAccessToken(accessToken);
+      onNewAccessToken(item.encryptedAccessToken);
+      const encryptedAccessToken = item.encryptedAccessToken;
+      setAccessToken(encryptedAccessToken);
       props.onAuthenticationDataChanged({
-        accessToken,
-        filled: !!accessToken,
+        encryptedAccessToken,
+        filled: !!encryptedAccessToken,
       });
     }
   }, []);
@@ -30,20 +30,21 @@ const ZoomLogin = (props: ProviderLoginProps) => {
         provider: 'ZOOM',
         code: router.query.code as string,
       }).then((res: GetOauthAccessTokenRequestResponse) => {
-        if (res.access_token) {
+        if (res.encrypted_access_token) {
           removeItem('ZOOM');
-          onNewAccessToken(res.access_token, res.expires_in * 1000);
+          onNewAccessToken(res.encrypted_access_token, res.expires_in * 1000);
+          router.replace('/zoom');
         }
       });
     }
   }, [router.query.code]);
 
-  const onNewAccessToken = async (accessToken: string, expiresIn?: number) => {
-    setItem('ZOOM', { accessToken }, expiresIn);
-    setAccessToken(accessToken);
+  const onNewAccessToken = async (encryptedAccessToken: string, expiresIn?: number) => {
+    setItem('ZOOM', { encryptedAccessToken }, expiresIn);
+    setAccessToken(encryptedAccessToken);
     props.onAuthenticationDataChanged({
-      accessToken,
-      filled: !!accessToken,
+      encryptedAccessToken,
+      filled: !!encryptedAccessToken,
     });
   };
  
@@ -52,11 +53,11 @@ const ZoomLogin = (props: ProviderLoginProps) => {
     await callRevokeAccessTokenApi({
       provider: 'ZOOM',
       authenticationContext: {
-        accessToken: accessToken,
+        encryptedAccessToken: accessToken,
       }
     });
     props.onAuthenticationDataChanged({
-      accessToken: '',
+      encryptedAccessToken: '',
       filled: false,
     });
     removeItem('ZOOM');

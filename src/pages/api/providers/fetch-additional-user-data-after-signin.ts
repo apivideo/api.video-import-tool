@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Providers, { ProviderName } from '../../../providers';
-import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, ProviderAuthenticationContext, SuccessResponse } from '../../../types/common';
+import { ApiResponse, EncryptedProviderAuthenticationContext, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
 
 export type FetchAdditionalUserDataAfterSigninRequestBody = {
     providerName: ProviderName,
-    authenticationContext: ProviderAuthenticationContext,
+    authenticationContext: EncryptedProviderAuthenticationContext,
 }
 
 export type FetchAdditionalUserDataAfterSigninRequestResponse = any;
@@ -21,6 +21,7 @@ export default async function handler(
             const providerService = new Providers[body.providerName].backendService(body.authenticationContext);
 
             const buckets = await providerService.fetchAdditionalUserDataAfterSignin();
+            res.setHeader('Cache-Control', 'no-store');
             res.status(201).send(SuccessResponse(buckets));
         } catch (e: any) {
             console.error(e);

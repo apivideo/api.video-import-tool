@@ -4,7 +4,7 @@ import { AlertTriangle, ArrowRight } from 'react-feather';
 import Providers, {
   ProviderName
 } from '../providers';
-import { ImportProvider, OptionalFeatureFlag, ProviderAuthenticationData } from '../providers/types';
+import { EncryptedProviderAuthenticationData, ImportProvider, OptionalFeatureFlag } from '../providers/types';
 import {
   callValidateProviderCredentialsApi,
   callVerifyApiVideoApiKeyApi
@@ -17,10 +17,10 @@ import { useGlobalContext } from './context/Global';
 const Authenticate: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [providerAuthenticationData, setProviderAuthenticationData] = useState<ProviderAuthenticationData | null>(null);
+  const [providerAuthenticationData, setProviderAuthenticationData] = useState<EncryptedProviderAuthenticationData | null>(null);
   const [providerErrorMessage, setProviderErrorMessage] = useState<string | null>();
 
-  const [apiVideoApiKey, setApiVideoApiKey] = useState<string | null>(null);
+  const [apiVideoEncryptedKey, setApiVideoEncryptedKey] = useState<string>();
   const [apiVideoErrorMessage, setApiVideoErrorMessage] = useState<string | null>(null);
 
   const { providerName, setProviderName, setProviderAuthenticationData: globalSetProviderAuthenticationData } = useGlobalContext();
@@ -56,6 +56,7 @@ const Authenticate: React.FC = () => {
 
     try {
       const res = await callValidateProviderCredentialsApi({
+        
         authenticationContext: {
           ...providerAuthenticationData,
         },
@@ -74,10 +75,10 @@ const Authenticate: React.FC = () => {
 
   const validateApiVideoAuthentication = async (): Promise<string | null> => {
     let error = null;
-    if (!apiVideoApiKey || apiVideoApiKey.trim() === '') {
+    if (!apiVideoEncryptedKey || apiVideoEncryptedKey.trim() === '') {
       error = 'Please enter your api.video API key';
     } else {
-      const res = await callVerifyApiVideoApiKeyApi({ apiKey: apiVideoApiKey });
+      const res = await callVerifyApiVideoApiKeyApi({ encryptedApiKey: apiVideoEncryptedKey });
 
       if (!res.ok) {
         error = 'Please verify your api key';
@@ -114,7 +115,7 @@ const Authenticate: React.FC = () => {
   };
 
 
-  const buttonDisabled = loading || !providerAuthenticationData?.filled || !apiVideoApiKey;
+  const buttonDisabled = loading || !providerAuthenticationData?.filled || !apiVideoEncryptedKey;
 
   return (
     <ImportCard activeStep={2} paddingTop>
@@ -129,13 +130,12 @@ const Authenticate: React.FC = () => {
         <div className="flex flex-col md:w-2/4">
           <div className="flex flex-col gap-4">
             <ApiKeySelector
-              mode={provider?.apiVideoAuthenticationMode || 'apiKey'}
               onApiKeyChange={(apiKey) => {
-                setApiVideoApiKey(apiKey);
+                setApiVideoEncryptedKey(apiKey);
                 setApiVideoErrorMessage(null);
               }}
               errorMessage={apiVideoErrorMessage}
-              apiKey={apiVideoApiKey}
+              encryptedKey={apiVideoEncryptedKey}
             />
           </div>
 
