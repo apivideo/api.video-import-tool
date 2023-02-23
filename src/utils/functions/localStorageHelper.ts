@@ -1,26 +1,26 @@
-import { ProjectWithApiKeys } from "../../pages/api/apivideo/keys";
+import { ProjectWithEncryptedApiKeys } from "../../pages/api/apivideo/keys";
 import { ProjectBucket } from "../../providers/gcs/BackendService";
 
 const PREFIX = "api-video-import-tool-";
 
 type SessionStorageEntries = {
     GCS: {
-        accessToken: string;
+        encryptedAccessToken: string;
         buckets?: ProjectBucket[]; 
         bucket?: string;
     };
     ZOOM: {
-        accessToken: string;
+        encryptedAccessToken: string;
     };
     DROPBOX: {
-        accessToken: string;
+        encryptedAccessToken: string;
     };
     VIMEO: {
         accessToken: string;
     };
     APIVIDEO: {
-        apiKey?: string;
-        apiKeys: ProjectWithApiKeys[];
+        encryptedKey?: string;
+        apiKeys: ProjectWithEncryptedApiKeys[];
     };
 };
 

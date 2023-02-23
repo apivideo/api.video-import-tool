@@ -32,7 +32,6 @@ const GcsProvider: ImportProvider = {
       formatter: (v) => formatSize(v),
     }]
   },
-  apiVideoAuthenticationMode: "auth0"
 };
 
 export default GcsProvider; 

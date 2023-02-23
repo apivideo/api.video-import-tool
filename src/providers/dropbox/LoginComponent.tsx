@@ -8,35 +8,35 @@ import { getItem, setItem } from '../../utils/functions/localStorageHelper';
 import { ProviderLoginProps } from '../types';
 
 const DropboxLogin = (props: ProviderLoginProps) => {
-  const [accessToken, setAccessToken] = useState<string>('');
+  const [encryptedAccessToken, setEncryptedAccessToken] = useState<string>('');
   const router = useRouter();
 
 
   useEffect(() => {
     const item = getItem('DROPBOX')
     if (item) {
-      const accessToken = item.accessToken;
-      setAccessToken(accessToken);
+      const encryptedAccessToken = item.encryptedAccessToken;
+      setEncryptedAccessToken(encryptedAccessToken);
       props.onAuthenticationDataChanged({
-        accessToken,
-        filled: !!accessToken,
+        encryptedAccessToken,
+        filled: !!encryptedAccessToken,
       });
     }
   }, []);
 
   useEffect(() => {
-    if (router.query.code && !accessToken) {
+    if (router.query.code && !encryptedAccessToken) {
       callGetOAuthAccessTokenApi({
         provider: 'DROPBOX',
         code: router.query.code as string,
       }).then((res: GetOauthAccessTokenRequestResponse) => {
-        if (res.access_token) {
-          setAccessToken(res.access_token);
-          setItem('DROPBOX', { accessToken: res.access_token }, res.expires_in * 1000);
+        if (res.encrypted_access_token) {
+          setEncryptedAccessToken(res.encrypted_access_token);
+          setItem('DROPBOX', { encryptedAccessToken: res.encrypted_access_token }, res.expires_in * 1000);
           
           props.onAuthenticationDataChanged({
-            accessToken,
-            filled: !!accessToken,
+            encryptedAccessToken: res.encrypted_access_token,
+            filled: !!res.encrypted_access_token,
           });
         }
       });
@@ -55,7 +55,7 @@ const DropboxLogin = (props: ProviderLoginProps) => {
           }
           className="bg-dropbox text-sm font-semibold w-full"
         >
-          {accessToken ? (
+          {encryptedAccessToken ? (
             <div className="flex justify-center items-center gap-2">
               <Check size={20} strokeWidth={'.2rem'} />
               Successfully signed into Dropbox

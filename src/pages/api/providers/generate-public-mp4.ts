@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Providers, { ProviderName } from '../../../providers';
-import VideoSource, { ApiResponse, ErrorResponse, MethodNotAllowedResponse, ProviderAuthenticationContext, SuccessResponse } from '../../../types/common';
+import VideoSource, { ApiResponse, EncryptedProviderAuthenticationContext, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
 
 export type GeneratePublicMp4RequestBody = {
     providerName: ProviderName,
-    authenticationContext: ProviderAuthenticationContext,
+    authenticationContext: EncryptedProviderAuthenticationContext,
     video: VideoSource,
 }
 
@@ -24,6 +24,7 @@ export default async function handler(
             const providerService = new Providers[body.providerName].backendService(body.authenticationContext);
 
             const video = await providerService.generatePublicMp4(body.video);
+            res.setHeader('Cache-Control', 'no-store');
             res.status(201).send(SuccessResponse({ video }));
         } catch (e: any) {
             console.error(e);
@@ -33,3 +34,4 @@ export default async function handler(
         res.status(405).send(MethodNotAllowedResponse);
     }
 }
+    

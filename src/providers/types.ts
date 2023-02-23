@@ -1,12 +1,11 @@
-import { ApiKeySelectorMode } from '../components/commons/ApiKeySelector';
-import { ProviderAuthenticationContext } from '../types/common';
+import { EncryptedProviderAuthenticationContext } from '../types/common';
 import AbstractProviderService from './AbstractProviderService';
 
-export type ProviderAuthenticationData = ProviderAuthenticationContext & { filled: boolean };
+export type EncryptedProviderAuthenticationData = EncryptedProviderAuthenticationContext & { filled: boolean };
 
 export interface ProviderLoginProps {
-  onAuthenticationDataChanged: (providerAuthenticationData: ProviderAuthenticationData | null) => void;
-  authenticationData: ProviderAuthenticationData | null;
+  onAuthenticationDataChanged: (providerAuthenticationData: EncryptedProviderAuthenticationData | null) => void;
+  authenticationData: EncryptedProviderAuthenticationData | null;
   errorMessage?: string;
 }
 
@@ -41,13 +40,12 @@ export type ImportProvider = {
   hidden?: boolean;
   backendService: {
     new(
-      authenticationContext?: ProviderAuthenticationContext
+      authenticationContext?: EncryptedProviderAuthenticationContext
     ): AbstractProviderService;
   };
   hasFeature: (feature: OptionalFeatureFlag) => boolean;
   providerErrorMessage?: string | React.ReactNode;
   authenticationScopes?: AuthenticationScope[];
   videoTableSettings: VideoSourceTableSettings;
-  apiVideoAuthenticationMode: ApiKeySelectorMode;
 };
 

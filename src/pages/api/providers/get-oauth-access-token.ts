@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Providers, { ProviderName } from '../../../providers';
-import { OauthAccessToken } from '../../../service/OAuthHelpers';
+import { EncryptedOauthAccessToken } from '../../../service/OAuthHelpers';
 import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
 
@@ -9,7 +9,7 @@ export type GetOauthAccessTokenRequestBody = {
     provider: ProviderName;
 }
 
-export type GetOauthAccessTokenRequestResponse = OauthAccessToken;
+export type GetOauthAccessTokenRequestResponse = EncryptedOauthAccessToken;
 
 
 export default async function handler(
@@ -23,6 +23,8 @@ export default async function handler(
             const providerService = new Providers[body.provider].backendService();
 
             const token = await providerService.getOauthAccessToken(body.code)
+
+            res.setHeader('Cache-Control', 'no-store');
             res.status(201).send(SuccessResponse(token));
         } catch (e: any) {
             console.error(e);

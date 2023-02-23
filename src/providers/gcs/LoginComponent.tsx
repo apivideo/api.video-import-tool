@@ -10,7 +10,7 @@ import { ProjectBucket } from './BackendService';
 
 
 const GcsLogin = (props: ProviderLoginProps) => {
-  const [accessToken, setAccessToken] = useState<string>();
+  const [encryptedAccessToken, setEncryptedAccessToken] = useState<string>();
   const [buckets, setBuckets] = useState<ProjectBucket[]>([]);
   const [bucket, setBucket] = useState<string>();
   const router = useRouter();
@@ -20,14 +20,14 @@ const GcsLogin = (props: ProviderLoginProps) => {
     if (storageItem) {
       setBuckets(storageItem.buckets || []);
       setBucket(storageItem.bucket);
-      setAccessToken(storageItem.accessToken);
+      setEncryptedAccessToken(storageItem.encryptedAccessToken);
 
       props.onAuthenticationDataChanged({
-        accessToken: storageItem.accessToken || '',
+        encryptedAccessToken: storageItem.encryptedAccessToken || '',
         additionnalData: {
           bucket: storageItem.bucket,
         },
-        filled: !!storageItem.accessToken && !!storageItem.bucket,
+        filled: !!storageItem.encryptedAccessToken && !!storageItem.bucket,
       });
     }
   }, []);
@@ -41,43 +41,43 @@ const GcsLogin = (props: ProviderLoginProps) => {
         provider: 'GCS',
         code: router.query.code as string,
       }).then((res: GetOauthAccessTokenRequestResponse) => {
-        if (res.access_token) {
-          onNewGcsAccessToken(res.access_token, res.expires_in * 1000);
+        if (res.encrypted_access_token) {
+          onNewGcsAccessToken(res.encrypted_access_token, res.expires_in * 1000);
         }
       });
     }
   }, [router.query.code]);
 
-  const onNewGcsAccessToken = async (accessToken: string, expiresIn: number) => {
+  const onNewGcsAccessToken = async (encryptedAccessToken: string, expiresIn: number) => {
     removeItem('GCS');
-    setItem('GCS', { accessToken }, expiresIn);
-    setAccessToken(accessToken);
+    setItem('GCS', { encryptedAccessToken }, expiresIn);
+    setEncryptedAccessToken(encryptedAccessToken);
 
     props.onAuthenticationDataChanged({
-      accessToken,
+      encryptedAccessToken,
       filled: false,
     });
 
     const buckets: ProjectBucket[] = (await callFetchAdditionalUserDataAfterSigninApi({
       providerName: 'GCS',
-      authenticationContext: { accessToken }
+      authenticationContext: { encryptedAccessToken }
     }));
 
     setBuckets(buckets);
 
-    onBucketSelected(buckets[0].projectId + ":" + buckets[0].buckets[0], buckets, accessToken)
+    onBucketSelected(buckets[0].projectId + ":" + buckets[0].buckets[0], buckets, encryptedAccessToken)
   }
 
-  const onBucketSelected = (bucket: string, buckets: ProjectBucket[], accessToken: string) => {
+  const onBucketSelected = (bucket: string, buckets: ProjectBucket[], encryptedAccessToken: string) => {
     setItem('GCS', {
-      accessToken: accessToken!,
+      encryptedAccessToken: encryptedAccessToken!,
       buckets,
       bucket,
     })
     setBucket(bucket);
     
     props.onAuthenticationDataChanged({
-      accessToken: accessToken!,
+      encryptedAccessToken: encryptedAccessToken!,
       additionnalData: {
         bucket,
       },
@@ -89,15 +89,15 @@ const GcsLogin = (props: ProviderLoginProps) => {
     await callRevokeAccessTokenApi({
       provider: 'GCS',
       authenticationContext: {
-        accessToken: accessToken!,
+        encryptedAccessToken: encryptedAccessToken!,
       }
     });
     props.onAuthenticationDataChanged({
-      accessToken: '',
+      encryptedAccessToken: '',
       filled: false,
     });
     removeItem('GCS');
-    setAccessToken('');
+    setEncryptedAccessToken('');
 }
 
 return (
@@ -110,10 +110,10 @@ return (
             `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GCS_CLIENT_ID}&redirect_uri=${GCS_REDIRECT_URL}&response_type=code&scope=https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/cloudplatformprojects.readonly`
           )
         }
-        disabled={!!accessToken}
+        disabled={!!encryptedAccessToken}
         className="bg-gcs text-sm font-semibold w-full"
       >
-        {accessToken ? (
+        {encryptedAccessToken ? (
           <div className="flex justify-center items-center gap-2">
             <Check size={20} strokeWidth={'.2rem'} />
             Successfully signed into GCS
@@ -124,14 +124,14 @@ return (
       </button>
     </div>
 
-    <div style={{ ...(!accessToken ? { display: "none" } : {}) }}>
+    <div style={{ ...(!encryptedAccessToken ? { display: "none" } : {}) }}>
       <p className="text-right"><a onClick={() => revokeAccessToken()} className="underline" href="#">Revoke GCS access</a></p>
 
       <label htmlFor="apiVideoApiKey" className="mb-4 mt-0 block">Select a Storage bucket</label>
       <select
         value={bucket || undefined}
         onChange={(v) => {
-          onBucketSelected(v.target.value, buckets, accessToken!);
+          onBucketSelected(v.target.value, buckets, encryptedAccessToken!);
         }}
         className="border border-gray-300 text-gray-900 text-sm  block w-full p-2.5"
       >

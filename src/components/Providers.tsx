@@ -19,13 +19,15 @@ const ProvidersPage: React.FC<ImportToolProps> = (props) => {
   return (
     <ImportCard activeStep={1} paddingTop>
       <div className="flex flex-col justify-between">
-        <div className="flex flex-row gap-4 pb-8 flex-wrap lg:flex-nowrap w-full">
+        <div className="flex flex-row gap-4 pb-8 flex-wrap lg:flex-wrap w-full">
           {providers
             .filter((p) => p.hidden !== true)
             .map(({ displayName, link, name, imgSrc, description }) => (
-              <Link href={link} key={name} className="w-full sm:w-72">
+              <Link href={link} key={name} className="w-1/3 sm:w-72 block">
                 <div className="border border-slate-200 rounded-lg shadow flex gap-4 p-6">
+                  <div className={"h-[40px] max-h-40px m-0 p-0"}>
                   <Image src={imgSrc} height={40} width={40} alt={displayName} />
+                  </div>
                   <div>
                     <p className="text-sm font-semibold">{displayName}</p>
                     <p className="text-xs text-slate-500">{description}</p>

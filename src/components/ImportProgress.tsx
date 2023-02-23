@@ -14,7 +14,7 @@ const ImportProgress: React.FC = () => {
 
   useEffect(() => {
     const item = getItem('APIVIDEO');
-    const apiKey = item?.apiKey || ''
+    const apiKey = item?.encryptedKey || ''
     setApiVideoApiKey(apiKey)
     if (!importId) {
       const impId = router.query.importId
@@ -41,7 +41,7 @@ const ImportProgress: React.FC = () => {
       </div>
       {videos?.length && importId && apiVideoApiKey && <>
         <ImportInfo imports={[{ id: importId, providerName: providerName, videos: videos, date: new Date() }]} />
-        <VideoImportTable videos={videos} apiVideoApiKey={apiVideoApiKey} />
+        <VideoImportTable videos={videos} apiVideoEncryptedKey={apiVideoApiKey} />
       </>}
 
     </ImportCard>

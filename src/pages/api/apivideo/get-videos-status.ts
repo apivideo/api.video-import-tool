@@ -5,7 +5,7 @@ import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, SuccessResponse }
 
 
 export type GetVideosStatusRequestBody = {
-    apiKey: string;
+    encryptedApiKey: string;
     videos: Video[];
 }
 
@@ -21,10 +21,11 @@ export default async function handler(
         try {
             const body = JSON.parse(req.body) as GetVideosStatusRequestBody;
 
-            const apiVideo = new ApiVideoService(body.apiKey);
+            const apiVideo = new ApiVideoService(body.encryptedApiKey);
 
             const videosWithStatuses = await apiVideo.getVideosStatuses(body.videos);
 
+            res.setHeader('Cache-Control', 'no-store');
             res.status(200).json(SuccessResponse({ videos: videosWithStatuses }));
         } catch (e: any) {
             console.error(e);

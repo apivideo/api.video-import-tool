@@ -12,8 +12,7 @@ import {
   callGetPublicMp4UrlApi
 } from '../service/ClientApiHelpers';
 import VideoSource, {
-  AuthenticationContext,
-  ProviderAuthenticationContext
+  EcryptedApiVideoAuthenticationContext, EncryptedProviderAuthenticationContext
 } from '../types/common';
 import { buildId, formatSize } from '../utils/functions';
 import { getItem } from '../utils/functions/localStorageHelper';
@@ -26,8 +25,10 @@ interface VideoSourceExtended extends VideoSource {
 }
 
 const VideoSourceSelector: React.FC = () => {
-  const [authenticationContext, setAuthenticationContext] =
-    useState<AuthenticationContext>();
+  const [providerAuthenticationContext, setProviderAuthenticationContext] =
+    useState<EncryptedProviderAuthenticationContext>();
+    const [apiVideoAuthenticationContext, setApiVideoAuthenticationContext] =
+    useState<EcryptedApiVideoAuthenticationContext>();
   const [videoSources, setVideoSources] = useState<VideoSourceExtended[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -44,30 +45,26 @@ const VideoSourceSelector: React.FC = () => {
   const provider = Providers[providerName as keyof typeof Providers];
 
   useEffect(() => {
-    if (!providerName || !providerAuthenticationData.accessToken) {
+    if (!providerName || !providerAuthenticationData.encryptedAccessToken) {
       const pName = router.query.provider;
       pName && router.push(`/${pName}`);
     } else {
       const item = getItem('APIVIDEO');
-      const apiVideoApiKey = item?.apiKey || '';
-      const authenticationContext: AuthenticationContext = {
-        apiVideoApiKey,
-        ...providerAuthenticationData,
-      };
-      setAuthenticationContext(authenticationContext);
+      const encryptedApiKey = item?.encryptedKey || '';
+      
+      setProviderAuthenticationContext(providerAuthenticationData);
+      setApiVideoAuthenticationContext({encryptedApiKey});
 
       (async () => {
-        const alreadyImported = await fetchAlreadyImportedVideos(
-          apiVideoApiKey
-        );
-        fetchVideos(authenticationContext, alreadyImported);
+        const alreadyImported = await fetchAlreadyImportedVideos(encryptedApiKey);
+        fetchVideos(providerAuthenticationData, alreadyImported);
       })();
     }
   }, [router, providerName]);
 
-  const fetchAlreadyImportedVideos = async (apiVideoApiKey: string) => {
+  const fetchAlreadyImportedVideos = async (apiVideoEncryptedKey: string) => {
     const previousImports = await callGetImportsApi({
-      apiKey: apiVideoApiKey,
+      encryptedApiKey: apiVideoEncryptedKey,
       provider: providerName,
     });
 
@@ -100,14 +97,14 @@ const VideoSourceSelector: React.FC = () => {
   };
 
   const fetchVideos = async (
-    authenticationContext: AuthenticationContext,
+    providerAutenticationContext: EncryptedProviderAuthenticationContext,
     alreadyImported: { [key: string]: { videoId: string; size: number } },
     videos: VideoSourceExtended[] = [],
     nextPageFetchDetails?: any
   ) => {
     try {
       const res = await callGetImportableVideosApi({
-        authenticationContext,
+        authenticationContext: providerAutenticationContext,
         provider: providerName,
         nextPageFetchDetails,
       });
@@ -124,7 +121,7 @@ const VideoSourceSelector: React.FC = () => {
 
       if (res.hasMore) {
         fetchVideos(
-          authenticationContext,
+          providerAutenticationContext,
           alreadyImported,
           videos,
           res.nextPageFetchDetails
@@ -182,7 +179,7 @@ const VideoSourceSelector: React.FC = () => {
           await callGeneratePublicMp4Api({
             providerName,
             authenticationContext:
-              authenticationContext as ProviderAuthenticationContext,
+              providerAuthenticationContext as EncryptedProviderAuthenticationContext,
             video: video,
           })
         ).video;
@@ -198,7 +195,7 @@ const VideoSourceSelector: React.FC = () => {
             (
               await callGetPublicMp4UrlApi({
                 authenticationContext:
-                  authenticationContext as ProviderAuthenticationContext,
+                  providerAuthenticationContext as EncryptedProviderAuthenticationContext,
                 provider: providerName,
                 video: video,
               })
@@ -213,7 +210,7 @@ const VideoSourceSelector: React.FC = () => {
 
       const res = (
         await callCreateApiVideoVideoApi({
-          apiKey: authenticationContext?.apiVideoApiKey as string,
+          encryptedApiKey: apiVideoAuthenticationContext?.encryptedApiKey!,
           importId,
           providerName,
           videoSource: video,

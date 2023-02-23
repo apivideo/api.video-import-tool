@@ -45,7 +45,6 @@ const VimeoProvider: ImportProvider = {
         formatter: (v) => formatDuration(v),
       }]
     },
-    apiVideoAuthenticationMode: 'auth0'
   };
 
   export default VimeoProvider;

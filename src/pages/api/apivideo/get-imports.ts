@@ -5,7 +5,7 @@ import ApiVideoService from '../../../service/ApiVideoService';
 import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
 export type GetImportsRequestBody = {
-    apiKey: string;
+    encryptedApiKey: string;
     provider?: ProviderName;
 }
 
@@ -21,10 +21,11 @@ export default async function handler(
         try {
             const body = JSON.parse(req.body) as GetImportsRequestBody;
 
-            const apiVideoService = new ApiVideoService(body.apiKey);
+            const apiVideoService = new ApiVideoService(body.encryptedApiKey);
 
             const videos = await apiVideoService.getImports(body.provider);
 
+            res.setHeader('Cache-Control', 'no-store');
             res.status(200).json(SuccessResponse({ videos }));
         } catch (e: any) {
             console.error(e);

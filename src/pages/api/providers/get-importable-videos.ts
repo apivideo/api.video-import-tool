@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Providers, { ProviderName } from '../../../providers';
-import VideoSource, { ApiResponse, AuthenticationContext, ErrorResponse, MethodNotAllowedResponse, Page, SuccessResponse } from '../../../types/common';
+import VideoSource, { ApiResponse, EncryptedProviderAuthenticationContext, ErrorResponse, MethodNotAllowedResponse, Page, SuccessResponse } from '../../../types/common';
 
 
 export type GetImportableVideosRequestBody = {
-    authenticationContext: AuthenticationContext,
+    authenticationContext: EncryptedProviderAuthenticationContext,
     provider: ProviderName,
     nextPageFetchDetails?: any;
 }
@@ -23,6 +23,7 @@ export default async function handler(
 
             const videos = await providerService.getImportableVideos(body.nextPageFetchDetails);
 
+            res.setHeader('Cache-Control', 'no-store');
             res.status(201).send(SuccessResponse(videos));
         } catch (e: any) {
             console.error(e);

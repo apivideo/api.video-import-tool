@@ -3,7 +3,7 @@ import ApiVideoService from '../../../service/ApiVideoService';
 import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
 export type VerifyApiKeyRequestBody = {
-    apiKey: string;
+    encryptedApiKey: string;
 }
 
 export type VerifyApiKeyRequestResponse = {
@@ -18,10 +18,11 @@ export default async function handler(
         try {
             const body = JSON.parse(req.body) as VerifyApiKeyRequestBody;
 
-            const apiVideoService = new ApiVideoService(body.apiKey);
+            const apiVideoService = new ApiVideoService(body.encryptedApiKey);
 
             const ok = await apiVideoService.apiKeyIsValid();
 
+            res.setHeader('Cache-Control', 'no-store');
             res.status(200).json(SuccessResponse({ ok }));
         } catch (e: any) {
             console.error(e);

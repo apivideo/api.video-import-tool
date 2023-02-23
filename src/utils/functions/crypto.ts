@@ -1,4 +1,7 @@
 import crypto from 'crypto';
+import { ProjectWithApiKeys, ProjectWithEncryptedApiKeys } from '../../pages/api/apivideo/keys';
+import { EncryptedOauthAccessToken, OauthAccessToken } from '../../service/OAuthHelpers';
+import { EncryptedProviderAuthenticationContext, ProviderAuthenticationContext } from '../../types/common';
 
 const key = process.env.IMPORT_TOOL_AES_256_CBC_KEY as string;
 
@@ -32,6 +35,66 @@ export const decrypt = (data: string) => {
     decipher.setAutoPadding(true);
     return decipher.update(encrypted, "base64url", "utf8") + decipher.final('utf8');;
 }
+
+
+export const encryptAccessToken = (accessToken: OauthAccessToken): EncryptedOauthAccessToken => ({
+    //@ts-ignore
+    encrypted_access_token: accessToken.access_token ? encrypt(accessToken.access_token) : undefined,
+    expires_in: accessToken.expires_in,
+    token_type: accessToken.token_type
+});
+
+export const decryptAccessToken = (accessToken: EncryptedOauthAccessToken): OauthAccessToken => ({
+    access_token: decrypt(accessToken.encrypted_access_token),
+    expires_in: accessToken.expires_in,
+    token_type: accessToken.token_type
+});
+
+export const encryptProviderAuthenticationContext = (providerAuthenticationContext: ProviderAuthenticationContext): EncryptedProviderAuthenticationContext => ({
+    encryptedAccessToken: encrypt(providerAuthenticationContext.accessToken),
+    additionnalData: providerAuthenticationContext.additionnalData
+});
+
+export const decryptProviderAuthenticationContext = (providerAuthenticationContext: EncryptedProviderAuthenticationContext): ProviderAuthenticationContext => ({
+    accessToken: decrypt(providerAuthenticationContext.encryptedAccessToken),
+    additionnalData: providerAuthenticationContext.additionnalData
+});
+
+export const encryptProjectWithApiKeys = (project: ProjectWithApiKeys): ProjectWithEncryptedApiKeys => ({
+    name: project.name,
+    keys: {
+        production: project.keys.production.map(key => ({
+            name: key.name,
+            encryptedKey: encrypt(key.key || ""),
+            projectId: key.projectId,
+            projectName: key.projectName
+        })),
+        sandbox: project.keys.sandbox.map(key => ({
+            name: key.name,
+            encryptedKey: encrypt(key.key || ""),
+            projectId: key.projectId,
+            projectName: key.projectName
+        }))
+    }
+});
+
+export const decryptProjectWithEncryptedApiKeys = (project: ProjectWithEncryptedApiKeys): ProjectWithApiKeys => ({
+    name: project.name,
+    keys: {
+        production: project.keys.production.map(key => ({
+            name: key.name,
+            key: decrypt(key.encryptedKey),
+            projectId: key.projectId,
+            projectName: key.projectName
+        })),
+        sandbox: project.keys.sandbox.map(key => ({
+            name: key.name,
+            key: decrypt(key.encryptedKey),
+            projectId: key.projectId,
+            projectName: key.projectName
+        }))
+    }
+});
 
 export const getVideoSourceProxyUrl = (url: string, filename: string, accessToken: string) => {
     const params: VideoSourceProxyParams = {

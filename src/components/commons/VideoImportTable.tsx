@@ -1,17 +1,16 @@
 import Quality from '@api.video/nodejs-client/lib/model/Quality';
+import Video from '@api.video/nodejs-client/lib/model/Video';
 import React, { useState } from 'react';
 import { Check, Eye } from 'react-feather';
 import { VideoWithStatus } from '../../service/ApiVideoService';
 import { callGetVideosStatusApi } from '../../service/ClientApiHelpers';
 import { formatSize } from '../../utils/functions';
 import { useInterval } from '../../utils/hooks';
-import Image from 'next/image';
 import Thumbnail from './Thumbnail';
-import Video from '@api.video/nodejs-client/lib/model/Video';
 
 interface VideoImportTableProps {
   videos: Video[];
-  apiVideoApiKey: string;
+  apiVideoEncryptedKey: string;
 }
 
 const VideoImportTable: React.FC<VideoImportTableProps> = (props) => {
@@ -31,7 +30,7 @@ const VideoImportTable: React.FC<VideoImportTableProps> = (props) => {
     const notDoneVideos = videoWithStatus.filter(isNotTotallyEncoded);
     const res = await callGetVideosStatusApi({
       videos: notDoneVideos,
-      apiKey: props.apiVideoApiKey,
+      encryptedApiKey: props.apiVideoEncryptedKey,
     });
 
     setVideoWithStatus([
