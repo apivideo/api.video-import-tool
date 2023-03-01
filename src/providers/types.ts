@@ -1,10 +1,9 @@
 import { EncryptedProviderAuthenticationContext } from '../types/common';
-import AbstractProviderService from './AbstractProviderService';
 
 export type EncryptedProviderAuthenticationData = EncryptedProviderAuthenticationContext & { filled: boolean };
 
 export interface ProviderLoginProps {
-  onAuthenticationDataChanged: (providerAuthenticationData: EncryptedProviderAuthenticationData | null) => void;
+  onAuthenticationDataChanged: (providerAuthenticationData: Partial<EncryptedProviderAuthenticationData> | null) => void;
   authenticationData: EncryptedProviderAuthenticationData | null;
   errorMessage?: string;
 }
@@ -38,11 +37,6 @@ export type ImportProvider = {
   imgSrc: string;
   loginComponent: React.FC<ProviderLoginProps>;
   hidden?: boolean;
-  backendService: {
-    new(
-      authenticationContext?: EncryptedProviderAuthenticationContext
-    ): AbstractProviderService;
-  };
   hasFeature: (feature: OptionalFeatureFlag) => boolean;
   providerErrorMessage?: string | React.ReactNode;
   authenticationScopes?: AuthenticationScope[];

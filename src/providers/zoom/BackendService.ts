@@ -1,6 +1,6 @@
 import { ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_REDIRECT_URL } from "../../env";
 import { EncryptedOauthAccessToken, getOauthAccessTokenCall, RevokeAccessTokenResponse, revokeOauthAccessTokenCall } from "../../service/OAuthHelpers";
-import VideoSource, { EncryptedProviderAuthenticationContext, Page, ProviderAuthenticationContext } from "../../types/common";
+import VideoSource, { CredentialsValidationResult, EncryptedProviderAuthenticationContext, Page, ProviderAuthenticationContext } from "../../types/common";
 import { decryptProviderAuthenticationContext, encryptAccessToken } from "../../utils/functions/crypto";
 import AbstractProviderService from "../AbstractProviderService";
 
@@ -70,7 +70,7 @@ class ZoomProviderService implements AbstractProviderService {
         throw new Error("Method not implemented.");
     }
 
-    public async validateCredentials(): Promise<string | null> {
+    public async validateCredentials(): Promise<CredentialsValidationResult> {
         throw new Error("Method not implemented.");
     }
 

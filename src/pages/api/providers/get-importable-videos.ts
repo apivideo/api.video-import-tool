@@ -1,11 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Providers, { ProviderName } from '../../../providers';
+import { ProviderName } from '../../../providers';
+import { getProviderBackendService } from '../../../providers/BackendServiceFactory';
 import VideoSource, { ApiResponse, EncryptedProviderAuthenticationContext, ErrorResponse, MethodNotAllowedResponse, Page, SuccessResponse } from '../../../types/common';
 
 
 export type GetImportableVideosRequestBody = {
     authenticationContext: EncryptedProviderAuthenticationContext,
-    provider: ProviderName,
+    providerName: ProviderName,
     nextPageFetchDetails?: any;
 }
 
@@ -19,7 +20,7 @@ export default async function handler(
         try {
             const body = JSON.parse(req.body) as GetImportableVideosRequestBody;
 
-            const providerService = new Providers[body.provider].backendService(body.authenticationContext);
+            const providerService = new (getProviderBackendService(body.providerName))(body.authenticationContext);
 
             const videos = await providerService.getImportableVideos(body.nextPageFetchDetails);
 

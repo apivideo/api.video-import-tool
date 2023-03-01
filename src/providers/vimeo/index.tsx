@@ -1,6 +1,5 @@
 import { arrayContains, formatDuration, formatSize } from "../../utils/functions";
 import { ImportProvider, OptionalFeatureFlag } from "../types";
-import VimeoProviderService from "./BackendService";
 import VimeoLogin from "./LoginComponent";
 
 const VimeoProvider: ImportProvider = {
@@ -8,7 +7,6 @@ const VimeoProvider: ImportProvider = {
     description: '⚠️ Pro Vimeo plan required',
     imgSrc: '/vimeo.svg',
     loginComponent: VimeoLogin,
-    backendService: VimeoProviderService,
     hasFeature: (feature: OptionalFeatureFlag) => arrayContains([OptionalFeatureFlag.ProviderCredentialsBackendValidation], feature),
     providerErrorMessage: (
       <p>

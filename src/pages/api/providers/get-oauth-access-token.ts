@@ -1,12 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Providers, { ProviderName } from '../../../providers';
+import { ProviderName } from '../../../providers';
+import { getProviderBackendService } from '../../../providers/BackendServiceFactory';
 import { EncryptedOauthAccessToken } from '../../../service/OAuthHelpers';
 import { ApiResponse, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
 
 export type GetOauthAccessTokenRequestBody = {
     code: string;
-    provider: ProviderName;
+    providerName: ProviderName;
 }
 
 export type GetOauthAccessTokenRequestResponse = EncryptedOauthAccessToken;
@@ -20,7 +21,7 @@ export default async function handler(
         try {
             const body = JSON.parse(req.body) as GetOauthAccessTokenRequestBody;
 
-            const providerService = new Providers[body.provider].backendService();
+            const providerService = new (getProviderBackendService(body.providerName))();
 
             const token = await providerService.getOauthAccessToken(body.code)
 

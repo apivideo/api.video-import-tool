@@ -56,7 +56,8 @@ export const encryptProviderAuthenticationContext = (providerAuthenticationConte
 });
 
 export const decryptProviderAuthenticationContext = (providerAuthenticationContext: EncryptedProviderAuthenticationContext): ProviderAuthenticationContext => ({
-    accessToken: decrypt(providerAuthenticationContext.encryptedAccessToken),
+    //@ts-ignore
+    accessToken: providerAuthenticationContext.encryptedAccessToken ? decrypt(providerAuthenticationContext.encryptedAccessToken) : undefined,
     additionnalData: providerAuthenticationContext.additionnalData
 });
 
@@ -96,7 +97,7 @@ export const decryptProjectWithEncryptedApiKeys = (project: ProjectWithEncrypted
     }
 });
 
-export const getVideoSourceProxyUrl = (url: string, filename: string, accessToken: string) => {
+export const getVideoSourceProxyUrlDefault = (url: string, filename: string, accessToken: string) => {
     const params: VideoSourceProxyParams = {
         url,
         headers: {
@@ -105,5 +106,10 @@ export const getVideoSourceProxyUrl = (url: string, filename: string, accessToke
         method: "GET",
         filename: filename.replaceAll("/", "_")
     }
-    return `https://video-source-proxy.herokuapp.com/?data=${encrypt(JSON.stringify(params))}`;
+    return getVideoSourceProxyUrl("default", params);
+}
+
+export const getVideoSourceProxyUrl = (type: string, params: any) => {
+    
+    return `https://video-source-proxy.herokuapp.com/?type=${type}&data=${encrypt(JSON.stringify(params))}`;
 }

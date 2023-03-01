@@ -63,7 +63,7 @@ const ApiKeySelector: React.FC<ApiKeySelectorProps> = (props) => {
     }, [isAuthenticated, getAccessTokenSilently, keys]);
 
     return <>
-            <label htmlFor="apiVideoApiKey">Authorize access to api.video</label>
+            <label htmlFor="apiVideoApiKey" className="font-semibold">Authorize access to api.video</label>
             <div className={'mb-4'}>
                 <button disabled={isAuthenticated || !!keys} className="bg-orange text-sm font-semibold w-full" onClick={() => loginWithRedirect({
                     redirectUri: currentUrl,

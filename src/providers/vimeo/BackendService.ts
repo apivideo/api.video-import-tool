@@ -1,6 +1,7 @@
 import { EncryptedOauthAccessToken, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
-import VideoSource, { EncryptedProviderAuthenticationContext, Page, ProviderAuthenticationContext } from "../../types/common";
+import VideoSource, { CredentialsValidationResult, EncryptedProviderAuthenticationContext, Page } from "../../types/common";
 import { uppercaseFirstLetter } from "../../utils/functions";
+import { decryptProviderAuthenticationContext, encrypt } from "../../utils/functions/crypto";
 import AbstractProviderService from "../AbstractProviderService";
 
 
@@ -39,19 +40,23 @@ type VimeoApiResult = {
 
 
 class VimeoProviderService implements AbstractProviderService {
-    authenticationContext?: ProviderAuthenticationContext;
+    accessToken: string;
 
     constructor(authenticationContext?: EncryptedProviderAuthenticationContext) {
-        this.authenticationContext = {
-            ...authenticationContext,
-            accessToken: authenticationContext?.encryptedAccessToken!
-        };
+        if(authenticationContext?.encryptedAccessToken) {
+            this.accessToken = decryptProviderAuthenticationContext(authenticationContext).accessToken;
+        }
+        else if(authenticationContext?.additionnalData?.accessToken) {
+            this.accessToken = authenticationContext.additionnalData.accessToken;
+        } else {
+            throw new Error("Missing access token.");
+        }
     }
-    
+
     public fetchAdditionalUserDataAfterSignin(): Promise<any> {
         throw new Error("Method not implemented.");
     }
-    
+
     public revokeOauthAccessToken(): Promise<RevokeAccessTokenResponse> {
         throw new Error("Method not implemented.");
     }
@@ -80,20 +85,34 @@ class VimeoProviderService implements AbstractProviderService {
         }
     };
 
-    public async validateCredentials(): Promise<string | null> {
-        if (!this.authenticationContext?.accessToken) {
-            return "Vimeo access token is required";
-        }
-        try {
-            return await this.callApi("https://api.vimeo.com/me").then(res => {
+    public async validateCredentials(): Promise<CredentialsValidationResult> {
+        
+        return new Promise(async (resolve, reject) => {
+            if (!this.accessToken) {
+                resolve({
+                    error: "Vimeo access token is required"
+                });
+                return;
+            }
+
+            try {
+                const res = await this.callApi("https://api.vimeo.com/me")
                 if (res.account === "basic" || res.account === "plus" || res.account === "free") {
-                    return `${uppercaseFirstLetter(res.account)} Vimeo account is not compatible with the import tool`;
+                    resolve({
+                        error: `${uppercaseFirstLetter(res.account)} Vimeo account is not compatible with the import tool`
+                    });
+                    return;
                 }
-                return null;
-            });
-        } catch (e) {
-            return "Your access token seems to be invalid";
-        }
+                resolve({
+                    encryptedAccessToken: encrypt(this.accessToken)
+                });
+
+            } catch (e) {
+                resolve({
+                    error: "Your access token seems to be invalid"
+                });
+            }
+        });
     }
 
     vimeoVideoToVideoSource(vimeoVideo: VimeoVideo): VideoSource {
@@ -114,11 +133,11 @@ class VimeoProviderService implements AbstractProviderService {
     private async callApi(url: string): Promise<any> {
         const headers = new Headers();
 
-        if (!this.authenticationContext) {
+        if (!this.accessToken) {
             throw new Error("Authentication context is required");
         }
 
-        headers.append("Authorization", `bearer ${this.authenticationContext.accessToken}`);
+        headers.append("Authorization", `bearer ${this.accessToken}`);
         headers.append("Content-Type", "application/json");
         headers.append("Accept", "application/vnd.vimeo.*+json;version=3.4");
 

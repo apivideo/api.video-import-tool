@@ -1,9 +1,9 @@
-import { GCS_CLIENT_ID, GCS_CLIENT_SECRET, GCS_REDIRECT_URL } from "../../env";
-import { EncryptedOauthAccessToken, getOauthAccessTokenCall, RevokeAccessTokenResponse, revokeOauthAccessTokenCall } from "../../service/OAuthHelpers";
-import VideoSource, { EncryptedProviderAuthenticationContext, Page, ProviderAuthenticationContext } from "../../types/common";
-import { decryptProviderAuthenticationContext, encryptAccessToken, getVideoSourceProxyUrl } from "../../utils/functions/crypto";
+import { JWT } from 'google-auth-library';
+import { GCS_CLIENT_EMAIL, GCS_CLIENT_SECRET } from '../../env';
+import { EncryptedOauthAccessToken, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
+import VideoSource, { CredentialsValidationResult, EncryptedProviderAuthenticationContext, Page, ProviderAuthenticationContext } from "../../types/common";
+import { decryptProviderAuthenticationContext, encrypt, getVideoSourceProxyUrlDefault } from "../../utils/functions/crypto";
 import AbstractProviderService from "../AbstractProviderService";
-
 
 export type ProjectBucket = {
     projectName: string;
@@ -12,45 +12,45 @@ export type ProjectBucket = {
 }
 
 class GcsProviderService implements AbstractProviderService {
-    authenticationContext?: ProviderAuthenticationContext;
+    authenticationContext?: Promise<ProviderAuthenticationContext>;
 
     constructor(authenticationContext?: EncryptedProviderAuthenticationContext) {
-        this.authenticationContext = authenticationContext ? decryptProviderAuthenticationContext(authenticationContext) : undefined;
+        this.authenticationContext = new Promise(async (resolve, reject) => {
+            if (!authenticationContext) {
+                resolve({
+                    accessToken: "",
+                });
+                return;
+            }
+            const decrypted = decryptProviderAuthenticationContext(authenticationContext);
+            if (decrypted.accessToken) {
+                resolve(decrypted);
+                return;
+            }
+
+            new JWT({
+                email: GCS_CLIENT_EMAIL,
+                key: atob(GCS_CLIENT_SECRET),
+                scopes: ["https://www.googleapis.com/auth/devstorage.read_only"]
+            }).authorize((err, tokens) => {
+                if (err) {
+                    return;
+                }
+                resolve({
+                    ...decrypted,
+                    accessToken: tokens?.access_token!
+                });
+            });
+        });
+
     }
 
     public async fetchAdditionalUserDataAfterSignin(): Promise<any> {
-
-        if (!this.authenticationContext) {
-            throw new Error("No authentication context");
-        }
-
-        const res = await fetch(`https://cloudresourcemanager.googleapis.com/v1/projects`, {
-            headers: {
-                Authorization: `Bearer ${this.authenticationContext?.accessToken}`,
-            }
-        }).then(res => res.json());
-
-        const buckets: ProjectBucket[] = (await Promise.all(res.projects.map(async (project: any) => {
-            const projectBuckets = await fetch(`https://storage.googleapis.com/storage/v1/b?project=${project.projectId}`, {
-                headers: {
-                    Authorization: `Bearer ${this.authenticationContext?.accessToken}`,
-                }
-            })
-                .then(res => res.json())
-                .then((a) => a.items ? a.items.map((b: any) => b.name) : []);
-
-            return {
-                projectId: project.projectId,
-                projectName: project.name,
-                buckets: projectBuckets
-            };
-        }))).filter(a => a.buckets.length > 0);
-
-        return buckets;
+        throw new Error("Method not implemented.");
     }
 
     public async revokeOauthAccessToken(): Promise<RevokeAccessTokenResponse> {
-        return await revokeOauthAccessTokenCall("https://oauth2.googleapis.com/revoke", GCS_CLIENT_ID, GCS_CLIENT_SECRET, this.authenticationContext?.accessToken!);;
+        throw new Error("Method not implemented.");
     }
 
     public getPublicMp4Url(videoSource: VideoSource): Promise<VideoSource> {
@@ -58,20 +58,36 @@ class GcsProviderService implements AbstractProviderService {
     }
 
     public async getOauthAccessToken(code: string): Promise<EncryptedOauthAccessToken> {
-        const res = encryptAccessToken(await getOauthAccessTokenCall("https://oauth2.googleapis.com/token", GCS_CLIENT_ID, GCS_CLIENT_SECRET, GCS_REDIRECT_URL, code));
-        return res;
+        throw new Error("Method not implemented.");
     }
 
     public async generatePublicMp4(videoSource: VideoSource): Promise<VideoSource> {
         throw new Error("Method not implemented.");
     }
 
-    public async validateCredentials(): Promise<string | null> {
-        throw new Error("Method not implemented.");
+    public async validateCredentials(): Promise<CredentialsValidationResult> {
+        try {
+            const res = await this.getImportableVideos();
+            return {
+                encryptedAccessToken: encrypt((await this.authenticationContext)?.accessToken!),
+            };
+        } catch (e: any) {
+            try {
+                const code = JSON.parse(("" + e).split("Response:")[1]).error.code;
+                if (code === 404) {
+                    return { error: "This bucket does not exist" };
+                }
+                if (code === 403) {
+                    return { error: "The Video Import Tool does not have access to this bucket. Please verify that you have granted the correct permissions to the service account" };
+                }
+            } catch (e) { }
+            return { error: "An error occured while trying to access the bucket" };
+        }
     }
 
     public async getImportableVideos(nextPageFetchDetails?: any): Promise<Page<VideoSource>> {
-        const bucket = this.authenticationContext?.additionnalData?.bucket.split(":")[1];
+        const authenticationContext = await this.authenticationContext;
+        const bucket = authenticationContext?.additionnalData?.bucket;
 
         const res = await this.callApi(`https://storage.googleapis.com/storage/v1/b/${bucket}/o/` + (nextPageFetchDetails ? `?pageToken=${nextPageFetchDetails}` : ""), "GET");
         return {
@@ -82,10 +98,10 @@ class GcsProviderService implements AbstractProviderService {
                     name: item.name,
                     size: Math.round(item.size),
                     date: new Date(item.timeCreated),
-                    url: getVideoSourceProxyUrl(
+                    url: getVideoSourceProxyUrlDefault(
                         `https://storage.googleapis.com/storage/v1/b/${bucket}/o/${encodeURIComponent(item.name)}?alt=media`,
                         item.name,
-                        this.authenticationContext?.accessToken!
+                        authenticationContext?.accessToken!
                     )
                 })),
             nextPageFetchDetails: res.nextPageToken,
@@ -98,8 +114,10 @@ class GcsProviderService implements AbstractProviderService {
             throw new Error("No authentication context provided");
         }
 
+        const authenticationContext = await this.authenticationContext;
+
         const headers = new Headers();
-        headers.append("Authorization", "Bearer " + this.authenticationContext.accessToken)
+        headers.append("Authorization", "Bearer " + authenticationContext.accessToken)
         headers.append("Content-Type", "application/json");
 
         const res = await fetch(path, {

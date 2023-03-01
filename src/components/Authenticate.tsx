@@ -56,13 +56,23 @@ const Authenticate: React.FC = () => {
 
     try {
       const res = await callValidateProviderCredentialsApi({
-        
         authenticationContext: {
           ...providerAuthenticationData,
         },
         provider: providerName,
       });
-      return res.error;
+      if(res.error) {
+        return res.error;
+      };
+      setProviderAuthenticationData({
+        ...providerAuthenticationData,
+        encryptedAccessToken: res.encryptedAccessToken!
+      })
+      globalSetProviderAuthenticationData({
+        ...providerAuthenticationData,
+        encryptedAccessToken: res.encryptedAccessToken!
+      })
+      return null;
     } catch (e: any) {
       return e.message;
     }
@@ -144,8 +154,8 @@ const Authenticate: React.FC = () => {
               onAuthenticationDataChanged={(providerAuthenticationData) => {
                 setLoading(false);
                 setProviderErrorMessage('');
-                setProviderAuthenticationData(providerAuthenticationData);
-                globalSetProviderAuthenticationData(providerAuthenticationData!);
+                setProviderAuthenticationData(providerAuthenticationData as EncryptedProviderAuthenticationData);
+                globalSetProviderAuthenticationData(providerAuthenticationData! as EncryptedProviderAuthenticationData);
               }}
               authenticationData={providerAuthenticationData}
               errorMessage={providerErrorMessage || undefined}

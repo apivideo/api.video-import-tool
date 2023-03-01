@@ -1,6 +1,7 @@
 import React from 'react';
 import { VideoSourceTableColumn, VideoSourceTableSettings } from '../providers/types';
 import VideoSource from '../types/common';
+import { beautifyVideoName } from '../utils/functions';
 import Thumbnail from './commons/Thumbnail';
 
 interface VideoSourceExtended extends VideoSource {
@@ -20,6 +21,8 @@ interface VideoSourceTableProps {
 }
 
 const VideoSourceTable: React.FC<VideoSourceTableProps> = ({ videoSources, onSortClick, selection, isCollapsed, videoSourceTableSettings: settings }) => {
+
+
 
   return (
     <table className={`w-full mb-8 ${isCollapsed ? 'collapse' : 'visible'}`}>
@@ -104,7 +107,7 @@ const VideoSourceTable: React.FC<VideoSourceTableProps> = ({ videoSources, onSor
                     alt={videoSource.name}
                   />}
 
-                  {videoSource.name}
+                  {beautifyVideoName(videoSource.name)}
 
                   {settings.columns.map((column) =>
                     <span className="block md:hidden" key={column.attributeName}>

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Check, Eye } from 'react-feather';
 import { VideoWithStatus } from '../../service/ApiVideoService';
 import { callGetVideosStatusApi } from '../../service/ClientApiHelpers';
-import { formatSize } from '../../utils/functions';
+import { beautifyVideoName, formatSize } from '../../utils/functions';
 import { useInterval } from '../../utils/hooks';
 import Thumbnail from './Thumbnail';
 
@@ -170,7 +170,7 @@ const VideoImportTable: React.FC<VideoImportTableProps> = (props) => {
     const sizeMetadata =
       video?.metadata &&
       video.metadata.find((mt) => mt.key === 'x-apivideo-import-video-size');
-    return sizeMetadata && formatSize(Number(sizeMetadata?.value));
+    return sizeMetadata && sizeMetadata?.value !== "undefined" && formatSize(Number(sizeMetadata?.value));
   };
 
   return (
@@ -200,7 +200,7 @@ const VideoImportTable: React.FC<VideoImportTableProps> = (props) => {
                       src={videoSource.assets?.thumbnail}
                       alt={videoSource.title as string} />
                   </div>
-                  <span>{videoSource.title}</span>
+                  <span>{beautifyVideoName(videoSource.title || "")}</span>
                   <span>{getFileSize(videoSource)}</span>
                 </div>
               </td>

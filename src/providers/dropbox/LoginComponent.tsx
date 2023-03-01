@@ -27,7 +27,7 @@ const DropboxLogin = (props: ProviderLoginProps) => {
   useEffect(() => {
     if (router.query.code && !encryptedAccessToken) {
       callGetOAuthAccessTokenApi({
-        provider: 'DROPBOX',
+        providerName: 'DROPBOX',
         code: router.query.code as string,
       }).then((res: GetOauthAccessTokenRequestResponse) => {
         if (res.encrypted_access_token) {
@@ -46,7 +46,7 @@ const DropboxLogin = (props: ProviderLoginProps) => {
   return (
     <div className="flex flex-col mb-3.5">
       <div className="flex flex-col gap-4">
-        <label>Authorize access to Dropbox</label>
+        <label className="font-semibold">Authorize access to Dropbox</label>
         <button
           onClick={() =>
             router.push(

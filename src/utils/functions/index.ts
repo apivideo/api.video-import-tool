@@ -47,3 +47,10 @@ export const joinStrings = (list: string[], lastSeparator: string) => {
   }
   return list.slice(0, -1).join(', ') + ` ${lastSeparator} ` + list.slice(-1);
 };
+
+export const beautifyVideoName = (name: string) => {
+  // if the name is a string without space and is longer than 40 characters, we remove the middle part of the string
+  return name.indexOf(' ') === -1 && name.length > 40
+    ? name.substring(0, 7) + '...' + name.substring(name.length - 7, name.length)
+    : name
+}

@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Providers, { ProviderName } from '../../../providers';
+import { ProviderName } from '../../../providers';
+import { getProviderBackendService } from '../../../providers/BackendServiceFactory';
 import { RevokeAccessTokenResponse } from '../../../service/OAuthHelpers';
 import { ApiResponse, EncryptedProviderAuthenticationContext, ErrorResponse, MethodNotAllowedResponse, SuccessResponse } from '../../../types/common';
 
@@ -19,7 +20,7 @@ export default async function handler(
         try {
             const body = JSON.parse(req.body) as RevokeOauthAccessTokenRequestBody;
 
-            const providerService = new Providers[body.provider].backendService(body.authenticationContext);
+            const providerService = new (getProviderBackendService(body.provider))(body.authenticationContext);
 
             const token = await providerService.revokeOauthAccessToken()
 
