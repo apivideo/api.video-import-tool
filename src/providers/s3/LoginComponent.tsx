@@ -8,6 +8,7 @@ import S3LoginPopup from './LoginPopup';
 const S3Login = (props: ProviderLoginProps) => {
   const [encryptedAccessToken, setEncryptedAccessToken] = useState<string>();
   const [buckets, setBuckets] = useState<string[]>([]);
+  const [bucket, setBucket] = useState<string>();
   const [popupVisible, setPopupVisible] = useState<boolean>(false);
 
 
@@ -30,6 +31,9 @@ const S3Login = (props: ProviderLoginProps) => {
     }
     setEncryptedAccessToken(encryptedAccessToken);
     setBuckets(buckets || []);
+    if(bucket) {
+      setBucket(bucket);
+    }
     props.onAuthenticationDataChanged({
       encryptedAccessToken,
       additionnalData: {
@@ -74,9 +78,9 @@ const S3Login = (props: ProviderLoginProps) => {
       {encryptedAccessToken && <>
         <label htmlFor="apiVideoApiKey" className="mb-4 block">Select your S3 bucket</label>
         <select
-          value={buckets[0] || undefined}
+          value={bucket}
           onChange={(v) => {
-
+            onChange(encryptedAccessToken, buckets, v.target.value);
           }}
           className="border border-gray-300 text-gray-900 text-sm  block w-full p-2.5">
           {(buckets || []).map((key, i) =>
