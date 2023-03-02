@@ -84,7 +84,8 @@ class GcsProviderService implements AbstractProviderService {
     }
 
     public async getImportableVideos(nextPageFetchDetails?: any): Promise<Page<VideoSource>> {
-        const apiRes = await this.callApi("https://api.mux.com/video/v1/assets", "GET");
+        const apiRes = await this.callApi("https://api.mux.com/video/v1/assets" + (nextPageFetchDetails?.page ? `?page=${nextPageFetchDetails?.page }` : ""), "GET");
+        const hasMore = apiRes.data.length == 25;
 
         return {
             data: apiRes.data.map((video: any) => ({
@@ -94,8 +95,8 @@ class GcsProviderService implements AbstractProviderService {
                 date: new Date(video.created_at! * 1000),
                 url: video.master?.url,
             })),
-            nextPageFetchDetails: "",
-            hasMore: false
+            nextPageFetchDetails: hasMore ? { page: nextPageFetchDetails?.page ? nextPageFetchDetails?.page + 1 : 2 } : undefined,
+            hasMore
         };
     };
 
