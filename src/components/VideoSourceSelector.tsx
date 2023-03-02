@@ -219,7 +219,7 @@ const VideoSourceSelector: React.FC = () => {
         })
       ).video;
 
-      setCreatedCount(createdCount + 1);
+      
 
       return {
         result: res,
@@ -241,18 +241,17 @@ const VideoSourceSelector: React.FC = () => {
     const successes: Video[] = [];
     const fails: VideoSource[] = [];
 
-    const results = await Promise.all(
-      selectedVideos.map((selectedVideo) => createApiVideoVideo(selectedVideo))
-    );
-
-    results.forEach((result, index) => {
+    for(let i = 0; i < selectedVideos.length; i++) {
+      const result = await createApiVideoVideo(selectedVideos[i]);
       if (result.result instanceof Error) {
         fails.push(result.source);
       } else {
         successes.push(result.result);
+        setTimeout(() => setCreatedCount(i+1), 10);
       }
-    });
-
+      await timeout(100);
+    }
+    
     return {
       successes,
       fails,
