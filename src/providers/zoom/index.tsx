@@ -6,7 +6,7 @@ const ZoomProvider: ImportProvider = {
   displayName: 'Zoom',
   description: '⚠️ Admin Zoom user only',
   imgSrc: '/zoom.svg',
-  hidden: true,
+  hidden: false,
   loginComponent: ZoomLogin,
   hasFeature: (feature: OptionalFeatureFlag) => false,
   authenticationScopes: [{

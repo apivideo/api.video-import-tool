@@ -6,7 +6,7 @@ const S3Provider: ImportProvider = {
   displayName: 'Amazon S3',
   description: 'Import from Amazon S3',
   imgSrc: '/s3.svg',
-  hidden: true,
+  hidden: false,
   loginComponent: S3Login,
   hasFeature: (feature: OptionalFeatureFlag) => arrayContains([OptionalFeatureFlag.ProviderCredentialsBackendValidation], feature),
   videoTableSettings: {

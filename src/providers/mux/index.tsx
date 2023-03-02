@@ -6,7 +6,7 @@ const MuxProvider: ImportProvider = {
     displayName: 'MUX',
     description: 'Import from MUX',
     imgSrc: '/mux.svg',
-    hidden: true,
+    hidden: false,
     loginComponent: MuxLogin,
     hasFeature: (feature: OptionalFeatureFlag) => arrayContains([
       OptionalFeatureFlag.ProviderCredentialsBackendValidation, 

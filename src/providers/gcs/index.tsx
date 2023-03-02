@@ -6,7 +6,7 @@ const GcsProvider: ImportProvider = {
   displayName: 'Google Cloud Storage',
   description: 'Import from GCS',
   imgSrc: '/gcs.svg',
-  hidden: true,
+  hidden: false,
   loginComponent: GcsLogin,
   hasFeature: (feature: OptionalFeatureFlag) => arrayContains([OptionalFeatureFlag.ProviderCredentialsBackendValidation], feature),
   videoTableSettings: {
