@@ -4,7 +4,7 @@ import GcsLogin from "./LoginComponent";
 
 const GcsProvider: ImportProvider = {
   displayName: 'Azure Media Services',
-  description: 'Import from Azure Media Services',
+  description: 'Import from Azure',
   imgSrc: '/azure-media-service.jpeg',
   hidden: false,
   loginComponent: GcsLogin,
