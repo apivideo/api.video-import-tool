@@ -1,11 +1,11 @@
 import crypto from 'crypto';
 import { ProjectWithApiKeys, ProjectWithEncryptedApiKeys } from '../../pages/api/apivideo/keys';
 import { EncryptedOauthAccessToken, OauthAccessToken } from '../../service/OAuthHelpers';
-import { EncryptedProviderAuthenticationContext, ProviderAuthenticationContext } from '../../types/common';
+import { EncryptedProviderAuthenticationContext, ClearProviderAuthenticationContext } from '../../types/common';
 
 const key = process.env.IMPORT_TOOL_AES_256_CBC_KEY as string;
 
-type VideoSourceProxyParams = {
+export type VideoSourceProxyParams = {
     url: string
     headers: {
         [key: string]: string
@@ -50,15 +50,15 @@ export const decryptAccessToken = (accessToken: EncryptedOauthAccessToken): Oaut
     token_type: accessToken.token_type
 });
 
-export const encryptProviderAuthenticationContext = (providerAuthenticationContext: ProviderAuthenticationContext): EncryptedProviderAuthenticationContext => ({
-    encryptedAccessToken: encrypt(providerAuthenticationContext.accessToken),
-    additionnalData: providerAuthenticationContext.additionnalData
+export const encryptProviderAuthenticationContext = (providerAuthenticationContext: ClearProviderAuthenticationContext): EncryptedProviderAuthenticationContext => ({
+    encryptedPrivateData: providerAuthenticationContext.clearPrivateData ? encrypt(providerAuthenticationContext.clearPrivateData) : undefined,
+    publicData: providerAuthenticationContext.publicData
 });
 
-export const decryptProviderAuthenticationContext = (providerAuthenticationContext: EncryptedProviderAuthenticationContext): ProviderAuthenticationContext => ({
+export const decryptProviderAuthenticationContext = (providerAuthenticationContext: EncryptedProviderAuthenticationContext): ClearProviderAuthenticationContext => ({
     //@ts-ignore
-    accessToken: providerAuthenticationContext.encryptedAccessToken ? decrypt(providerAuthenticationContext.encryptedAccessToken) : undefined,
-    additionnalData: providerAuthenticationContext.additionnalData
+    clearPrivateData: providerAuthenticationContext.encryptedPrivateData ? decrypt(providerAuthenticationContext.encryptedPrivateData) : undefined,
+    publicData: providerAuthenticationContext.publicData
 });
 
 export const encryptProjectWithApiKeys = (project: ProjectWithApiKeys): ProjectWithEncryptedApiKeys => ({

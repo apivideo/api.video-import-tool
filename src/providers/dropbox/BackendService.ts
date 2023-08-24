@@ -1,6 +1,6 @@
 import { DROPBOX_CLIENT_ID, DROPBOX_CLIENT_SECRET, DROPBOX_REDIRECT_URL } from "../../env";
 import { EncryptedOauthAccessToken, getOauthAccessTokenCall, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
-import VideoSource, { CredentialsValidationResult, EncryptedProviderAuthenticationContext, Page } from "../../types/common";
+import VideoSource, { ClearProviderAuthenticationContext, CredentialsValidationResult, EncryptedProviderAuthenticationContext, Page } from "../../types/common";
 import { decryptProviderAuthenticationContext, encryptAccessToken } from "../../utils/functions/crypto";
 import AbstractProviderService from "../AbstractProviderService";
 
@@ -29,9 +29,10 @@ type DropboxSearchApiResponse = {
 class DropboxProviderService implements AbstractProviderService {
     accessToken?: string;
 
-    constructor(authenticationContext?: EncryptedProviderAuthenticationContext) {
-        if(authenticationContext?.encryptedAccessToken) {
-            this.accessToken = decryptProviderAuthenticationContext(authenticationContext).accessToken;
+    constructor(clearAuthenticationContext?: ClearProviderAuthenticationContext,
+        encryptedAuthenticationContext?: EncryptedProviderAuthenticationContext) {
+        if(encryptedAuthenticationContext) {
+            this.accessToken = decryptProviderAuthenticationContext(encryptedAuthenticationContext).clearPrivateData;
         } 
     }
 

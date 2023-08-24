@@ -35,8 +35,8 @@ const S3Login = (props: ProviderLoginProps) => {
       setBucket(bucket);
     }
     props.onAuthenticationDataChanged({
-      encryptedAccessToken,
-      additionnalData: {
+      encryptedPrivateData: encryptedAccessToken,
+      publicData: {
         bucket,
       },
       filled: !!encryptedAccessToken && !!bucket,

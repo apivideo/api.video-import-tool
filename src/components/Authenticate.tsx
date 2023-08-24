@@ -56,21 +56,31 @@ const Authenticate: React.FC = () => {
 
     try {
       const res = await callValidateProviderCredentialsApi({
-        authenticationContext: {
+        encryptedAuthenticationContext: {
           ...providerAuthenticationData,
         },
         provider: providerName,
       });
       if(res.error) {
+        setProviderAuthenticationData({
+          ...providerAuthenticationData,
+          encryptedPrivateData: undefined
+        })
+        globalSetProviderAuthenticationData({
+          filled: false,
+          publicData: undefined,
+          encryptedPrivateData: undefined
+        })
         return res.error;
       };
       setProviderAuthenticationData({
         ...providerAuthenticationData,
-        encryptedAccessToken: res.encryptedAccessToken!
+        encryptedPrivateData: res.encryptedPrivateData!
       })
       globalSetProviderAuthenticationData({
-        ...providerAuthenticationData,
-        encryptedAccessToken: res.encryptedAccessToken!
+        filled: true,
+        publicData: res.publicData,
+        encryptedPrivateData: res.encryptedPrivateData!
       })
       return null;
     } catch (e: any) {

@@ -20,7 +20,7 @@ export default async function handler(
         try {
             const body = JSON.parse(req.body) as GetImportableVideosRequestBody;
 
-            const providerService = new (getProviderBackendService(body.providerName))(body.authenticationContext);
+            const providerService = new (getProviderBackendService(body.providerName))(undefined, body.authenticationContext);
 
             const videos = await providerService.getImportableVideos(body.nextPageFetchDetails);
 

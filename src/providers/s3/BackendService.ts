@@ -1,7 +1,7 @@
 import AWS from "aws-sdk";
 import { EncryptedOauthAccessToken, RevokeAccessTokenResponse } from "../../service/OAuthHelpers";
-import VideoSource, { CredentialsValidationResult, EncryptedProviderAuthenticationContext, Page } from "../../types/common";
-import { decryptProviderAuthenticationContext, encrypt, getVideoSourceProxyUrl } from "../../utils/functions/crypto";
+import VideoSource, { ClearProviderAuthenticationContext, CredentialsValidationResult, EncryptedProviderAuthenticationContext, Page } from "../../types/common";
+import { decryptProviderAuthenticationContext, encrypt, encryptProviderAuthenticationContext, getVideoSourceProxyUrl } from "../../utils/functions/crypto";
 import AbstractProviderService from "../AbstractProviderService";
 
 
@@ -21,27 +21,40 @@ export type ProjectBucket = {
 
 const VIDEO_FILE_EXTENSIONS = ['.webm', '.mkv', '.flv', '.vob', '.ogv', '.ogg', '.rrc', '.gifv', '.mng', '.mov', '.avi', '.qt', '.wmv', '.yuv', '.rm', '.asf', '.amv', '.mp4', '.m4p', '.m4v', '.mpg', '.mp2', '.mpeg', '.mpe', '.mpv', '.m4v', '.svi', '.3gp', '.3g2', '.mxf', '.roq', '.nsv', '.flv', '.f4v', '.f4p', '.f4a', '.f4b', '.mod'];
 
-class GcsProviderService implements AbstractProviderService {
+class S3ProviderService implements AbstractProviderService {
     accessKey: string;
     secretKey: string;
     bucket?: string;
+    buckets?: string[];
     s3: AWS.S3;
 
-    constructor(authenticationContext?: EncryptedProviderAuthenticationContext) {
-        if (authenticationContext?.encryptedAccessToken) {
-            const decrypted = decryptProviderAuthenticationContext(authenticationContext);
-            const decryptedAccessToken = JSON.parse(decrypted.accessToken);
-            this.accessKey = decryptedAccessToken.accessKey;
-            this.secretKey = decryptedAccessToken.secretKey;
-            this.bucket = decrypted.additionnalData.bucket;
-        } else {
-            this.accessKey = authenticationContext?.additionnalData.accessKey;
-            this.secretKey = authenticationContext?.additionnalData.secretKey;
+    constructor(clearAuthenticationContext?: ClearProviderAuthenticationContext,
+        encryptedAuthenticationContext?: EncryptedProviderAuthenticationContext) {
+
+            console.log(clearAuthenticationContext, encryptedAuthenticationContext);
+
+        if (encryptedAuthenticationContext) {
+            clearAuthenticationContext = decryptProviderAuthenticationContext(encryptedAuthenticationContext);
+        } 
+        
+        if(!clearAuthenticationContext) {
+            throw new Error("No authentication context provided");
         }
+
+        
+        
+        const decryptedAccessToken = JSON.parse(clearAuthenticationContext.clearPrivateData!);
+        this.accessKey = decryptedAccessToken.accessKey;
+        this.secretKey = decryptedAccessToken.secretKey;
+        this.bucket = clearAuthenticationContext.publicData?.bucket;
+        this.buckets = clearAuthenticationContext.publicData?.buckets;
+
+        
         this.s3 = new AWS.S3({
             accessKeyId: this.accessKey,
             secretAccessKey: this.secretKey,
         });
+
     }
 
     public async fetchAdditionalUserDataAfterSignin(): Promise<any> {
@@ -65,6 +78,16 @@ class GcsProviderService implements AbstractProviderService {
     }
 
     public async validateCredentials(): Promise<CredentialsValidationResult> {
+        if(this.bucket) {
+            return encryptProviderAuthenticationContext({
+                clearPrivateData: JSON.stringify({ accessKey: this.accessKey, secretKey: this.secretKey }),
+                publicData: {
+                    buckets: [this.bucket],
+                    bucket: this.bucket,
+                }
+            })
+        }
+
         return new Promise((resolve, reject) => {
             this.s3.listBuckets((err, data) => {
                 if (err) {
@@ -72,12 +95,12 @@ class GcsProviderService implements AbstractProviderService {
                         error: err.message
                     });
                 } else {
-                    resolve({
-                        additionnalData: {
+                    resolve(encryptProviderAuthenticationContext({
+                        clearPrivateData: JSON.stringify({ accessKey: this.accessKey, secretKey: this.secretKey }),
+                        publicData: {
                             buckets: data.Buckets?.map(bucket => bucket.Name!) || [],
                         },
-                        encryptedAccessToken: encrypt(JSON.stringify({ accessKey: this.accessKey, secretKey: this.secretKey })),
-                    });
+                    }));
                 }
             })
         });
@@ -119,4 +142,4 @@ class GcsProviderService implements AbstractProviderService {
 
 }
 
-export default GcsProviderService;
+export default S3ProviderService;

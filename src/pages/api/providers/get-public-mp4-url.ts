@@ -22,7 +22,7 @@ export default async function handler(
         try {
             const body = JSON.parse(req.body) as GetPublicMp4UrlRequestBody;
 
-            const providerService = new (getProviderBackendService(body.provider))(body.authenticationContext);
+            const providerService = new (getProviderBackendService(body.provider))(undefined, body.authenticationContext);
 
             const video = await providerService.getPublicMp4Url(body.video);
 

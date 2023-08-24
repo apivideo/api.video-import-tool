@@ -14,7 +14,7 @@ type SessionStorageEntries = {
         encryptedAccessToken: string;
     };
     VIMEO: {
-        accessToken: string;
+        encryptedAccessToken: string;
     };
     MUX: {
         encryptedAccessToken: string;
@@ -28,7 +28,9 @@ type SessionStorageEntries = {
         bucket?: string;
         buckets?: string[];
     };
-
+    AZURE_MEDIA: {
+        encryptedPrivateData: string;
+    }
 };
 
 

@@ -3,34 +3,31 @@ import { callValidateProviderCredentialsApi } from '../../service/ClientApiHelpe
 
 export interface S3LoginPopupProps {
   onCancel: () => void;
-  onSuccess: (buckets: string[], encryptedAccessToken: string) => void;
+  onSuccess: (encryptedAccessToken: string) => void;
 }
 
 const S3LoginPopup = (props: S3LoginPopupProps) => {
 
-  const [accessKey, setAccessKey] = useState<string>("");
-  const [secretKey, setSecretKey] = useState<string>("");
+  const [accessToken, setAccessToken] = useState<string>("");
+  
   const [error, setError] = useState<string | undefined>(undefined);
 
   const onSubmit = async () => {
-    if(!accessKey || !secretKey) {
-      setError("Missing access key or secret key");
+    if(!accessToken) {
+      setError("Missing access token");
       return;
     }
     const res = await callValidateProviderCredentialsApi({
-      provider: 'S3',
+      provider: 'VIMEO',
       clearAuthenticationContext: {
-        clearPrivateData: JSON.stringify({
-          accessKey,
-          secretKey,
-        }),
-      },
+        clearPrivateData:  accessToken,
+      }
     })
     if(res.error) {
       setError(res.error);
       return;
     }
-    props.onSuccess(res.publicData.buckets, res.encryptedPrivateData!);
+    props.onSuccess(res.encryptedPrivateData!);
   }
 
   return (
@@ -43,16 +40,12 @@ const S3LoginPopup = (props: S3LoginPopupProps) => {
             <span className="sr-only">Close modal</span>
           </button>
           <div className="px-6 py-6 lg:px-8">
-            <h3 className="mb-4 text-xl font-medium text-gray-900">Sign in to AWS S3</h3>
+            <h3 className="mb-4 text-xl font-medium text-gray-900">Sign in to Vimeo</h3>
             <div className="space-y-6">
               <div>
-                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">AWS Access Key</label>
-                <input value={accessKey} onChange={(e) => setAccessKey(e.target.value)} type="text" name="email" id="email"
+                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">Vimeo access token</label>
+                <input value={accessToken} onChange={(e) => setAccessToken(e.target.value)} type="text" name="email" id="email"
                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5" placeholder="" required />
-              </div>
-              <div>
-                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">AWS Secret Key</label>
-                <input value={secretKey} onChange={(e) => setSecretKey(e.target.value)} type="password" name="password" id="password" placeholder="" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-s3 focus:border-s3hover block w-full p-2.5" required />
               </div>
               
               {error && <div className="text-red-500">{error}</div>}

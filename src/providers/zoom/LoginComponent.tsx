@@ -18,7 +18,7 @@ const ZoomLogin = (props: ProviderLoginProps) => {
       const encryptedAccessToken = item.encryptedAccessToken;
       setAccessToken(encryptedAccessToken);
       props.onAuthenticationDataChanged({
-        encryptedAccessToken,
+        encryptedPrivateData: encryptedAccessToken,
         filled: !!encryptedAccessToken,
       });
     }
@@ -43,7 +43,7 @@ const ZoomLogin = (props: ProviderLoginProps) => {
     setItem('ZOOM', { encryptedAccessToken }, expiresIn);
     setAccessToken(encryptedAccessToken);
     props.onAuthenticationDataChanged({
-      encryptedAccessToken,
+      encryptedPrivateData: encryptedAccessToken,
       filled: !!encryptedAccessToken,
     });
   };
@@ -53,11 +53,11 @@ const ZoomLogin = (props: ProviderLoginProps) => {
     await callRevokeAccessTokenApi({
       provider: 'ZOOM',
       authenticationContext: {
-        encryptedAccessToken: accessToken,
+        encryptedPrivateData: accessToken,
       }
     });
     props.onAuthenticationDataChanged({
-      encryptedAccessToken: '',
+      encryptedPrivateData: '',
       filled: false,
     });
     removeItem('ZOOM');

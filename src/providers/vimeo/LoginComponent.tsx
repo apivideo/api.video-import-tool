@@ -1,67 +1,72 @@
-import React, { useEffect } from 'react';
-import { getItem, setItem } from '../../utils/functions/localStorageHelper';
+import React, { useEffect, useState } from 'react';
+import { getItem, removeItem, setItem } from '../../utils/functions/localStorageHelper';
 import { ProviderLoginProps } from '../types';
+import VimeoLoginPopup from './LoginPopup'
+import { Check } from 'react-feather';
 
 const VimeoLogin = (props: ProviderLoginProps) => {
-  const [vimeoAccessToken, setVimeoAccessToken] = React.useState<string>('');
+  const [encryptedAccessToken, setEncryptedAccessToken] = useState<string>();
+  const [popupVisible, setPopupVisible] = useState<boolean>(false);
 
-
+  
   useEffect(() => {
     const storageItem = getItem('VIMEO');
     if (storageItem) {
-      setVimeoAccessToken(storageItem.accessToken);
-      
-      props.onAuthenticationDataChanged({
-        additionnalData: {
-          accessToken: storageItem.accessToken,
-        },
-        filled: !!storageItem.accessToken,
-      });
+      onChange(storageItem.encryptedAccessToken);
     }
   }, []);
 
+  const onChange = (encryptedAccessToken?: string) => {
+    if (encryptedAccessToken) {
+      setItem('VIMEO', {
+        encryptedAccessToken,
+      });
+    } else {
+      removeItem('VIMEO');
+    }
+    setEncryptedAccessToken(encryptedAccessToken);
+    props.onAuthenticationDataChanged({
+      encryptedPrivateData: encryptedAccessToken,
+      filled: !!encryptedAccessToken,
+    });
+  };
 
   return (
-    <div>
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-2 flex-wrap">
-          <label htmlFor="vimeoAccessToken" className="flex gap-4">
-            Enter your Vimeo access token
-          </label>
-          <i>
-            <a
-              target="_blank"
-              href="/doc/generate-a-vimeo-access-token"
-              className="text-blue-500 underline text-xs"
-            >
-              how to generate your access token
-            </a>
-          </i>
-        </div>
-        <div className={'mb-4'}>
-          <input
-            className={`h-10 ${props.errorMessage
-                ? 'outline outline-red-500 outline-2'
-                : 'outline outline-slate-300 rounded-lg shadow outline-1'
-              }`}
-            id="vimeoAccessToken"
-            type={'password'}
-            value={vimeoAccessToken}
-            onChange={(v) => {
-              setItem('VIMEO', { accessToken: v.target.value });
-              setVimeoAccessToken(v.target.value);
-              props.onAuthenticationDataChanged({
-                additionnalData: {
-                  accessToken: v.target.value,
-                },
-                filled: !!v.target.value && v.target.value.length > 0,
-              });
-            }}
-          ></input>
-          {props.errorMessage && <p className="text-sm text-red-600 pt-2">{props.errorMessage}&nbsp;</p>}
-        </div>
-      </div>
+    <div className="flex flex-col mb-3.5">
+
+    {popupVisible && <VimeoLoginPopup
+      onSuccess={(encryptedAccessToken) => {
+        onChange(encryptedAccessToken);
+        setPopupVisible(false);
+      }}
+      onCancel={() => setPopupVisible(false)}
+    />}
+
+    <div className="flex flex-col">
+      <label className="font-semibold">Authorize access to Vimeo</label>
+      <button
+        onClick={() => setPopupVisible(true)}
+        disabled={!!encryptedAccessToken}
+        className="bg-dropbox text-sm font-semibold w-full mt-4"
+      >
+        {encryptedAccessToken ? (
+          <div className="flex justify-center items-center gap-2">
+            <Check size={20} strokeWidth={'.2rem'} />
+            Successfully signed into Vimeo
+          </div>
+        ) : (
+          'Sign in to Vimeo'
+        )}
+      </button>
+      {encryptedAccessToken && <p className="text-right"><a onClick={() => {
+        onChange(undefined);
+      }} className="text-orange underline" href="#">Revoke Vimeo access</a></p>}
     </div>
+
+    <p className="text-sm text-red-600 mt-4">{props.errorMessage}</p>
+
+
+  </div>
   );
 };
 
