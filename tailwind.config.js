@@ -18,6 +18,9 @@ module.exports = {
       fontFamily: {
         jetbrains: ['JetBrains Mono', 'monospace'],
       },
+      boxShadow: {
+        '3xl': '0 10px 35px -15px rgba(0, 0, 0, 0.5)',
+      }
     },
   },
   plugins: [],

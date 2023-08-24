@@ -45,7 +45,7 @@ const VideoSourceSelector: React.FC = () => {
   const provider = Providers[providerName as keyof typeof Providers];
 
   useEffect(() => {
-    if (!providerName || !providerAuthenticationData.encryptedAccessToken) {
+    if (!providerName || !providerAuthenticationData.encryptedPrivateData) {
       const pName = router.query.provider;
       pName && router.push(`/${pName}`);
     } else {

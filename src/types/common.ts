@@ -8,6 +8,7 @@ export default interface VideoSource {
     thumbnail?: string;
     duration?: number;
     size?: number;
+    creationDate?: string;
 }
 
 export type Page<T> = {
@@ -24,23 +25,23 @@ export type EcryptedApiVideoAuthenticationContext = {
     encryptedApiKey: string;
 };
 
-export type ProviderAuthenticationContext = {
-    accessToken: string;
-    additionnalData?: any;
+export type ClearProviderAuthenticationContext = {
+    clearPrivateData?: string;
+    publicData?: any;
 };  
 
 export type EncryptedProviderAuthenticationContext = {
-    encryptedAccessToken?: string;
-    additionnalData?: any;
+    encryptedPrivateData?: string;
+    publicData?: any;
 };  
 
 export type CredentialsValidationResult = {
     error?: string;
-    encryptedAccessToken?: string;
-    additionnalData?: any;
+    encryptedPrivateData?: string;
+    publicData?: any;
 }
 
-export type AuthenticationContext = ApiVideoAuthenticationContext & ProviderAuthenticationContext;
+export type ClearAuthenticationContext = ApiVideoAuthenticationContext & ClearProviderAuthenticationContext;
 export type EncryptedAuthenticationContext = ApiVideoAuthenticationContext & EncryptedProviderAuthenticationContext;
 
 export type ApiResponse<T> = {

@@ -19,18 +19,18 @@ const S3LoginPopup = (props: S3LoginPopupProps) => {
     }
     const res = await callValidateProviderCredentialsApi({
       provider: 'MUX',
-      authenticationContext: {
-        additionnalData: {
+      clearAuthenticationContext: {
+        clearPrivateData: JSON.stringify({
           accessKey,
           secretKey,
-        },
+        }),
       },
     })
     if(res.error) {
       setError(res.error);
       return;
     }
-    props.onSuccess(res.encryptedAccessToken!);
+    props.onSuccess(res.encryptedPrivateData!);
   }
 
   return (

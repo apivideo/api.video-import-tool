@@ -16,8 +16,8 @@ const GcsLogin = (props: ProviderLoginProps) => {
       setEncryptedAccessToken(storageItem.encryptedAccessToken);
 
       props.onAuthenticationDataChanged({
-        encryptedAccessToken: storageItem.encryptedAccessToken || '',
-        additionnalData: {
+        encryptedPrivateData: storageItem.encryptedAccessToken || '',
+        publicData: {
           bucket: storageItem.bucket,
         },
         filled: !!storageItem.bucket,
@@ -29,7 +29,7 @@ const GcsLogin = (props: ProviderLoginProps) => {
     if(props.authenticationData) {
       setItem('GCS', {
         bucket,
-        encryptedAccessToken: props.authenticationData.encryptedAccessToken,
+        encryptedAccessToken: props.authenticationData.encryptedPrivateData,
       });
     }
   }, [props.authenticationData]);
@@ -60,7 +60,7 @@ return (
           });
           setBucket(v.target.value);
           props.onAuthenticationDataChanged({
-            additionnalData: {
+            publicData: {
               bucket: v.target.value,
             },
             filled: !!v.target.value && v.target.value.length > 0,

@@ -4,6 +4,7 @@ import MUX from './mux';
 import S3 from './s3';
 import VIMEO from './vimeo';
 import ZOOM from './zoom';
+import AZURE_MEDIA from './azureMediaServices';
 
 const Providers = {
     VIMEO,
@@ -11,7 +12,8 @@ const Providers = {
     ZOOM,
     GCS,
     S3,
-    MUX
+    MUX,
+    AZURE_MEDIA,
 };
 
 export default Providers;

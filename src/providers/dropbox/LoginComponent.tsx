@@ -18,7 +18,7 @@ const DropboxLogin = (props: ProviderLoginProps) => {
       const encryptedAccessToken = item.encryptedAccessToken;
       setEncryptedAccessToken(encryptedAccessToken);
       props.onAuthenticationDataChanged({
-        encryptedAccessToken,
+        encryptedPrivateData: encryptedAccessToken,
         filled: !!encryptedAccessToken,
       });
     }
@@ -35,7 +35,7 @@ const DropboxLogin = (props: ProviderLoginProps) => {
           setItem('DROPBOX', { encryptedAccessToken: res.encrypted_access_token }, res.expires_in * 1000);
           
           props.onAuthenticationDataChanged({
-            encryptedAccessToken: res.encrypted_access_token,
+            encryptedPrivateData: res.encrypted_access_token,
             filled: !!res.encrypted_access_token,
           });
         }

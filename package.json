@@ -25,6 +25,10 @@
   "dependencies": {
     "@api.video/nodejs-client": "^2.2.9",
     "@auth0/auth0-react": "^1.12.1",
+    "@azure/arm-mediaservices": "^13.1.0",
+    "@azure/identity": "^3.2.4",
+    "@azure/msal-node": "^1.18.0",
+    "@azure/storage-blob": "^12.15.0",
     "aws-sdk": "^2.1317.0",
     "crypto": "^1.0.1",
     "google-auth-library": "^8.7.0",

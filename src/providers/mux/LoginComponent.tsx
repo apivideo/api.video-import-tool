@@ -27,7 +27,7 @@ const MuxLogin = (props: ProviderLoginProps) => {
     }
     setEncryptedAccessToken(encryptedAccessToken);
     props.onAuthenticationDataChanged({
-      encryptedAccessToken,
+      encryptedPrivateData: encryptedAccessToken,
       filled: !!encryptedAccessToken,
     });
   };
