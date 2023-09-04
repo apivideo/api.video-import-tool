@@ -199,6 +199,7 @@ const Authenticate: React.FC = () => {
           <li className="list-disc">If you are importing to a sandbox project, your videos will be watermarked and deleted after 24 hours.</li>
           <li className="list-disc">If you are importing to a production project, your videos will count towards your encoding and hosting usage quota.</li>
           <li>Depending on your plan, this might incur additional usage charges.</li>
+          <li className="list-disc">At present, the tool can handle roughly 1,000 videos per import. We&apos;re working on a more robust version. For larger volumes, contact us for free manual transfer.</li>
         </ul>
       </div>
     </ImportCard>
