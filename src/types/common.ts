@@ -8,6 +8,7 @@ export default interface VideoSource {
     thumbnail?: string;
     duration?: number;
     size?: number;
+    folder?: string;
     creationDate?: string;
 }
 

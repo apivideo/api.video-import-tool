@@ -97,7 +97,7 @@ const VideoSourceTable: React.FC<VideoSourceTableProps> = ({ videoSources, onSor
                   onChange={(a) => selection.toggleSelection(videoSource.id)}
                 />
               </td>}
-              <td className="py-2.5 md:w-6/12">
+              <td className="py-2.5">
                 <div className="flex flex-col md:flex-row gap-2">
                   {settings.showThumnail && <Thumbnail
                     className="h-[75px] w-[100px] object-contain bg-black"

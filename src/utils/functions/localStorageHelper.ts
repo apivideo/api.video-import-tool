@@ -30,7 +30,10 @@ type SessionStorageEntries = {
     };
     AZURE_MEDIA: {
         encryptedPrivateData: string;
-    }
+    };
+    AZURE_STORAGE: {
+        encryptedPrivateData: string;
+    };
 };
 
 
