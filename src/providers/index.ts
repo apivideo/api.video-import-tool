@@ -6,6 +6,7 @@ import VIMEO from './vimeo';
 import ZOOM from './zoom';
 import AZURE_MEDIA from './azureMediaServices';
 import AZURE_STORAGE from './azureBlobStorage';
+import WISTIA from './wistia';
 
 const Providers = {
     VIMEO,
@@ -15,7 +16,8 @@ const Providers = {
     S3,
     MUX,
     AZURE_MEDIA,
-    AZURE_STORAGE
+    AZURE_STORAGE,
+    WISTIA
 };
 
 export default Providers;

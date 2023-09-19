@@ -9,6 +9,7 @@ import VimeoBackendService from "./vimeo/BackendService";
 import ZoomBackendService from "./zoom/BackendService";
 import AzureBackendService from "./azureMediaServices/BackendService";
 import AzureStorageBackendService from "./azureBlobStorage/BackendService";
+import WistiaBackendService from "./wistia/BackendService";
 
 const backendServices : { [key in ProviderName]: {new(clearAuthenticationContext?: ClearProviderAuthenticationContext,
     encryptedAuthenticationContext?: EncryptedProviderAuthenticationContext): AbstractProviderService;} } = {
@@ -19,7 +20,8 @@ const backendServices : { [key in ProviderName]: {new(clearAuthenticationContext
     ZOOM: ZoomBackendService,
     MUX: MuxBackendService,
     AZURE_MEDIA: AzureBackendService,
-    AZURE_STORAGE: AzureStorageBackendService
+    AZURE_STORAGE: AzureStorageBackendService,
+    WISTIA: WistiaBackendService
 };
 
 export const getProviderBackendService = (providerName: ProviderName) => backendServices[providerName];
