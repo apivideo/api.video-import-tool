@@ -16,6 +16,9 @@ type SessionStorageEntries = {
     VIMEO: {
         encryptedAccessToken: string;
     };
+    WISTIA: {
+        encryptedAccessToken: string;
+    };
     MUX: {
         encryptedAccessToken: string;
     };
