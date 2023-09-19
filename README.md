@@ -30,8 +30,15 @@ In addition to this core feature, the import tool also allows users to view a li
 # Supported providers
 
 Currently, the following providers are supported:
-- [Vimeo](https://vimeo.com)
+- [Amazon S3](https://aws.amazon.com/s3/)
+- [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/)
+- [Azure Media Services](https://azure.microsoft.com/en-us/services/media-services/)
 - [Dropbox](https://dropbox.com)
+- [Google Cloud Storage](https://cloud.google.com/storage)
+- [MUX](https://mux.com)
+- [Vimeo](https://vimeo.com)
+- [Wistia](https://wistia.com)
+- [Zoom](https://zoom.us)
 
 Other providers will be added in the future. If you want to add a new provider, you can open a pull request. See [Adding new providers](#adding-new-providers) for more information about how to add a new provider by yourself.
 
