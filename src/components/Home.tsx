@@ -24,7 +24,7 @@ const HomePage: React.FC = () => {
         </p>
 
         <div className="flex gap-4 pt-6 flex-wrap justify-center">
-          <Link href="https://dashboard.api.video/videos?from=import">
+          <Link href="https://api.video/contact/">
             <button className="text-sm bg-white border text-black font-semibold w-44">
               Contact support
             </button>
