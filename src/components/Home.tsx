@@ -1,12 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import Providers from "../providers";
-import { joinStrings } from "../utils/functions";
 
 const HomePage: React.FC = () => {
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-screen flex flex-col justify-between">
+      <div></div>
       <div className="flex items-center flex-col max-w-xs sm:max-w-2xl pt-36 self-center">
         <Image
           src="/api-video.svg"
@@ -42,7 +41,7 @@ const HomePage: React.FC = () => {
         width={1400}
         height={400}
         quality={100}
-        className="w-full h-auto mt-auto"
+        className="w-full h-auto"
       />
     </div>
   );
