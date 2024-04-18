@@ -1,53 +1,48 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import React from 'react';
-import Providers from '../providers';
-import { joinStrings } from '../utils/functions';
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
 
 const HomePage: React.FC = () => {
-
-
   return (
-    <div className="flex items-center flex-col max-w-xs sm:max-w-2xl pt-36 self-center mb-auto">
-      <Image
-        src="/import-tool-logo.svg"
-        width={300}
-        height={100}
-        alt="logo"
-        className="pb-8"
-      />
-      <h1 className="text-2xl font-semibold text-center">
-        Video import tool
-      </h1>
-      <p className="text-gray-500 font-semibold py-2 text-center">
-        Import your videos from {joinStrings(Object.values(Providers).map((a) => a.displayName), "or")} directly to api.video
-      </p>
-      <p className="text-sm text-center">
-        We built this tool to help you quickly import your already hosted videos
-        to the api.video platform.
-      </p>
-      <p className="text-sm text-center">
-        {' '}
-        Take advantage of our API with your existing content.
-      </p>
-      <div className="flex gap-4 pt-6 flex-wrap justify-center">
-        <Link href={'/providers'} passHref>
-          <button className="text-sm font-semibold w-44">
-            Get started
-          </button>
-        </Link>
-        <a
-          href="https://github.com/apivideo/api.video-import-tool"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button className="w-44 flex items-center justify-center gap-2 border rounded-md bg-black text-white text-sm font-semibold">
-            <Image src="/github.svg" height={14} width={14} alt="github" />
-            View on Github
-          </button>
-        </a>
+    <div className="h-screen flex flex-col justify-between">
+      <div></div>
+      <div className="flex items-center flex-col max-w-xs sm:max-w-2xl pt-36 self-center">
+        <Image
+          src="/api-video.svg"
+          width={100}
+          height={100}
+          alt="logo"
+          className="pb-8"
+        />
+        <h1 className="text-6xl font-semibold text-center pb-6">Import Tool</h1>
+        <p className="text-primary_blue text-lg py-2 text-center">
+          We built this tool to help you quickly import your already hosted
+          videos to api.video for a stress-free migration. Log in to your
+          account to begin the import process and enjoy a smooth transition to
+          api.video.
+        </p>
+
+        <div className="flex gap-4 pt-6 flex-wrap justify-center">
+          <Link href="https://api.video/contact/">
+            <button className="text-sm bg-white border text-black font-semibold w-44">
+              Contact support
+            </button>
+          </Link>
+          <Link href="https://dashboard.api.video/videos?from=import">
+            <button className="text-sm bg-orange_gradient font-semibold w-44">
+              Start Importing now
+            </button>
+          </Link>
+        </div>
       </div>
-      <p className="text-sm mt-8">Access <Link className="text-blue-500 underline" href={'/imports'}>previous imports</Link>.</p>
+      <Image
+        src="/ImportTool_IMG.png"
+        alt="Import Tool illustration"
+        width={1400}
+        height={400}
+        quality={100}
+        className="w-full h-auto"
+      />
     </div>
   );
 };
